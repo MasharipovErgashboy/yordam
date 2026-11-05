@@ -1005,24 +1005,22 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         </TouchableOpacity>
       </View>
 
-      {/* ===================== CUSTOM SERVICE DETAIL MODAL (ALERT O'RNIGA) ===================== */}
+      {/* ===================== CUSTOM SERVICE DETAIL MODAL (MARKAZIY ALERT) ===================== */}
       <Modal
         visible={!!selectedService}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setSelectedService(null)}
       >
         <View style={styles.modalOverlay}>
+          {/* Orqa fon: bosganda yopiladi */}
           <TouchableOpacity
             style={styles.modalBackdrop}
             activeOpacity={1}
             onPress={() => setSelectedService(null)}
           />
 
-          <View style={[styles.modalSheet, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-            {/* Handle Drag Bar */}
-            <View style={styles.modalHandle} />
-
+          <View style={styles.modalDialogCard}>
             {/* Header with Close Icon */}
             <View style={styles.modalHeaderRow}>
               <View style={[styles.modalIconBox, { backgroundColor: selectedService?.iconBg }]}>
@@ -1044,9 +1042,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <TouchableOpacity
                 onPress={() => setSelectedService(null)}
                 style={styles.modalCloseBtn}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <Ionicons name="close-circle" size={24} color="#9CA3AF" />
+                <Ionicons name="close-circle" size={26} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
@@ -1732,50 +1730,51 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // ===================== CUSTOM SERVICE DETAIL MODAL =====================
+  // ===================== CUSTOM SERVICE DETAIL MODAL (CENTERED DIALOG) =====================
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
   },
   modalBackdrop: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  modalSheet: {
+  modalDialogCard: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: '84%',
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderRadius: 24,
     paddingHorizontal: 22,
-    paddingTop: 12,
+    paddingTop: 20,
+    paddingBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 20,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 14,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 24,
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
+    alignItems: 'center',
+    marginBottom: 14,
   },
   modalIconBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCloseBtn: {
-    padding: 2,
+    padding: 4,
   },
   modalTitleBlock: {
     flexDirection: 'row',
@@ -1784,7 +1783,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalServiceName: {
-    fontSize: 19,
+    fontSize: 18.5,
     fontWeight: '800',
     color: '#0F172A',
     flex: 1,
@@ -1805,10 +1804,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#4B5563',
     lineHeight: 19,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   modalBodyScroll: {
-    maxHeight: Dimensions.get('window').height * 0.52,
+    maxHeight: Dimensions.get('window').height * 0.44,
     marginBottom: 12,
   },
   modalSpecialNoteBox: {

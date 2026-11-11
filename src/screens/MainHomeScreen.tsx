@@ -18,6 +18,7 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-ico
 import { HuquqMaktabiScreen } from './HuquqMaktabiScreen';
 import { IshVaMehnatHuquqiScreen } from './IshVaMehnatHuquqiScreen';
 import { IstemolchiHuquqlariScreen } from './IstemolchiHuquqlariScreen';
+import { HujjatlarHamyoniScreen } from './HujjatlarHamyoniScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -365,9 +366,16 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   // Iste'molchi Huquqlari Mini App State
   const [isIstemolchiOpen, setIsIstemolchiOpen] = useState(false);
 
+  // Hujjatlar Hamyoni Mini App State
+  const [isHujjatlarHamyoniOpen, setIsHujjatlarHamyoniOpen] = useState(false);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
+      return;
+    }
+    if (item.id === 'hujjatlar_hamyoni') {
+      setIsHujjatlarHamyoniOpen(true);
       return;
     }
     // Find matching detailed service or show modal
@@ -395,6 +403,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       setIsIshHuquqiOpen(true);
     } else if (sId === 'istemolchi') {
       setIsIstemolchiOpen(true);
+    } else if (sId === 'hujjatlar_hamyoni') {
+      setIsHujjatlarHamyoniOpen(true);
     } else if (sId === 'legal_map') {
       Alert.alert(
         'LegalMap (Yuridik Xarita)',
@@ -447,6 +457,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
 
   if (isIstemolchiOpen) {
     return <IstemolchiHuquqlariScreen onBack={() => setIsIstemolchiOpen(false)} />;
+  }
+
+  if (isHujjatlarHamyoniOpen) {
+    return <HujjatlarHamyoniScreen onBack={() => setIsHujjatlarHamyoniOpen(false)} />;
   }
 
   return (

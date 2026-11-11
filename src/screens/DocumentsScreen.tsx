@@ -1,0 +1,499 @@
+import React, { useState } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, TextInput,
+  TouchableOpacity, FlatList, StatusBar, Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+
+// ─── COLORS ─────────────────────────────────────────────────
+const C = {
+  primary: '#2563EB',
+  secondary: '#0F172A',
+  bg: '#F1F5FB',
+  white: '#FFFFFF',
+  textDark: '#0F172A',
+  textGrey: '#64748B',
+  red: '#EF4444',
+  redLight: '#FEE2E2',
+  green: '#22C55E',
+  greenLight: '#DCFCE7',
+  orange: '#F97316',
+  orangeLight: '#FFEDD5',
+  blue: '#2563EB',
+  blueLight: '#DBEAFE',
+  purple: '#7C3AED',
+  purpleLight: '#EDE9FE',
+};
+
+// ─── DUMMY DATA ──────────────────────────────────────────────
+const CATEGORIES = [
+  { id: '1', label: 'Barchasi', count: 24, icon: '📁' },
+  { id: '2', label: 'Shartnomalar', count: 5, icon: '📄' },
+  { id: '3', label: 'Cheklar', count: 8, icon: '🧾' },
+  { id: '4', label: 'Kafolat', count: 6, icon: '🛡️' },
+  { id: '5', label: 'Guvohnoma', count: 3, icon: '🪪' },
+  { id: '6', label: "Sug'urta", count: 2, icon: '🚗' },
+];
+
+const DOCS = [
+  {
+    id: '1',
+    type: 'Shartnoma',
+    typeColor: C.blue,
+    typeBg: C.blueLight,
+    badge: 'Yuridik tasdiqlangan',
+    badgeColor: C.blue,
+    badgeBg: C.blueLight,
+    name: 'Kvartira oldi-sotdi shartnomasi',
+    sub: 'Notarial reyestr: №4-11182/2025 • Seri...',
+    uploadDate: '21-may, 2025',
+    deadline: 'Muddat: 2028-yilgacha',
+    deadlineColor: C.textGrey,
+    icon: '📄',
+  },
+  {
+    id: '2',
+    type: 'Chek',
+    typeColor: C.red,
+    typeBg: C.redLight,
+    badge: '5 kun qoldi',
+    badgeColor: C.red,
+    badgeBg: C.redLight,
+    name: 'Samsung Galaxy S24 Ultra xarid cheki',
+    sub: "Do'kon: MediaPark Toshkent |Shayxont",
+    uploadDate: '18-may, 2025',
+    deadline: 'Kafolat yakuni: 25-may',
+    deadlineColor: C.red,
+    icon: '🧾',
+  },
+  {
+    id: '3',
+    type: 'Kafolat',
+    typeColor: C.blue,
+    typeBg: C.blueLight,
+    badge: '2 yil qoldi',
+    badgeColor: C.blue,
+    badgeBg: C.blueLight,
+    name: 'Bosch kir yuvish mashinasi kafolat taloni',
+    sub: 'Model: Serie 6 WAT28481ME • Zavod',
+    uploadDate: '10-aprel, 2025',
+    deadline: 'Amal qiladi: 2027-yilgacha',
+    deadlineColor: C.textGrey,
+    icon: '🛡️',
+  },
+  {
+    id: '4',
+    type: 'Guvohnoma',
+    typeColor: C.green,
+    typeBg: C.greenLight,
+    badge: 'Faol (2030-yilgacha)',
+    badgeColor: C.green,
+    badgeBg: C.greenLight,
+    name: 'Haydovchilik guvohnomasi (B toifa)',
+    sub: 'Guvohnoma №: AB 3381920 • YHXX Ti...',
+    uploadDate: '02-yanvar, 2025',
+    deadline: 'QR-kod bilan tekshiriladi',
+    deadlineColor: C.blue,
+    icon: '🪪',
+  },
+  {
+    id: '5',
+    type: "Sug'urta",
+    typeColor: C.red,
+    typeBg: C.redLight,
+    badge: 'Tugashiga 18 kun qoldi',
+    badgeColor: C.red,
+    badgeBg: C.redLight,
+    name: "Avtomobil sug'urta polisi (KASKO)",
+    sub: "Sug'urtaolchi: Apex Insurance • Polis",
+    uploadDate: '12-fevral, 2025',
+    deadline: 'Uzaytirish talab etiladi',
+    deadlineColor: C.red,
+    icon: '🚗',
+  },
+];
+
+// ─── COMPONENT ───────────────────────────────────────────────
+export default function DocumentsScreen() {
+  const navigation = useNavigation<any>();
+  const [search, setSearch] = useState('');
+  const [selectedCat, setSelectedCat] = useState('1');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sortType, setSortType] = useState<'newest' | 'oldest' | 'name'>('newest');
+
+  const handleSortToggle = () => {
+    Alert.alert(
+      "Hujjatlarni saralash",
+      "Tartiblash usulini tanlang:",
+      [
+        { text: "Eng yangi (sana bo'yicha)", onPress: () => setSortType('newest') },
+        { text: "Eng eski (sana bo'yicha)", onPress: () => setSortType('oldest') },
+        { text: "Nomi bo'yicha (A-Z)", onPress: () => setSortType('name') },
+        { text: "Bekor qilish", style: "cancel" },
+      ]
+    );
+  };
+
+  const getSortLabel = () => {
+    if (sortType === 'newest') return "↓ Sana bo'yicha (eng yangi)";
+    if (sortType === 'oldest') return "↑ Sana bo'yicha (eng eski)";
+    return "↕ Nomi bo'yicha (A-Z)";
+  };
+
+  const filtered = DOCS.filter(d => {
+    const matchText = d.name.toLowerCase().includes(search.toLowerCase());
+    const matchCat =
+      selectedCat === '1' ||
+      CATEGORIES.find(c => c.id === selectedCat)?.label === d.type;
+    return matchText && matchCat;
+  }).sort((a, b) => {
+    if (sortType === 'newest') return Number(b.id) - Number(a.id);
+    if (sortType === 'oldest') return Number(a.id) - Number(b.id);
+    if (sortType === 'name') return a.name.localeCompare(b.name);
+    return 0;
+  });
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* ── HEADER ── */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Text style={styles.backArrow}>‹</Text>
+        </TouchableOpacity>
+        <View style={styles.headerMid}>
+          <View style={styles.logoBox}>
+            <Text>💼</Text>
+          </View>
+          <View>
+            <Text style={styles.appName}>Hujjatlarim</Text>
+            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
+          </View>
+        </View>
+        <View style={styles.headerRight}>
+          <View style={styles.syncBadge}>
+            <Text style={styles.syncDot}>●</Text>
+            <Text style={styles.syncText}>Sinxronlangan</Text>
+          </View>
+          <View style={styles.avatar}>
+            <Text style={{ fontSize: 18 }}>👤</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ── TITLE ── */}
+      <View style={styles.titleRow}>
+        <Text style={styles.pageTitle}>Hujjatlarim</Text>
+        <View style={styles.countBadge}>
+          <Text style={styles.countText}>24 ta</Text>
+        </View>
+      </View>
+
+      {/* ── SEARCH ── */}
+      <View style={styles.searchBox}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Nomi, sana yoki so'z bo'yicha..."
+          placeholderTextColor={C.textGrey}
+          value={search}
+          onChangeText={setSearch}
+          returnKeyType="search"
+        />
+      </View>
+
+      {/* ── CATEGORIES ── */}
+      <View style={styles.catWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.catScrollContent}
+        >
+          {CATEGORIES.map(cat => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[styles.catChip, selectedCat === cat.id && styles.catChipActive]}
+              onPress={() => setSelectedCat(cat.id)}
+            >
+              <Text style={[styles.catIcon, selectedCat === cat.id && styles.catIconActive]}>
+                {cat.icon}
+              </Text>
+              <Text style={[styles.catText, selectedCat === cat.id && styles.catTextActive]}>
+                {cat.label} ({cat.count})
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* ── SORT + VIEW MODE ── */}
+      <View style={styles.sortRow}>
+        <TouchableOpacity style={styles.sortBtn} onPress={handleSortToggle}>
+          <Text style={styles.sortText}>{getSortLabel()}</Text>
+          <Text style={styles.sortArrow}> ▾</Text>
+        </TouchableOpacity>
+        <View style={styles.viewToggle}>
+          <TouchableOpacity
+            style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
+            onPress={() => setViewMode('list')}
+          >
+            <Text style={[styles.toggleIcon, viewMode === 'list' && styles.toggleIconActive]}>☰</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, viewMode === 'grid' && styles.toggleBtnActive]}
+            onPress={() => setViewMode('grid')}
+          >
+            <Text style={[styles.toggleIcon, viewMode === 'grid' && styles.toggleIconActive]}>⊞</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* ── DOC LIST ── */}
+      <FlatList
+        key={viewMode}
+        data={filtered}
+        keyExtractor={item => item.id}
+        numColumns={viewMode === 'grid' ? 2 : 1}
+        columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) =>
+          viewMode === 'grid' ? (
+            <TouchableOpacity
+              style={styles.docCardGrid}
+              onPress={() => navigation.navigate('Details', { docId: item.id })}
+            >
+              <View style={[styles.docIconBoxGrid, { backgroundColor: item.typeBg }]}>
+                <Text style={styles.docIconText}>{item.icon}</Text>
+              </View>
+              <View style={[styles.typeBadge, { backgroundColor: item.typeBg, alignSelf: 'flex-start', marginTop: 8 }]}>
+                <Text style={[styles.typeBadgeText, { color: item.typeColor }]}>{item.type}</Text>
+              </View>
+              <Text style={styles.docNameGrid} numberOfLines={2}>{item.name}</Text>
+              <Text style={styles.docMetaGrid}>{item.uploadDate}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.docCard}
+              onPress={() => navigation.navigate('Details', { docId: item.id })}
+            >
+              {/* Icon + badge */}
+              <View style={[styles.docIconBox, { backgroundColor: item.typeBg }]}>
+                <Text style={styles.docIconText}>{item.icon}</Text>
+              </View>
+
+              <View style={styles.docBody}>
+                {/* Type + badge */}
+                <View style={styles.docTopRow}>
+                  <View style={[styles.typeBadge, { backgroundColor: item.typeBg }]}>
+                    <Text style={[styles.typeBadgeText, { color: item.typeColor }]}>{item.type}</Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: item.badgeBg }]}>
+                    <Text style={[styles.statusBadgeText, { color: item.badgeColor }]}>
+                      {item.badgeColor === C.red ? '⏰ ' : ''}{item.badge}
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={styles.moreBtn}>
+                    <Text style={styles.moreIcon}>⋮</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Name */}
+                <Text style={styles.docName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.docSub} numberOfLines={1}>{item.sub}</Text>
+
+                {/* Meta */}
+                <View style={styles.docMetaRow}>
+                  <Text style={styles.docMeta}>⬆️ Yuklangan: {item.uploadDate}</Text>
+                  <Text style={[styles.docDeadline, { color: item.deadlineColor }]}>
+                    {item.deadlineColor === C.red ? '⏰ ' : '📅 '}{item.deadline}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )
+        }
+        ListFooterComponent={() => (
+          <View style={styles.storageCard}>
+            <Text style={styles.storageIcon}>🔒</Text>
+            <View style={styles.storageInfo}>
+              <Text style={styles.storageTitle}>Xavfsiz bulutli xotira</Text>
+              <View style={styles.storageBarBg}>
+                <View style={[styles.storageBarFill, { width: '24%' }]} />
+              </View>
+              <Text style={styles.storageText}>1.2 GB / 5 GB ishlatildi</Text>
+            </View>
+            <Text style={styles.storageSize}>1.2 GB{'\n'}<Text style={styles.storageSub}>/ 5 GB</Text></Text>
+          </View>
+        )}
+      />
+
+      {/* ── BOTTOM NAV ── */}
+      <View style={styles.bottomNav}>
+        {[
+          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
+          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
+          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
+          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
+          { icon: '👤', label: 'Profil', screen: 'Profile' },
+        ].map(item => (
+          <TouchableOpacity
+            key={item.screen}
+            style={[styles.navItem, item.center && styles.navItemCenter]}
+            onPress={() => navigation.navigate(item.screen)}
+          >
+            {item.center ? (
+              <View style={styles.navCenterBtn}>
+                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.navIcon}>{item.icon}</Text>
+                <Text style={[styles.navLabel, item.screen === 'Documents' && styles.navLabelActive]}>
+                  {item.label}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// ─── STYLES ──────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: C.bg },
+
+  // Header
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6 },
+  backBtn: { marginRight: 8 },
+  backArrow: { fontSize: 28, color: C.textDark, fontWeight: '300' },
+  headerMid: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 8 },
+  logoBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
+  appName: { fontSize: 13, fontWeight: '700', color: C.textDark },
+  appSub: { fontSize: 11, color: C.textGrey },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  syncBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  syncDot: { fontSize: 8, color: C.green, marginRight: 4 },
+  syncText: { fontSize: 11, color: C.green, fontWeight: '600' },
+  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
+
+  // Title
+  titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, gap: 10 },
+  pageTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
+  countBadge: { backgroundColor: C.blueLight, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+  countText: { fontSize: 13, color: C.primary, fontWeight: '700' },
+
+  // Search
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 6, marginHorizontal: 16, marginBottom: 14, elevation: 2 },
+  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 13, color: C.textDark, paddingVertical: 6 },
+  // Categories
+  catWrapper: {
+    height: 52,
+    marginVertical: 4,
+    justifyContent: 'center',
+  },
+  catScrollContent: {
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  catChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 40,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: '#E2E8F0',
+    gap: 6,
+  },
+  catChipActive: {
+    backgroundColor: C.primary,
+    elevation: 2,
+    shadowColor: C.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  catIcon: { fontSize: 14 },
+  catIconActive: {},
+  catText: { fontSize: 13, color: '#334155', fontWeight: '600' },
+  catTextActive: { color: C.white, fontWeight: '700' },
+
+  // Sort
+  sortRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, marginTop: 8 },
+  sortBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  sortText: { fontSize: 13, color: '#334155', fontWeight: '600' },
+  sortArrow: { fontSize: 11, color: C.primary, fontWeight: '700' },
+  viewToggle: { flexDirection: 'row', backgroundColor: C.white, borderRadius: 8, overflow: 'hidden', elevation: 1 },
+  toggleBtn: { paddingHorizontal: 10, paddingVertical: 6 },
+  toggleBtnActive: { backgroundColor: C.primary },
+  toggleIcon: { fontSize: 16, color: C.textGrey },
+  toggleIconActive: { color: C.white },
+
+  // Grid view styles
+  gridRow: { justifyContent: 'space-between', gap: 10 },
+  docCardGrid: {
+    width: '48%',
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  docIconBoxGrid: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  docNameGrid: { fontSize: 13, fontWeight: '700', color: C.textDark, marginTop: 8 },
+  docMetaGrid: { fontSize: 11, color: C.textGrey, marginTop: 4 },
+
+  // Doc list
+  list: { paddingHorizontal: 16, paddingBottom: 110 },
+  docCard: { flexDirection: 'row', backgroundColor: C.white, borderRadius: 16, padding: 12, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
+  docIconBox: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  docIconText: { fontSize: 24 },
+  docBody: { flex: 1 },
+  docTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, gap: 6 },
+  typeBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  typeBadgeText: { fontSize: 11, fontWeight: '600' },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  statusBadgeText: { fontSize: 11, fontWeight: '600' },
+  moreBtn: { marginLeft: 'auto' as any },
+  moreIcon: { fontSize: 18, color: C.textGrey },
+  docName: { fontSize: 14, fontWeight: '700', color: C.textDark },
+  docSub: { fontSize: 12, color: C.textGrey, marginTop: 2 },
+  docMetaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
+  docMeta: { fontSize: 11, color: C.textGrey },
+  docDeadline: { fontSize: 11, fontWeight: '600' },
+
+  // Storage
+  storageCard: { flexDirection: 'row', backgroundColor: '#E0F2FE', borderRadius: 14, padding: 12, alignItems: 'center', marginTop: 4, gap: 10 },
+  storageIcon: { fontSize: 22 },
+  storageInfo: { flex: 1 },
+  storageTitle: { fontSize: 13, fontWeight: '700', color: C.secondary },
+  storageBarBg: { height: 6, backgroundColor: '#BAE6FD', borderRadius: 4, marginVertical: 4 },
+  storageBarFill: { height: 6, backgroundColor: C.primary, borderRadius: 4 },
+  storageText: { fontSize: 11, color: C.textGrey },
+  storageSize: { fontSize: 15, fontWeight: '800', color: C.secondary, textAlign: 'right' },
+  storageSub: { fontSize: 11, fontWeight: '400', color: C.textGrey },
+
+  // Bottom Nav
+  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navItemCenter: { position: 'relative', top: -20 },
+  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
+  navIcon: { fontSize: 20 },
+  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
+  navLabelActive: { color: C.primary, fontWeight: '700' },
+});

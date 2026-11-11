@@ -21,6 +21,8 @@ import { IstemolchiHuquqlariScreen } from './IstemolchiHuquqlariScreen';
 import { HujjatlarHamyoniScreen } from './HujjatlarHamyoniScreen';
 import { AiChatScreen } from './AiChat/AiChatScreen';
 import { ContractAiScreen } from './ContractAi/ContractAiScreen';
+import { LegalMapNavigator } from '../features/legal-map/LegalMapNavigator';
+import { FraudRadarNavigator } from '../features/fraud-radar/FraudRadarNavigator';
 
 const { width } = Dimensions.get('window');
 
@@ -374,6 +376,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   // Shartnoma AI to‘liq ekrani (bosh sahifa yoki xizmatlar katalogidan ochiladi)
   const [showContractAi, setShowContractAi] = useState(false);
 
+  // LegalMap & Firibgarlik Radari Mini App State
+  const [isLegalMapOpen, setIsLegalMapOpen] = useState(false);
+  const [isFraudRadarOpen, setIsFraudRadarOpen] = useState(false);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
@@ -385,6 +391,14 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     }
     if (item.id === 'shartnoma_ai') {
       setShowContractAi(true);
+      return;
+    }
+    if (item.id === 'firibgarlik_radari') {
+      setIsFraudRadarOpen(true);
+      return;
+    }
+    if (item.id === 'legal_map') {
+      setIsLegalMapOpen(true);
       return;
     }
     // Find matching detailed service or show modal
@@ -417,11 +431,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     } else if (sId === 'shartnoma_ai') {
       setShowContractAi(true);
     } else if (sId === 'legal_map') {
-      Alert.alert(
-        'LegalMap (Yuridik Xarita)',
-        '📍 Geolokatsiya böyiça atrofingizdagi advokatura va yuridik firmalar:\n\n1. "Adolat Hamkori" advokatlik byurosi\n   • Narx: 150 000 söm/soat • Masofa: 0.8 km\n   • Ixtisoslik: Fuqarolik, Şartnomalar\n\n2. "Lex Consult Group" yuridik firmasi\n   • Narx: 200 000 söm/soat • Masofa: 1.4 km\n   • Ixtisoslik: Iqtisodiy nizolar, Soliq\n\n3. Advokat Ş. Rahimov (Xususiy amaliyot)\n   • Narx: 180 000 söm/soat • Masofa: 2.1 km\n   • Ixtisoslik: Kredit, Iste’molçi huquqlari\n\nNarxlar balansi böyiça istalgan mutaxassisga töğridan-töğri qönğiroq qilişingiz mumkin.',
-        [{ text: 'Tuşundim' }]
-      );
+      setIsLegalMapOpen(true);
+    } else if (sId === 'firibgarlik_radari') {
+      setIsFraudRadarOpen(true);
     } else if (sId === 'bank_kredit_himoyasi') {
       Alert.alert(
         'Bank Kreditlari Himoyasi',
@@ -484,6 +496,14 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         }}
       />
     );
+  }
+
+  if (isLegalMapOpen) {
+    return <LegalMapNavigator onBack={() => setIsLegalMapOpen(false)} />;
+  }
+
+  if (isFraudRadarOpen) {
+    return <FraudRadarNavigator onBack={() => setIsFraudRadarOpen(false)} />;
   }
 
   // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran

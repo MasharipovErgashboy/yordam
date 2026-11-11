@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Platform, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEventListener } from 'expo';
@@ -23,6 +23,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   // Initialize video player with auto-play and no looping
   const player = useVideoPlayer(introVideoSource, (p) => {
     p.loop = false;
+    if (Platform.OS === 'web') {
+      p.muted = true;
+    }
     p.play();
   });
 
@@ -31,8 +34,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     handleFinish();
   });
 
+  // Fallback on web in case browser blocks autoplay or playToEnd event
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const timer = setTimeout(() => {
+      handleFinish();
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      onPress={Platform.OS === 'web' ? handleFinish : undefined}
+    >
       <StatusBar style="light" />
 
       {/* Pure Fullscreen Video Splash Player */}
@@ -42,7 +57,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         contentFit="cover"
         nativeControls={false}
       />
-    </View>
+    </Pressable>
   );
 };
 

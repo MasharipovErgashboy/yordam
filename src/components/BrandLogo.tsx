@@ -137,7 +137,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             { color: lightMode ? COLORS.textSecondary : COLORS.textWhiteDim },
           ]}
         >
-          Huquqingizni biling. Yordamingiz shu yerda.
+          Huquqingizni biling. Yordamingiz şu yerda.
         </Text>
       )}
     </View>

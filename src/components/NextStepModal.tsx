@@ -43,9 +43,9 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
             <BrandLogo size={56} showText={false} lightMode={true} />
           </View>
 
-          <Text style={styles.sheetTitle}>Xush kelibsiz!</Text>
+          <Text style={styles.sheetTitle}>Xuş kelibsiz!</Text>
           <Text style={styles.sheetSubtitle}>
-            YORDAM platformasiga ulanish uchun keyingi bosqich navigatsiyasi tayyorlandi.
+            YORDAM platformasiga ulaniş uçun keyingi bosqiç navigatsiyasi tayyorlandi.
           </Text>
 
           {/* Language Selection Preview */}
@@ -53,7 +53,7 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
             <Text style={styles.sectionLabel}>Dastur tili:</Text>
             <View style={styles.langRow}>
               <TouchableOpacity style={[styles.langBtn, styles.langBtnActive]} activeOpacity={0.8}>
-                <Text style={styles.langTextActive}>O‘zbekcha</Text>
+                <Text style={styles.langTextActive}>Özbekça</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.langBtn} activeOpacity={0.8}>
                 <Text style={styles.langText}>Ўзбекча</Text>
@@ -76,7 +76,7 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
                 }}
               >
                 <Ionicons name="arrow-forward-circle" size={20} color="#FFFFFF" />
-                <Text style={styles.mainEnterText}>Asosiy tizimga kirish</Text>
+                <Text style={styles.mainEnterText}>Asosiy tizimga kiriş</Text>
               </TouchableOpacity>
             )}
 
@@ -89,7 +89,7 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
               }}
             >
               <MaterialCommunityIcons name="shield-key" size={20} color="#FFFFFF" />
-              <Text style={styles.oneIdText}>OneID orqali kirish</Text>
+              <Text style={styles.oneIdText}>OneID orqali kiriş</Text>
               <View style={styles.officialPill}>
                 <Text style={styles.officialText}>Rasmiy</Text>
               </View>
@@ -116,7 +116,7 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
               activeOpacity={0.7}
             >
               <Ionicons name="refresh" size={16} color={COLORS.accent} />
-              <Text style={styles.restartText}>Taqdimotni qayta ko‘rish</Text>
+              <Text style={styles.restartText}>Taqdimotni qayta köriş</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -124,7 +124,7 @@ export const NextStepModal: React.FC<NextStepModalProps> = ({
               style={styles.closeBtn}
               activeOpacity={0.7}
             >
-              <Text style={styles.closeText}>Yopish</Text>
+              <Text style={styles.closeText}>Yopiş</Text>
             </TouchableOpacity>
           </View>
         </View>

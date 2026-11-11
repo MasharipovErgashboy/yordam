@@ -15,6 +15,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { HuquqMaktabiScreen } from './HuquqMaktabiScreen';
+import { IshVaMehnatHuquqiScreen } from './IshVaMehnatHuquqiScreen';
+import { IstemolchiHuquqlariScreen } from './IstemolchiHuquqlariScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -43,12 +46,12 @@ interface ServiceGridItem {
 const PRIMARY_SERVICES: ServiceGridItem[] = [
   {
     id: 'shartnoma_ai',
-    title: 'Shartnoma\nAI',
+    title: 'Şartnoma\nAI',
     iconName: 'document-text',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     bgColor: '#F0F9FF',
-    detail: 'Shartnomalarni yuklang va AI orqali yuridik xavflarni tahlil qiling.',
+    detail: 'Şartnomalarni yuklang va AI orqali yuridik xavflarni tahlil qiling.',
   },
   {
     id: 'murojaat',
@@ -57,7 +60,7 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     bgColor: '#F0F9FF',
-    detail: 'Davlat idoralariga ariza va shikoyat loyihalarini tayyorlash.',
+    detail: 'Davlat idoralariga ariza va şikoyat loyihalarini tayyorlaş.',
   },
   {
     id: 'firibgarlik_radari',
@@ -66,7 +69,7 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
     iconFamily: 'MaterialCommunityIcons',
     iconColor: '#F59E0B',
     bgColor: '#FFFBEB',
-    detail: 'Shubhali havola, xabar va moliyaviy sxemalarni tekshirish.',
+    detail: 'Şubhali havola, xabar va moliyaviy sxemalarni tekşiriş.',
   },
   {
     id: 'huquq_maktabi',
@@ -75,7 +78,7 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     bgColor: '#F0F9FF',
-    detail: 'Kundalik huquqiy savodxonlik darslari va qo‘llanmalar.',
+    detail: 'Kundalik huquqiy savodxonlik darslari va qöllanmalar.',
   },
   {
     id: 'hujjatlar_hamyoni',
@@ -84,7 +87,7 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
     bgColor: '#FFFBEB',
-    detail: 'Shaxsiy va rasmiy hujjatlaringizning shifrlangan xavfsiz arxivi.',
+    detail: 'Şaxsiy va rasmiy hujjatlaringizning şifrlangan xavfsiz arxivi.',
   },
   {
     id: 'yurist_online',
@@ -93,25 +96,25 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     bgColor: '#F0F9FF',
-    detail: 'Malakali advokat va huquqshunoslar bilan 24/7 bog‘lanish.',
+    detail: 'Malakali advokat va huquqşunoslar bilan 24/7 boğlaniş.',
   },
   {
     id: 'istemolchi',
-    title: 'Iste’molchi',
+    title: 'Iste’molçi',
     iconName: 'cart',
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
     bgColor: '#FFFBEB',
-    detail: 'Xaridor huquqlari, kafolat va tovarlarni qaytarish masalalari.',
+    detail: 'Xaridor huquqlari, kafolat va tovarlarni qaytariş masalalari.',
   },
   {
     id: 'ish_huquqi',
-    title: 'Ish\nhuquqi',
+    title: 'Iş\nhuquqi',
     iconName: 'briefcase',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     bgColor: '#F0F9FF',
-    detail: 'Mehnat shartnomasi, ish haqi, ta’til va ishdan bo‘shatish huquqlari.',
+    detail: 'Mehnat şartnomasi, iş haqi, ta’til va işdan böşatiş huquqlari.',
   },
 ];
 
@@ -137,15 +140,15 @@ interface DetailedServiceItem {
 const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   {
     id: 'shartnoma_ai',
-    name: 'Shartnoma AI Tahlili',
+    name: 'Şartnoma AI Tahlili',
     category: 'ai',
     categoryLabel: 'Yuridik tahlil',
-    description: 'Oldi-sotdi, ijara yoki mehnat shartnomalaridagi xavfli bandlar va noaniqliklarni aniqlash.',
-    fullExplanation: 'Shartnomangizni rasm yoki PDF formatida yuklang. Shartnoma AI barcha bandlarni chuqur tekshirib, siz uchun noqulay yoki xatarli shartlarni ko‘rsatib beradi.',
+    description: 'Oldi-sotdi, ijara yoki mehnat şartnomalaridagi xavfli bandlar va noaniqliklarni aniqlaş.',
+    fullExplanation: 'Şartnomangizni rasm yoki PDF formatida yuklang. Şartnoma AI barça bandlarni çuqur tekşirib, siz uçun noqulay yoki xatarli şartlarni körsatib beradi.',
     keyBenefits: [
-      'Xatarlarni 98% aniqlikda tezkor avtomatik tahlil qilish',
-      'Noaniq va ikki ma’noli yuridik atamalarni aniqlash',
-      'Shartnomani imzolashdan oldin tavsiyalar va tuzatishlar berish',
+      'Xatarlarni 98% aniqlikda tezkor avtomatik tahlil qiliş',
+      'Noaniq va ikki ma’noli yuridik atamalarni aniqlaş',
+      'Şartnomani imzolaşdan oldin tavsiyalar va tuzatişlar beriş',
     ],
     feature: 'Avto-ekspertiza',
     iconName: 'document-text',
@@ -158,25 +161,25 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'LegalMap (Yuridik Xarita)',
     category: 'protection',
     categoryLabel: 'Geolokatsiya & Advokatlar',
-    description: 'Atrofingizdagi yuridik firma va advokaturalarni xaritada ko‘ring, narxlar balansida tanlab bog‘laning.',
-    fullExplanation: 'LegalMap — atrofingizdagi litsenziyalangan advokatlik byurolari, yuridik firmalar va mustaqil advokatlarni geolokatsiya orqali xaritada ko‘rsatuvchi interaktiv xizmat. Unda xizmat narxlari balansi, mijozlar reytingi va yuridik ixtisoslashuv shaffof aks etadi.',
+    description: 'Atrofingizdagi yuridik firma va advokaturalarni xaritada köring, narxlar balansida tanlab boğlaning.',
+    fullExplanation: 'LegalMap — atrofingizdagi litsenziyalangan advokatlik byurolari, yuridik firmalar va mustaqil advokatlarni geolokatsiya orqali xaritada körsatuvçi interaktiv xizmat. Unda xizmat narxlari balansi, mijozlar reytingi va yuridik ixtisoslaşuv şaffof aks etadi.',
     keyBenefits: [
-      'Atrofdagi eng yaqin advokatlik byurosi va yuridik firmalarni xaritada aniqlash',
-      'Xizmat narxlari balansi va shaffof narxlar ro‘yxati (byudjetga mos tanlash)',
-      'Yuristlar reytingi, ko‘rib chiqqan ishlari va ixtisoslashuvini solishtirish',
-      'Bir bosish orqali to‘g‘ridan-to‘g‘ri konsultatsiyaga yozilish yoki bog‘lanish',
+      'Atrofdagi eng yaqin advokatlik byurosi va yuridik firmalarni xaritada aniqlaş',
+      'Xizmat narxlari balansi va şaffof narxlar röyxati (byudjetga mos tanlaş)',
+      'Yuristlar reytingi, körib çiqqan işlari va ixtisoslaşuvini soliştiriş',
+      'Bir bosiş orqali töğridan-töğri konsultatsiyaga yoziliş yoki boğlaniş',
     ],
     feature: 'Xarita & Narxlar',
     iconName: 'map-outline',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
     iconBg: '#F0F9FF',
-    specialNote: '📍 Geolokatsiya bo‘yicha eng yaqin yuridik firmalar va narxlar balansi',
+    specialNote: '📍 Geolokatsiya böyiça eng yaqin yuridik firmalar va narxlar balansi',
     problemAreas: [
       'Yaqin masofadagi advokatlar',
       'Arzon va maqbul narxlar balansi',
       'Sud va tergovda himoya',
-      'Mijozlar reytingi va sharhlar',
+      'Mijozlar reytingi va şarhlar',
     ],
   },
   {
@@ -184,35 +187,35 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'Bank Kreditlari Himoyasi',
     category: 'protection',
     categoryLabel: 'Bank & Kredit huquqlari',
-    description: 'Bank kreditlari bo‘yicha fuqarolar huquqlarini himoya qilish: kartadan pul yechish, foizlar va Markaziy bankka shikoyat.',
-    fullExplanation: 'Amaliy huquqiy tadqiqot loyihasi: O‘zbekistonda bank kreditlari bo‘yicha fuqarolar huquqlarini himoya qilish. Asosiy yondashuv: "Muammo → Qonun → Dalil → Yechim". Bank kreditini qaytarish majburiyati bilan fuqaroning qonuniy huquqlari o‘rtasidagi adolatli va qonuniy muvozanatni ta’minlashga yo‘naltirilgan.',
+    description: 'Bank kreditlari böyiça fuqarolar huquqlarini himoya qiliş: kartadan pul yeçiş, foizlar va Markaziy bankka şikoyat.',
+    fullExplanation: 'Amaliy huquqiy tadqiqot loyihasi: Özbekistonda bank kreditlari böyiça fuqarolar huquqlarini himoya qiliş. Asosiy yondaşuv: "Muammo → Qonun → Dalil → Yeçim". Bank kreditini qaytariş majburiyati bilan fuqaroning qonuniy huquqlari örtasidagi adolatli va qonuniy muvozanatni ta’minlaşga yönaltirilgan.',
     keyBenefits: [
-      'Kartadan asossiz yoki ruxsatsiz pul yechilganda bankka e’tiroz xatini shakllantirish',
-      'To‘liq kredit qiymati, sug‘urta va yashirin komissiyalarni qonuniy taftish qilish',
-      'Roziliksiz (firibgarlik yo‘li bilan) olingan kreditlarni bekor qilish tartibi',
-      'Daromad kamayganda kredit restrukturizatsiyasi va imtiyoz so‘rash arizalari',
-      'Markaziy bank (3030-son Nizom) va sud organlari orqali fuqaroni himoya qilish',
+      'Kartadan asossiz yoki ruxsatsiz pul yeçilganda bankka e’tiroz xatini şakllantiriş',
+      'Töliq kredit qiymati, suğurta va yaşirin komissiyalarni qonuniy taftiş qiliş',
+      'Roziliksiz (firibgarlik yöli bilan) olingan kreditlarni bekor qiliş tartibi',
+      'Daromad kamayganda kredit restrukturizatsiyasi va imtiyoz söraş arizalari',
+      'Markaziy bank (3030-son Nizom) va sud organlari orqali fuqaroni himoya qiliş',
     ],
     feature: 'MB 3030 & LexUZ',
     iconName: 'card-outline',
     iconFamily: 'Ionicons',
     iconColor: '#D97706',
     iconBg: '#FFFBEB',
-    specialNote: '⚖️ Amaliy tahlil: Fuqarolik kodeksi, MB 3030-Nizomi va O‘RQ-1060 qonuni',
+    specialNote: '⚖️ Amaliy tahlil: Fuqarolik kodeksi, MB 3030-Nizomi va ÖRQ-1060 qonuni',
     problemAreas: [
-      '1. Kartadan asossiz pul yechish',
-      '2. Foizlar va qo‘shimcha to‘lovlar',
+      '1. Kartadan asossiz pul yeçiş',
+      '2. Foizlar va qöşimça tölovlar',
       '3. Roziliksiz (firibgarlik) kreditlar',
-      '4. To‘lov qobiliyati pasayishi',
-      '5. Muddatidan oldin qarz undirish',
+      '4. Tölov qobiliyati pasayişi',
+      '5. Muddatidan oldin qarz undiriş',
       '6. Markaziy bankka murojaatlar',
     ],
     actionSteps: [
-      '1. Dalillarni saqlash (shartnoma, SMS, bank ko‘chirmasi)',
-      '2. Bankka yozma murojaat va murojaat raqamini olish',
-      '3. Javobni shartnoma va qonunchilik bilan solishtirish',
-      '4. Markaziy bank yoki ichki ishlar organiga ariza',
-      '5. Nizo hal bo‘lmasa, sud himoyasi orqali hal etish',
+      '1. Dalillarni saqlaş (şartnoma, SMS, bank köçirmasi)',
+      '2. Bankka yozma murojaat va murojaat raqamini oliş',
+      '3. Javobni şartnoma va qonunçilik bilan soliştiriş',
+      '4. Markaziy bank yoki içki işlar organiga ariza',
+      '5. Nizo hal bölmasa, sud himoyasi orqali hal etiş',
     ],
   },
   {
@@ -220,12 +223,12 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'Firibgarlik Radari',
     category: 'protection',
     categoryLabel: 'Xavfsizlik',
-    description: 'Shubhali SMS havolalar, soxta aksiyalar va onlayn to‘lov firibgarliklarini tekshirish.',
-    fullExplanation: 'Firibgarlik Radari — internetda, Telegram va SMS xabarlarda tarqalayotgan shubhali havolalar, soxta saytlar va moliyaviy piramidalar xavfini tekshirish uchun maxsus vosita.',
+    description: 'Şubhali SMS havolalar, soxta aksiyalar va onlayn tölov firibgarliklarini tekşiriş.',
+    fullExplanation: 'Firibgarlik Radari — internetda, Telegram va SMS xabarlarda tarqalayotgan şubhali havolalar, soxta saytlar va moliyaviy piramidalar xavfini tekşiriş uçun maxsus vosita.',
     keyBenefits: [
-      'Havolani bir zumda xavfsizlik ma’lumotlar bazasi bilan solishtirish',
-      'Karta ma’lumotlarini o‘g‘irlovchi soxta fishing saytlarni aniqlash',
-      'Firibgarlarga aldanib qolganda tezkor harakatlar bo‘yicha qo‘llanma',
+      'Havolani bir zumda xavfsizlik ma’lumotlar bazasi bilan soliştiriş',
+      'Karta ma’lumotlarini öğirlovçi soxta fişing saytlarni aniqlaş',
+      'Firibgarlarga aldanib qolganda tezkor harakatlar böyiça qöllanma',
     ],
     feature: 'Xavf filtri',
     iconName: 'shield-alert-outline',
@@ -238,12 +241,12 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'Murojaat va Arizalar',
     category: 'documents',
     categoryLabel: 'Davlat xizmatlari',
-    description: 'Vazirliklar, sudlar va davlat organlariga rasmiy ariza va shikoyat loyihalarini tuzish.',
-    fullExplanation: 'Davlat idoralari va tashkilotlariga taqdim etiladigan barcha turdagi rasmiy ariza, shikoyat va takliflarni qonuniy andozalar asosida bir necha daqiqada tayyorlash xizmati.',
+    description: 'Vazirliklar, sudlar va davlat organlariga rasmiy ariza va şikoyat loyihalarini tuziş.',
+    fullExplanation: 'Davlat idoralari va taşkilotlariga taqdim etiladigan barça turdagi rasmiy ariza, şikoyat va takliflarni qonuniy andozalar asosida bir neça daqiqada tayyorlaş xizmati.',
     keyBenefits: [
-      'Davlat idoralari qabul qiladigan rasmiy yuridik shablonlar',
-      'Avtomatlashtirilgan rekvizitlar va moddalar kiritish',
-      'Tayyor hujjatni PDF yoki Word formatida yuklab olish',
+      'Davlat idoralari qabul qiladigan rasmiy yuridik şablonlar',
+      'Avtomatlaştirilgan rekvizitlar va moddalar kiritiş',
+      'Tayyor hujjatni PDF yoki Word formatida yuklab oliş',
     ],
     feature: 'Tayyor loyiha',
     iconName: 'mail',
@@ -255,13 +258,13 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     id: 'hujjatlar_hamyoni',
     name: 'Hujjatlar Hamyoni',
     category: 'documents',
-    categoryLabel: 'Shaxsiy arxiv',
-    description: 'Shaxsiy hujjatlar, guvohnomalar, cheklar va shartnomalarning 256-bit shifrlangan arxivi.',
-    fullExplanation: 'Barcha muhim shartnomalaringiz, to‘lov kvitansiyalari, kafolat talonlari va rasmiy hujjatlaringizni bitta joyda xavfsiz va qulay tartibda saqlang.',
+    categoryLabel: 'Şaxsiy arxiv',
+    description: 'Şaxsiy hujjatlar, guvohnomalar, çeklar va şartnomalarning 256-bit şifrlangan arxivi.',
+    fullExplanation: 'Barça muhim şartnomalaringiz, tölov kvitansiyalari, kafolat talonlari va rasmiy hujjatlaringizni bitta joyda xavfsiz va qulay tartibda saqlang.',
     keyBenefits: [
-      'Harbiy darajadagi 256-bit shifrlangan xavfsiz bulutli xotira',
-      'Hujjatlarning amal qilish muddati tugashidan oldin eslatmalar',
-      'Kerakli hujjatni bir zumda qidirib topish va ulashish imkoniyati',
+      'Harbiy darajadagi 256-bit şifrlangan xavfsiz bulutli xotira',
+      'Hujjatlarning amal qiliş muddati tugaşidan oldin eslatmalar',
+      'Kerakli hujjatni bir zumda qidirib topiş va ulaşiş imkoniyati',
     ],
     feature: 'Maxfiy arxiv',
     iconName: 'folder',
@@ -274,12 +277,12 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'Yurist Online',
     category: 'protection',
     categoryLabel: 'Advokatlar',
-    description: 'Litsenziyaga ega professional advokatlar va yuridik mutaxassislar bilan onlayn bog‘lanish.',
-    fullExplanation: 'Murakkab huquqiy masalalar, sud nizolari va shaxsiy himoya bo‘yicha O‘zbekiston advokatlar palatasida ro‘yxatdan o‘tgan malakali advokatlar bilan to‘g‘ridan-to‘g‘ri bog‘laning.',
+    description: 'Litsenziyaga ega professional advokatlar va yuridik mutaxassislar bilan onlayn boğlaniş.',
+    fullExplanation: 'Murakkab huquqiy masalalar, sud nizolari va şaxsiy himoya böyiça Özbekiston advokatlar palatasida röyxatdan ötgan malakali advokatlar bilan töğridan-töğri boğlaning.',
     keyBenefits: [
       'Tasdiqlangan litsenziyaga ega tajribali mutaxassislar',
       'Onlayn chat, audio yoki video konsultatsiya imkoniyati',
-      'Shaxsiy sir va advokatlik daxlsizligi to‘liq kafolatlangan',
+      'Şaxsiy sir va advokatlik daxlsizligi töliq kafolatlangan',
     ],
     feature: 'Jonli maslahat',
     iconName: 'headset',
@@ -292,12 +295,12 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
     name: 'Huquq Maktabi',
     category: 'protection',
     categoryLabel: 'Ta’lim',
-    description: 'Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar.',
-    fullExplanation: 'Har bir fuqaro o‘z huquq va majburiyatlarini bilishi uchun sodda, vizual va tushunarli shaklda yaratilgan bepul huquqiy savodxonlik kursi.',
+    description: 'Fuqarolar uçun hayotiy huquqiy vaziyatlar, qöllanmalar, testlar va audio-darsliklar.',
+    fullExplanation: 'Har bir fuqaro öz huquq va majburiyatlarini bilişi uçun sodda, vizual va tuşunarli şaklda yaratilgan bepul huquqiy savodxonlik kursi.',
     keyBenefits: [
-      'Hayotiy vaziyatlarga bag‘ishlangan qisqa va amaliy darslar',
-      'Bilimlarni mustahkamlash uchun interaktiv testlar',
-      'Doimiy yangilanib boruvchi qonunchilik sharhlari',
+      'Hayotiy vaziyatlarga bağişlangan qisqa va amaliy darslar',
+      'Bilimlarni mustahkamlaş uçun interaktiv testlar',
+      'Doimiy yangilanib boruvçi qonunçilik şarhlari',
     ],
     feature: 'Interaktiv',
     iconName: 'school',
@@ -307,17 +310,17 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   },
   {
     id: 'istemolchi',
-    name: 'Iste’molchi Huquqlari',
+    name: 'Iste’molçi Huquqlari',
     category: 'protection',
     categoryLabel: 'Xaridor himoyasi',
-    description: 'Sifatsiz xarid, to‘lovni qaytarish, kafolat muddati va da’vo talablarini shakllantirish.',
-    fullExplanation: 'Do‘konlar, onlayn bozorlar yoki xizmat ko‘rsatuvchilar tomonidan huquqlaringiz buzilganda tovarlarni almashtirish yoki pulingizni qaytarib olishda yordam.',
+    description: 'Sifatsiz xarid, tölovni qaytariş, kafolat muddati va da’vo talablarini şakllantiriş.',
+    fullExplanation: 'Dökonlar, onlayn bozorlar yoki xizmat körsatuvçilar tomonidan huquqlaringiz buzilganda tovarlarni almaştiriş yoki pulingizni qaytarib olişda yordam.',
     keyBenefits: [
-      'Iste’molchilar huquqlarini himoya qilish qonunchiligi asosida harakat',
-      'Sotuvchiga yuboriladigan e’tiroz xati shablonini generatsiya qilish',
-      'Vakolatli davlat organlariga to‘g‘ridan-to‘g‘ri murojaat yo‘llash',
+      'Iste’molçilar huquqlarini himoya qiliş qonunçiligi asosida harakat',
+      'Sotuvçiga yuboriladigan e’tiroz xati şablonini generatsiya qiliş',
+      'Vakolatli davlat organlariga töğridan-töğri murojaat yöllaş',
     ],
-    feature: 'Mablag‘ni qaytarish',
+    feature: 'Mablağni qaytariş',
     iconName: 'cart',
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
@@ -325,15 +328,15 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   },
   {
     id: 'ish_huquqi',
-    name: 'Ish va Mehnat Huquqi',
+    name: 'Iş va Mehnat Huquqi',
     category: 'protection',
     categoryLabel: 'Mehnat munosabatlari',
-    description: 'Noqonuniy bo‘shatish, ish haqi ushlab qolinishi, ta’til va xodim huquqlarini himoya qilish.',
-    fullExplanation: 'Mehnat shartnomasi shartlari buzilishi, oylik maosh kechiktirilishi, noqonuniy jazo choralari yoki asossiz ishdan bo‘shatish bo‘yicha to‘liq huquqiy yordam.',
+    description: 'Noqonuniy böşatiş, iş haqi uşlab qolinişi, ta’til va xodim huquqlarini himoya qiliş.',
+    fullExplanation: 'Mehnat şartnomasi şartlari buzilişi, oylik maoh keçiktirilişi, noqonuniy jazo çoralari yoki asossiz işdan böşatiş böyiça töliq huquqiy yordam.',
     keyBenefits: [
-      'Yangi tahrirdagi Mehnat Kodeksi bo‘yicha huquqiy tahlil',
-      'Mehnat inspeksiyasiga shikoyat arizasini tayyorlash',
-      'Noqonuniy bo‘shatilganda ishga tiklash va kompensatsiya talab qilish tartibi',
+      'Yangi tahrirdagi Mehnat Kodeksi böyiça huquqiy tahlil',
+      'Mehnat inspeksiyasiga şikoyat arizasini tayyorlaş',
+      'Noqonuniy böşatilganda işga tiklaş va kompensatsiya talab qiliş tartibi',
     ],
     feature: 'Mehnat himoyasi',
     iconName: 'briefcase',
@@ -353,7 +356,20 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
 
+  // Huquq Maktabi Mini App State
+  const [isHuquqMaktabiOpen, setIsHuquqMaktabiOpen] = useState(false);
+
+  // Ish va Mehnat Huquqi Mini App State
+  const [isIshHuquqiOpen, setIsIshHuquqiOpen] = useState(false);
+
+  // Iste'molchi Huquqlari Mini App State
+  const [isIstemolchiOpen, setIsIstemolchiOpen] = useState(false);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
+    if (item.id === 'istemolchi') {
+      setIsIstemolchiOpen(true);
+      return;
+    }
     // Find matching detailed service or show modal
     const detailed = SERVICES_TABLE_CATALOG.find((s) => s.id === item.id);
     if (detailed) {
@@ -373,23 +389,29 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     const sId = selectedService.id;
     setSelectedService(null);
 
-    if (sId === 'legal_map') {
+    if (sId === 'huquq_maktabi') {
+      setIsHuquqMaktabiOpen(true);
+    } else if (sId === 'ish_huquqi') {
+      setIsIshHuquqiOpen(true);
+    } else if (sId === 'istemolchi') {
+      setIsIstemolchiOpen(true);
+    } else if (sId === 'legal_map') {
       Alert.alert(
         'LegalMap (Yuridik Xarita)',
-        '📍 Geolokatsiya bo‘yicha atrofingizdagi advokatura va yuridik firmalar:\n\n1. "Adolat Hamkori" advokatlik byurosi\n   • Narx: 150 000 so‘m/soat • Masofa: 0.8 km\n   • Ixtisoslik: Fuqarolik, Shartnomalar\n\n2. "Lex Consult Group" yuridik firmasi\n   • Narx: 200 000 so‘m/soat • Masofa: 1.4 km\n   • Ixtisoslik: Iqtisodiy nizolar, Soliq\n\n3. Advokat Sh. Rahimov (Xususiy amaliyot)\n   • Narx: 180 000 so‘m/soat • Masofa: 2.1 km\n   • Ixtisoslik: Kredit, Iste’molchi huquqlari\n\nNarxlar balansi bo‘yicha istalgan mutaxassisga to‘g‘ridan-to‘g‘ri qo‘ng‘iroq qilishingiz mumkin.',
-        [{ text: 'Tushundim' }]
+        '📍 Geolokatsiya böyiça atrofingizdagi advokatura va yuridik firmalar:\n\n1. "Adolat Hamkori" advokatlik byurosi\n   • Narx: 150 000 söm/soat • Masofa: 0.8 km\n   • Ixtisoslik: Fuqarolik, Şartnomalar\n\n2. "Lex Consult Group" yuridik firmasi\n   • Narx: 200 000 söm/soat • Masofa: 1.4 km\n   • Ixtisoslik: Iqtisodiy nizolar, Soliq\n\n3. Advokat Ş. Rahimov (Xususiy amaliyot)\n   • Narx: 180 000 söm/soat • Masofa: 2.1 km\n   • Ixtisoslik: Kredit, Iste’molçi huquqlari\n\nNarxlar balansi böyiça istalgan mutaxassisga töğridan-töğri qönğiroq qilişingiz mumkin.',
+        [{ text: 'Tuşundim' }]
       );
     } else if (sId === 'bank_kredit_himoyasi') {
       Alert.alert(
         'Bank Kreditlari Himoyasi',
-        '🏦 Kredit masalalari bo‘yicha amaliy yo‘nalishni tanlang:\n\n1. Kartadan asossiz yechilgan pulni qaytarish talabnomasi\n2. Yashirin foiz va komissiyalar tahlili\n3. Roziliksiz (firibgarlik) rasmiylashtirilgan kredit shikoyati\n4. Kredit restrukturizatsiyasi va yengillik so‘rovi\n5. Markaziy bank (3030-son Nizom) va sudga murojaat\n\nTanlangan yo‘nalish bo‘yicha ariza andozasi yuklanmoqda.',
-        [{ text: 'Tushundim' }]
+        '🏦 Kredit masalalari böyiça amaliy yönalişni tanlang:\n\n1. Kartadan asossiz yeçilgan pulni qaytariş talabnomasi\n2. Yaşirin foiz va komissiyalar tahlili\n3. Roziliksiz (firibgarlik) rasmiylaştirilgan kredit şikoyati\n4. Kredit restrukturizatsiyasi va yengillik sörovi\n5. Markaziy bank (3030-son Nizom) va sudga murojaat\n\nTanlangan yönaliş böyiça ariza andozasi yuklanmoqda.',
+        [{ text: 'Tuşundim' }]
       );
     } else {
       Alert.alert(
         'Xizmat tanlandi',
-        `"${sName}" xizmati ishga tushirilmoqda. Tez orada to‘liq interaktiv funksiyalar bilan integratsiya qilinadi.`,
-        [{ text: 'Tushundim' }]
+        `"${sName}" xizmati işga tuşirilmoqda. Tez orada töliq interaktiv funksiyalar bilan integratsiya qilinadi.`,
+        [{ text: 'Tuşundim' }]
       );
     }
   };
@@ -415,6 +437,18 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     return matchesCategory && matchesSearch;
   });
 
+  if (isHuquqMaktabiOpen) {
+    return <HuquqMaktabiScreen onBack={() => setIsHuquqMaktabiOpen(false)} />;
+  }
+
+  if (isIshHuquqiOpen) {
+    return <IshVaMehnatHuquqiScreen onBack={() => setIsIshHuquqiOpen(false)} />;
+  }
+
+  if (isIstemolchiOpen) {
+    return <IstemolchiHuquqlariScreen onBack={() => setIsIstemolchiOpen(false)} />;
+  }
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
@@ -439,7 +473,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
           <TouchableOpacity
             style={styles.iconCircleButton}
             activeOpacity={0.7}
-            onPress={() => Alert.alert('Bildirishnomalar', 'Yangi xabarlar mavjud emas.')}
+            onPress={() => Alert.alert('Bildirişnomalar', 'Yangi xabarlar mavjud emas.')}
           >
             <Ionicons name="notifications-outline" size={20} color="#1F2937" />
             <View style={styles.notificationDot} />
@@ -449,7 +483,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
           <TouchableOpacity
             style={styles.iconCircleButton}
             activeOpacity={0.7}
-            onPress={() => Alert.alert('Hujjat skaneri', 'QR yoki hujjat skaneri tez orada ishga tushadi.')}
+            onPress={() => Alert.alert('Hujjat skaneri', 'QR yoki hujjat skaneri tez orada işga tuşadi.')}
           >
             <Ionicons name="scan-outline" size={20} color="#1F2937" />
           </TouchableOpacity>
@@ -463,9 +497,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
           <View style={styles.stickyFilterHeader}>
             {/* Table Header Title (without count badge) */}
             <View style={styles.tableHeaderSection}>
-              <Text style={styles.tableMainTitle}>Barcha huquqiy xizmatlar</Text>
+              <Text style={styles.tableMainTitle}>Barça huquqiy xizmatlar</Text>
               <Text style={styles.tableSubtitleText}>
-                O‘zbekiston Respublikasi qonunchiligiga asoslangan raqamli xizmatlar
+                Özbekiston Respublikasi qonunçiligiga asoslangan raqamli xizmatlar
               </Text>
             </View>
 
@@ -474,7 +508,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <Ionicons name="search" size={17} color="#9CA3AF" style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Xizmat nomi yoki toifasi bo‘yicha izlash..."
+                placeholder="Xizmat nomi yoki toifasi böyiça izlaş..."
                 placeholderTextColor="#9CA3AF"
                 value={serviceSearch}
                 onChangeText={setServiceSearch}
@@ -506,7 +540,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                     serviceCategory === 'all' && styles.filterPillTextActive,
                   ]}
                 >
-                  Barchasi
+                  Barçasi
                 </Text>
               </TouchableOpacity>
 
@@ -649,7 +683,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 <Ionicons name="search" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
                 <TextInput
                   style={styles.searchInput}
-                  placeholder="Masalan: mehnat shartnomasi, kredit, ijara..."
+                  placeholder="Masalan: mehnat şartnomasi, kredit, ijara..."
                   placeholderTextColor="#9CA3AF"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
@@ -679,7 +713,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 >
                   <Ionicons name="search" size={15} color="#0284C7" />
                   <Text style={styles.homeSearchQuickText}>
-                    "{searchQuery}" bo‘yicha xizmatlar katalogida qidirish →
+                    "{searchQuery}" böyiça xizmatlar katalogida qidiriş →
                   </Text>
                 </TouchableOpacity>
               )}
@@ -703,7 +737,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                       <Text style={styles.haqimBadgeText}>HAQIM</Text>
                     </View>
 
-                    <Text style={styles.heroTitle}>AI huquqiy yordamchi</Text>
+                    <Text style={styles.heroTitle}>AI huquqiy yordamçi</Text>
                     <Text style={styles.heroDesc}>
                       Savolingizni yozing va tezkor huquqiy javob oling.
                     </Text>
@@ -733,7 +767,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   onPress={() => setActiveTab('services')}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.seeAllText}>Barchasini ko‘rish ›</Text>
+                  <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
                 </TouchableOpacity>
               </View>
 
@@ -760,10 +794,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
                 <Text style={styles.sectionTitle}>Foydali ma’lumotlar</Text>
                 <TouchableOpacity
-                  onPress={() => Alert.alert('Maqolalar', 'Barcha foydali huquqiy maqolalar sahifasi.')}
+                  onPress={() => Alert.alert('Maqolalar', 'Barça foydali huquqiy maqolalar sahifasi.')}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.seeAllText}>Barchasini ko‘rish ›</Text>
+                  <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
                 </TouchableOpacity>
               </View>
 
@@ -773,8 +807,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 activeOpacity={0.85}
                 onPress={() =>
                   Alert.alert(
-                    'Mehnat shartnomasi',
-                    'Mehnat shartnomasi tuzishda asosiy qoidalar: sinov muddati, ta’tillar, oylik maosh va bekor qilish shartlariga e’tibor qaratish lozim.'
+                    'Mehnat şartnomasi',
+                    'Mehnat şartnomasi tuzişda asosiy qoidalar: sinov muddati, ta’tillar, oylik maoh va bekor qiliş şartlariga e’tibor qaratiş lozim.'
                   )
                 }
               >
@@ -792,7 +826,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   </View>
 
                   <Text style={styles.articleTitle} numberOfLines={2}>
-                    Mehnat shartnomasi tuzishda nimalarga e’tibor berish kerak?
+                    Mehnat şartnomasi tuzişda nimalarga e’tibor beriş kerak?
                   </Text>
 
                   {/* Date & Views Meta */}
@@ -817,9 +851,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <View style={styles.aiTabHeaderCard}>
                 <Image source={robotImage} style={{ width: 64, height: 64 }} resizeMode="contain" />
                 <View style={{ flex: 1, marginLeft: 14 }}>
-                  <Text style={styles.aiTabTitle}>HAQIM AI Yordamchi</Text>
+                  <Text style={styles.aiTabTitle}>HAQIM AI Yordamçi</Text>
                   <Text style={styles.aiTabDesc}>
-                    O‘zbekiston Respublikasi qonunchiligi bo‘yicha istalgan huquqiy savolingizni bering.
+                    Özbekiston Respublikasi qonunçiligi böyiça istalgan huquqiy savolingizni bering.
                   </Text>
                 </View>
               </View>
@@ -830,26 +864,26 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
 
               <TouchableOpacity
                 style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Ijara shartnomasi bo‘yicha maslahat tahlili boshlanmoqda...')}
+                onPress={() => Alert.alert('HAQIM AI', 'Ijara şartnomasi böyiça maslahat tahlili boşlanmoqda...')}
               >
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Kvartira ijarasi shartnomasi qanday bekor qilinadi?</Text>
+                <Text style={styles.quickPromptText}>Kvartira ijarasi şartnomasi qanday bekor qilinadi?</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Mehnat nizosi bo‘yicha tahlil boshlanmoqda...')}
+                onPress={() => Alert.alert('HAQIM AI', 'Mehnat nizosi böyiça tahlil boşlanmoqda...')}
               >
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Ish beruvchi ogohlantirishsiz ishdan bo‘shatishi mumkinmi?</Text>
+                <Text style={styles.quickPromptText}>Iş beruvçi oğohlantirişsiz işdan böşatişi mumkinmi?</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Iste’molchi huquqlari bo‘yicha tahlil boshlanmoqda...')}
+                onPress={() => Alert.alert('HAQIM AI', 'Iste’molçi huquqlari böyiça tahlil boşlanmoqda...')}
               >
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Nuqsonli tovarni qancha muddatda qaytarish mumkin?</Text>
+                <Text style={styles.quickPromptText}>Nuqsonli tovarni qança muddatda qaytariş mumkin?</Text>
               </TouchableOpacity>
 
               {/* Input message box */}
@@ -877,7 +911,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   <Ionicons name="person" size={28} color="#FFFFFF" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.profileName}>O‘zbekiston Fuqarosi</Text>
+                  <Text style={styles.profileName}>Özbekiston Fuqarosi</Text>
                   <Text style={styles.profileStatus}>OneID orqali tasdiqlangan</Text>
                 </View>
                 <Ionicons name="checkmark-circle" size={22} color="#10B981" />
@@ -887,7 +921,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 <TouchableOpacity style={styles.profileMenuItem}>
                   <Ionicons name="globe-outline" size={20} color="#0284C7" />
                   <Text style={styles.profileMenuText}>Dastur tili</Text>
-                  <Text style={styles.profileMenuSub}>O‘zbekcha</Text>
+                  <Text style={styles.profileMenuSub}>Özbekça</Text>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
@@ -900,7 +934,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 {onBackToOnboarding && (
                   <TouchableOpacity style={styles.profileMenuItem} onPress={onBackToOnboarding}>
                     <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
-                    <Text style={styles.profileMenuText}>Kirish taqdimotini ko‘rish</Text>
+                    <Text style={styles.profileMenuText}>Kiriş taqdimotini köriş</Text>
                     <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                   </TouchableOpacity>
                 )}
@@ -977,7 +1011,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               activeTab === 'ai_assistant' ? styles.navLabelActive : styles.navLabelInactive,
             ]}
           >
-            AI yordamchi
+            AI yordamçi
           </Text>
         </TouchableOpacity>
 
@@ -1077,8 +1111,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 <View style={styles.modalProblemsBox}>
                   <Text style={styles.modalSectionSmallTitle}>
                     {selectedService.id === 'bank_kredit_himoyasi'
-                      ? 'O‘rganiladigan 6 ta asosiy muammo:'
-                      : 'Asosiy yo‘nalishlar va filtrlar:'}
+                      ? 'Örganiladigan 6 ta asosiy muammo:'
+                      : 'Asosiy yönalişlar va filtrlar:'}
                   </Text>
                   <View style={styles.modalProblemsGrid}>
                     {selectedService.problemAreas.map((prob, idx) => (
@@ -1129,7 +1163,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               activeOpacity={0.88}
               onPress={handleUseService}
             >
-              <Text style={styles.useServiceBtnText}>Xizmatdan foydalanish</Text>
+              <Text style={styles.useServiceBtnText}>Xizmatdan foydalaniş</Text>
               <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -1138,7 +1172,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               activeOpacity={0.7}
               onPress={() => setSelectedService(null)}
             >
-              <Text style={styles.cancelBtnText}>Bekor qilish</Text>
+              <Text style={styles.cancelBtnText}>Bekor qiliş</Text>
             </TouchableOpacity>
           </View>
         </View>

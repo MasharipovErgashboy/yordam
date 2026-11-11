@@ -31,7 +31,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           style={styles.skipButton}
         >
-          <Text style={styles.skipText}>O'tkazib yuborish</Text>
+          <Text style={styles.skipText}>Ötkazib yuboriş</Text>
         </TouchableOpacity>
       ) : (
         <View style={styles.placeholder} />

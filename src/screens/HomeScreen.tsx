@@ -63,36 +63,48 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const [selectedCat, setSelectedCat] = useState('1');
   const [search, setSearch] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* ── HEADER ── */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <View style={styles.logoBox}>
-              <Text style={styles.logoIcon}>💼</Text>
-            </View>
-            <View>
-              <Text style={styles.appName}>Bosh sahifa</Text>
-              <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-            </View>
+      {/* ── HEADER ── */}
+      <View style={[styles.header, isScrolled && styles.headerScrolled]}>
+        <View style={styles.headerLeft}>
+          <View style={styles.logoBox}>
+            <Text style={styles.logoIcon}>💼</Text>
           </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.bellBtn}>
-              <Text style={styles.bellIcon}>🔔</Text>
-              <View style={styles.badgeDot} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-              <View style={styles.avatar}>
-                <Text style={{ fontSize: 20 }}>👤</Text>
-              </View>
-            </TouchableOpacity>
+          <View>
+            <Text style={styles.appName}>Bosh sahifa</Text>
+            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
           </View>
         </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.bellBtn}
+            onPress={() => navigation.navigate('Reminders')}
+          >
+            <Text style={styles.bellIcon}>🔔</Text>
+            <View style={styles.badgeDot} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <View style={styles.avatar}>
+              <Text style={{ fontSize: 20 }}>👤</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
 
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        onScroll={(e) => {
+          const offsetY = e.nativeEvent.contentOffset.y;
+          setIsScrolled(offsetY > 10);
+        }}
+        scrollEventThrottle={16}
+      >
         {/* ── GREETING ── */}
         <Text style={styles.greeting}>Assalomu alaykum{'\n'}Sardorbek! 👋</Text>
 
@@ -266,7 +278,25 @@ const styles = StyleSheet.create({
   scroll: { flex: 1, paddingHorizontal: 16 },
 
   // Header
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    backgroundColor: C.bg,
+    zIndex: 10,
+  },
+  headerScrolled: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logoBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.primary + '22', alignItems: 'center', justifyContent: 'center' },
   logoIcon: { fontSize: 18 },

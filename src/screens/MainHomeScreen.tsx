@@ -19,6 +19,8 @@ import { HuquqMaktabiScreen } from './HuquqMaktabiScreen';
 import { IshVaMehnatHuquqiScreen } from './IshVaMehnatHuquqiScreen';
 import { IstemolchiHuquqlariScreen } from './IstemolchiHuquqlariScreen';
 import { HujjatlarHamyoniScreen } from './HujjatlarHamyoniScreen';
+import { AiChatScreen } from './AiChat/AiChatScreen';
+import { ContractAiScreen } from './ContractAi/ContractAiScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -369,6 +371,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   // Hujjatlar Hamyoni Mini App State
   const [isHujjatlarHamyoniOpen, setIsHujjatlarHamyoniOpen] = useState(false);
 
+  // Shartnoma AI to‘liq ekrani (bosh sahifa yoki xizmatlar katalogidan ochiladi)
+  const [showContractAi, setShowContractAi] = useState(false);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
@@ -376,6 +381,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     }
     if (item.id === 'hujjatlar_hamyoni') {
       setIsHujjatlarHamyoniOpen(true);
+      return;
+    }
+    if (item.id === 'shartnoma_ai') {
+      setShowContractAi(true);
       return;
     }
     // Find matching detailed service or show modal
@@ -405,6 +414,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       setIsIstemolchiOpen(true);
     } else if (sId === 'hujjatlar_hamyoni') {
       setIsHujjatlarHamyoniOpen(true);
+    } else if (sId === 'shartnoma_ai') {
+      setShowContractAi(true);
     } else if (sId === 'legal_map') {
       Alert.alert(
         'LegalMap (Yuridik Xarita)',
@@ -461,6 +472,23 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
 
   if (isHujjatlarHamyoniOpen) {
     return <HujjatlarHamyoniScreen onBack={() => setIsHujjatlarHamyoniOpen(false)} />;
+  }
+
+  if (showContractAi) {
+    return (
+      <ContractAiScreen
+        onBack={() => setShowContractAi(false)}
+        onAskAi={() => {
+          setShowContractAi(false);
+          setActiveTab('ai_assistant');
+        }}
+      />
+    );
+  }
+
+  // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran
+  if (activeTab === 'ai_assistant') {
+    return <AiChatScreen onBack={() => setActiveTab('home')} />;
   }
 
   return (
@@ -859,63 +887,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
             </>
           )}
 
-          {/* ===================== 3. AI YORDAMCHI TAB ===================== */}
-          {activeTab === 'ai_assistant' && (
-            <View style={styles.tabContentContainer}>
-              <View style={styles.aiTabHeaderCard}>
-                <Image source={robotImage} style={{ width: 64, height: 64 }} resizeMode="contain" />
-                <View style={{ flex: 1, marginLeft: 14 }}>
-                  <Text style={styles.aiTabTitle}>HAQIM AI Yordamçi</Text>
-                  <Text style={styles.aiTabDesc}>
-                    Özbekiston Respublikasi qonunçiligi böyiça istalgan huquqiy savolingizni bering.
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={[styles.sectionTitle, { marginTop: 8, marginBottom: 10 }]}>
-                Tezkor huquqiy savollar:
-              </Text>
-
-              <TouchableOpacity
-                style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Ijara şartnomasi böyiça maslahat tahlili boşlanmoqda...')}
-              >
-                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Kvartira ijarasi şartnomasi qanday bekor qilinadi?</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Mehnat nizosi böyiça tahlil boşlanmoqda...')}
-              >
-                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Iş beruvçi oğohlantirişsiz işdan böşatişi mumkinmi?</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.quickPromptCard}
-                onPress={() => Alert.alert('HAQIM AI', 'Iste’molçi huquqlari böyiça tahlil boşlanmoqda...')}
-              >
-                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-                <Text style={styles.quickPromptText}>Nuqsonli tovarni qança muddatda qaytariş mumkin?</Text>
-              </TouchableOpacity>
-
-              {/* Input message box */}
-              <View style={styles.chatInputBar}>
-                <TextInput
-                  style={styles.chatInput}
-                  placeholder="Savolingizni bu yerga yozing..."
-                  placeholderTextColor="#9CA3AF"
-                />
-                <TouchableOpacity
-                  style={styles.sendButton}
-                  onPress={() => Alert.alert('HAQIM AI', 'Savolingiz qabul qilindi, tahlil qilinmoqda...')}
-                >
-                  <Ionicons name="arrow-up" size={18} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
 
           {/* ===================== 4. PROFIL TAB ===================== */}
           {activeTab === 'profile' && (
@@ -1012,19 +983,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
           onPress={() => setActiveTab('ai_assistant')}
           activeOpacity={0.7}
         >
-          {activeTab === 'ai_assistant' ? (
-            <View style={styles.activePillContainer}>
-              <Ionicons name="sparkles" size={20} color="#D97706" />
-            </View>
-          ) : (
-            <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
-          )}
-          <Text
-            style={[
-              styles.navLabel,
-              activeTab === 'ai_assistant' ? styles.navLabelActive : styles.navLabelInactive,
-            ]}
-          >
+          {/* AI tab to‘liq ekran (AiChatScreen) ochadi, shuning uchun bu yerda faol holat bo‘lmaydi */}
+          <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
+          <Text style={[styles.navLabel, styles.navLabelInactive]}>
             AI yordamçi
           </Text>
         </TouchableOpacity>
@@ -1611,70 +1572,6 @@ const styles = StyleSheet.create({
   // Tab container styles
   tabContentContainer: {
     paddingTop: 8,
-  },
-  aiTabHeaderCard: {
-    flexDirection: 'row',
-    backgroundColor: '#F0F9FF',
-    borderRadius: 18,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#BAE6FD',
-    marginBottom: 14,
-  },
-  aiTabTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  aiTabDesc: {
-    fontSize: 11.5,
-    color: '#475569',
-    marginTop: 2,
-    lineHeight: 16,
-  },
-  quickPromptCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 8,
-    gap: 10,
-  },
-  quickPromptText: {
-    flex: 1,
-    fontSize: 12.5,
-    color: '#1F2937',
-    fontWeight: '500',
-  },
-  chatInputBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    gap: 8,
-  },
-  chatInput: {
-    flex: 1,
-    fontSize: 13,
-    color: '#0F172A',
-    padding: 2,
-  },
-  sendButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#0284C7',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   profileCard: {
     flexDirection: 'row',

@@ -10,12 +10,11 @@ import {
   Alert,
   Share,
   TextInput,
-  Modal,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -24,23 +23,6 @@ const heroGraphic = require('../../assets/images/istemolchi_hero_graphic.png');
 const mehnatAiRobot = require('../../assets/images/mehnat_ai_robot.png');
 
 export type IstemolchiTab = 'home' | 'rights' | 'ai' | 'documents';
-type RightsFilterType = 'all' | 'basic' | 'popular';
-
-interface RightItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  category: 'basic' | 'popular';
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  bgColor: string;
-  borderColor: string;
-  legalArticle: string;
-  lawName: string;
-  explanation: string;
-  practicalSteps: string[];
-  sampleDocName: string;
-}
 
 interface IstemolchiHuquqlariScreenProps {
   onBack: () => void;
@@ -53,11 +35,9 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
   const [hasUnreadNotification, setHasUnreadNotification] = useState<boolean>(true);
 
-  // Rights Tab states
+  // Rights Tab Search & Category Filter
   const [rightsSearchQuery, setRightsSearchQuery] = useState<string>('');
-  const [rightsFilter, setRightsFilter] = useState<RightsFilterType>('all');
-  const [selectedRightDetail, setSelectedRightDetail] = useState<RightItem | null>(null);
-  const [showLegalDocsModal, setShowLegalDocsModal] = useState<boolean>(false);
+  const [rightsFilter, setRightsFilter] = useState<'all' | 'basic' | 'popular'>('all');
 
   // AI Chat Input state
   const [aiQuestion, setAiQuestion] = useState<string>('');
@@ -71,137 +51,6 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
       time: '10:00',
     },
   ]);
-
-  // 6 Rights matching the uploaded screenshot
-  const RIGHTS_LIST: RightItem[] = [
-    {
-      id: 'r1',
-      title: 'Sifatli mahsulot huquqi',
-      subtitle: 'Xavfsiz va standartlarga mos mahsulot oliş huquqi.',
-      category: 'basic',
-      icon: 'cube-outline',
-      iconColor: '#E11D48',
-      bgColor: '#FFF1F2',
-      borderColor: '#FFE4E6',
-      legalArticle: '4-modda',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Iste’molchi sotib olgan tovarining (ish, xizmatning) xavfsiz bo‘lishi, sanitariya-gigiyena me’yorlariga va amaldagi davlat standartlariga to‘liq javob berishini talab qilishga qat’iy haqlidir.',
-      practicalSteps: [
-        'Mahsulot sertifikati va muvofiqlik belgisi mavjudligini tekshiring.',
-        'Standart talablariga mos kelmagan tovar sotilganda xarid chekini saqlang.',
-        'Zudlik bilan sotuvchiga yoki SES inspeksiyasiga murojaat qiling.',
-      ],
-      sampleDocName: 'Sifatsiz tovar haqida sotuvchiga e’tiroz xati',
-    },
-    {
-      id: 'r2',
-      title: 'Kafolat (garantiya) huquqi',
-      subtitle: 'Mahsulotning kafolat muddati davomida ta’mir, almaştiriş yoki qaytariş huquqi.',
-      category: 'basic',
-      icon: 'shield-checkmark-outline',
-      iconColor: '#2563EB',
-      bgColor: '#EFF6FF',
-      borderColor: '#DBEAFE',
-      legalArticle: '11-modda',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Kafolat muddati davomida tovarda aniqlangan barcha kamchiliklar sotuvchi yoki ishlab chiqaruvchi hisobidan mutlaqo bepul bartaraf etiladi. Tovar ta’mirlanayotgan muddat kafolat muddatiga qo‘shib uzaytiriladi.',
-      practicalSteps: [
-        'Kafolat talonida muhr va sotuv sanasi borligini tekshiring.',
-        'Ta’mirlash 20 kundan oshib ketsa, yangi tovarga almashtirishni talab qiling.',
-        'Muzlatgich, televizor kabi tovarlar ta’mirda bo‘lgan davrda vaqtincha foydalanishga bepul muqobil tovar berilishi shart.',
-      ],
-      sampleDocName: 'Kafolat bo‘yicha bepul ta’mirlash talabnomasi',
-    },
-    {
-      id: 'r3',
-      title: 'Qaytariş va almaştiriş',
-      subtitle: 'Sifatsiz yoki mos kelmaydigan mahsulotni qaytariş yoki almaştiriş tartibi.',
-      category: 'popular',
-      icon: 'sync-outline',
-      iconColor: '#16A34A',
-      bgColor: '#F0FDF4',
-      borderColor: '#DCFCE7',
-      legalArticle: '18-modda',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Xaridor maqbul sifatli nooziq-ovqat tovarini o‘lchami, rangi yoki shakli to‘g‘ri kelmagan taqdirda 10 kun ichida qaytarish yoki boshqasiga almashtirib olishga haqli.',
-      practicalSteps: [
-        'Tovar iste’mol xususiyatlari, plombalari va yorliqlari saqlangan bo‘lishi lozim.',
-        'Kassa yoki tovar cheki, yoki xaridni tasdiqlovchi guvohlar ko‘rsatmasi taqdim etiladi.',
-        'Sotuvchida muqobil tovar bo‘lmasa, to‘langan pul to‘liq qaytariladi.',
-      ],
-      sampleDocName: 'Tovarni 10 kun ichida qaytarish va pulni talab qilish arizasi',
-    },
-    {
-      id: 'r4',
-      title: 'Xizmat sifatiga oid huquqlar',
-      subtitle: 'Körsatilgan xizmatning sifati, hajmi va şartlariga mos bölişi.',
-      category: 'popular',
-      icon: 'headset-outline',
-      iconColor: '#D97706',
-      bgColor: '#FFFBEB',
-      borderColor: '#FEF3C7',
-      legalArticle: '19-modda',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Xizmat ko‘rsatuvchi shartnomada belgilangan muddatda va sifatda xizmat ko‘rsatishi shart. Agar xizmat kechiktirilsa, har bir kechiktirilgan kun yoki soat uchun to‘langan summaning 1 foizi miqdorida penya undiriladi.',
-      practicalSteps: [
-        'Xizmat ko‘rsatish shartnomasi va to‘lov kvitansiyasini saqlang.',
-        'Kamchiliklar aniqlanganda kamchilikni bepul bartaraf etish yoki narxni kamaytirish talabnomasini bering.',
-        'Xizmat ko‘rsatish rad etilsa, iste’molchilar qo‘mitasiga murojaat qiling.',
-      ],
-      sampleDocName: 'Sifatsiz xizmat uchun pulni qaytarish talabnomasi',
-    },
-    {
-      id: 'r5',
-      title: 'Töliq va aniq ma’lumot oliş',
-      subtitle: 'Mahsulot yoki xizmat haqida töğri, aniq va töliq ma’lumot berilişi.',
-      category: 'basic',
-      icon: 'document-text-outline',
-      iconColor: '#7C3AED',
-      bgColor: '#F5F3FF',
-      borderColor: '#EDE9FE',
-      legalArticle: '5-modda',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Sotuvchi tovarning narxi, ishlab chiqaruvchi mamlakat, yaroqlilik muddati, xavfsizlik qoidalari haqida o‘zbek tilida to‘liq va ishonchli ma’lumot berishi shart. Noto‘g‘ri ma’lumot berilsa, shartnoma bekor qilinadi.',
-      practicalSteps: [
-        'Mahsulot qadog‘idagi shtrix-kod va o‘zbek tilidagi yorliqni tekshiring.',
-        'Kassada ko‘rsatilgan narx rastadagi narxdan baland bo‘lsa, rastadagi narx bo‘yicha sotib olish huquqiga egasiz.',
-        'Yashirin to‘lov yoki yolg‘on reklama aniqlanganda shikoyat qiling.',
-      ],
-      sampleDocName: 'Chalg‘ituvchi narx va ma’lumot yuzasidan shikoyat arizasi',
-    },
-    {
-      id: 'r6',
-      title: 'Huquq buzilganda himoya',
-      subtitle: 'Sotuvçi talabni bajarmasa, rasmiy şikoyat qiliş va zararni qoplaş huquqi.',
-      category: 'popular',
-      icon: 'warning-outline',
-      iconColor: '#EF4444',
-      bgColor: '#FEF2F2',
-      borderColor: '#FEE2E2',
-      legalArticle: '14, 29-moddalar',
-      lawName: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun',
-      explanation: 'Sotuvchi qonuniy talabni rad etsa, iste’molchi davlat organlariga, Raqobat qo‘mitasiga (1159) va sudga murojaat qilishga haqli. Iste’molchilar sudlarda davlat boji to‘lashdan butunlay ozod etilgan.',
-      practicalSteps: [
-        'Sotuvchiga yuborilgan yozma e’tiroz xatining nusxasini saqlang.',
-        '10 kunlik muddat tugagach, 1159 ishonch telefoniga qo‘ng‘iroq qiling.',
-        'Sud orqali moddiy zararni va qo‘shimcha ma’naviy kompensatsiyani undiring.',
-      ],
-      sampleDocName: 'Raqobat qo‘mitasiga rasmiy shikoyat arizasi',
-    },
-  ];
-
-  // Filtered Rights List
-  const filteredRights = RIGHTS_LIST.filter((item) => {
-    const matchesFilter =
-      rightsFilter === 'all' ? true : item.category === rightsFilter;
-    const matchesSearch =
-      rightsSearchQuery.trim().length === 0
-        ? true
-        : item.title.toLowerCase().includes(rightsSearchQuery.toLowerCase()) ||
-          item.subtitle.toLowerCase().includes(rightsSearchQuery.toLowerCase()) ||
-          item.legalArticle.toLowerCase().includes(rightsSearchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
 
   // Handle Quick Issue Press
   const handleQuickIssuePress = (issueTitle: string) => {
@@ -244,6 +93,30 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     }
   };
 
+  // Handle Rights Topic Press
+  const handleTopicPress = (topic: any) => {
+    Alert.alert(
+      topic.title,
+      `📘 Qonuniy asos: ${topic.articles}\n\n${topic.fullDesc}\n\n💡 Amaliy tavsiya: Agar sotuvchi talabni qanoatlantirishdan bosh tortsa, 10 kun ichida yozma talabnoma topshiriladi yoki 1159 (Raqobat qo‘mitasi) orqali chora ko‘riladi.\n\nUshbu holat bo‘yicha tayyor talabnoma yaratilsinmi?`,
+      [
+        { text: 'Yopiş', style: 'cancel' },
+        {
+          text: 'Talabnoma yaratish',
+          onPress: () => setActiveTab('documents'),
+        },
+      ]
+    );
+  };
+
+  // Handle Open Asosiy Qonunlar Callout
+  const handleOpenAsosiyQonunlar = () => {
+    Alert.alert(
+      'Asosiy qonun va rasmiy hujjatlar',
+      '⚖️ O‘zbekiston Respublikasida iste’molchilar huquqlarini himoya qiluvchi asosiy me’yoriy baza:\n\n1. «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun (N 221-I)\n2. Chakana savdo qoidalari (VM 75-son qarori)\n3. Maishiy xizmat ko‘rsatish qoidalari (VM 386-son qarori)\n4. O‘zbekiston Respublikasi Fuqarolik Kodeksi (Oldi-sotdi va kafolat boblari)\n5. «Muvofiqlikni baholash to‘g‘risida»gi Qonun va GOST standartlari',
+      [{ text: 'Tuşundim' }]
+    );
+  };
+
   // Handle Send AI message
   const handleSendAi = (textToSend?: string) => {
     const q = textToSend || aiQuestion;
@@ -269,6 +142,90 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
       setAiChatMessages((prev) => [...prev, botReply]);
     }, 450);
   };
+
+  // 6 Core Rights Topics matching Screenshot
+  const ALL_RIGHTS_TOPICS = [
+    {
+      id: 'r1',
+      title: 'Sifatli mahsulot huquqi',
+      desc: 'Xavfsiz va standartlarga mos mahsulot oliş huquqi.',
+      icon: 'cube-outline',
+      iconColor: '#E11D48',
+      iconBg: '#FFF1F2',
+      iconBorder: '#FFE4E6',
+      category: 'basic',
+      articles: '4, 12, 14-moddalar',
+      fullDesc: 'Iste’molchi tovarning (ishning, xizmatning) xavfsiz bo‘lishiga, uning hayoti, sog‘lig‘i va mol-mulkiga zarar yetkazmasligiga to‘liq haqli. Tovar standartlar va sanitariya talablariga to‘liq javob berishi lozim.',
+    },
+    {
+      id: 'r2',
+      title: 'Kafolat (garantiya) huquqi',
+      desc: 'Mahsulotning kafolat muddati davomida ta’mir, almaştiriş yoki qaytariş huquqi.',
+      icon: 'shield-checkmark-outline',
+      iconColor: '#2563EB',
+      iconBg: '#EFF6FF',
+      iconBorder: '#DBEAFE',
+      category: 'basic',
+      articles: '11, 14-moddalar',
+      fullDesc: 'Kafolat muddati davomida tovardagi nuqsonlar sotuvchi yoki ishlab chiqaruvchi hisobidan bepul bartaraf etiladi. Ta’mir muddati 20 kundan oshmasligi lozim, aks holda yangisiga almashtiriladi.',
+    },
+    {
+      id: 'r3',
+      title: 'Qaytariş va almaştiriş',
+      desc: 'Sifatsiz yoki mos kelmaydigan mahsulotni qaytariş yoki almaştiriş tartibi.',
+      icon: 'sync-outline',
+      iconColor: '#16A34A',
+      iconBg: '#F0FDF4',
+      iconBorder: '#DCFCE7',
+      category: 'popular',
+      articles: '18-modda',
+      fullDesc: 'Xaridor maqbul sifatli nooziq-ovqat tovarini 10 kun ichida qaytarishga yoki boshqa o‘lcham, fason, rangdagisiga almashtirib olishga haqli.',
+    },
+    {
+      id: 'r4',
+      title: 'Xizmat sifatiga oid huquqlar',
+      desc: 'Körsatilgan xizmatning sifati, hajmi va şartlariga mos bölişi.',
+      icon: 'headset-outline',
+      iconColor: '#D97706',
+      iconBg: '#FFFBEB',
+      iconBorder: '#FEF3C7',
+      category: 'basic',
+      articles: '19, 21-moddalar',
+      fullDesc: 'Ijrochi xizmatni shartnomada belgilangan muddatda va sifatda ko‘rsatishi shart. Kamchiliklar aniqlanganda bepul bartaraf etish yoki to‘langan haqni kamaytirish talab qilinishi mumkin.',
+    },
+    {
+      id: 'r5',
+      title: 'Töliq va aniq ma’lumot oliş',
+      desc: 'Mahsulot yoki xizmat haqida töğri, aniq va töliq ma’lumot berilişi.',
+      icon: 'document-text-outline',
+      iconColor: '#4F46E5',
+      iconBg: '#EEF2FF',
+      iconBorder: '#E0E7FF',
+      category: 'popular',
+      articles: '5, 6-moddalar',
+      fullDesc: 'Sotuvchi iste’molchiga tovarning tarkibi, yaroqlilik muddati, ishlab chiqaruvchi manzili va qo‘llash qoidalari haqida o‘zbek tilida to‘liq ma’lumot berishi shart.',
+    },
+    {
+      id: 'r6',
+      title: 'Huquq buzilganda himoya',
+      desc: 'Sotuvçi talabni bajarmasa, rasmiy şikoyat qiliş va zararni qoplaş huquqi.',
+      icon: 'warning-outline',
+      iconColor: '#DC2626',
+      iconBg: '#FEF2F2',
+      iconBorder: '#FEE2E2',
+      category: 'popular',
+      articles: '20, 26, 29-moddalar',
+      fullDesc: 'Iste’molchi qonuniy huquqlari buzilganda Raqobat qo‘mitasiga, Iste’molchilar federatsiyasiga va sudga murojaat qilishga, shuningdek, yetkazilgan moddiy va ma’naviy zararni to‘liq qoplashni talab qilishga haqli.',
+    },
+  ];
+
+  const filteredRightsTopics = ALL_RIGHTS_TOPICS.filter((item) => {
+    const matchesFilter = rightsFilter === 'all' || item.category === rightsFilter;
+    const matchesQuery =
+      item.title.toLowerCase().includes(rightsSearchQuery.toLowerCase()) ||
+      item.desc.toLowerCase().includes(rightsSearchQuery.toLowerCase());
+    return matchesFilter && matchesQuery;
+  });
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -328,7 +285,6 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ===================== TAB 1: BOSH SAHIFA ===================== */}
         {activeTab === 'home' && (
           <>
             {/* 1. HERO BANNER CARD */}
@@ -587,46 +543,47 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           </>
         )}
 
-        {/* ===================== TAB 2: HUQUQLAR (MATCHING SCREENSHOT 1:1) ===================== */}
+        {/* ===================== TAB 2: HUQUQLAR SAHIFASI (1:1 Screenshot Design) ===================== */}
         {activeTab === 'rights' && (
-          <View style={styles.rightsRootContainer}>
-            {/* 1. Page Header: Large "Huquqlar" + Subtitle */}
-            <View style={styles.rightsHeaderBlock}>
-              <Text style={styles.rightsMainTitle}>Huquqlar</Text>
-              <Text style={styles.rightsMainSubtitle}>
-                Iste’molçi sifatida sizning asosiy huquqlaringiz va{'\n'}qonuniy kafolatlaringiz.
-              </Text>
-            </View>
+          <View style={styles.rightsTabRoot}>
+            {/* 1. Page Title & Subtitle */}
+            <Text style={styles.rightsPageTitle}>Huquqlar</Text>
+            <Text style={styles.rightsPageSub}>
+              Iste’molçi sifatida sizning asosiy huquqlaringiz va qonuniy kafolatlaringiz.
+            </Text>
 
-            {/* 2. Search Bar */}
+            {/* 2. Fully Rounded Pill Search Bar */}
             <View style={styles.rightsSearchBox}>
-              <Ionicons name="search-outline" size={19} color="#94A3B8" style={{ marginRight: 8 }} />
+              <Ionicons name="search" size={18} color="#0F172A" style={{ marginRight: 10 }} />
               <TextInput
                 style={styles.rightsSearchInput}
                 placeholder="Mavzu yoki savolni qidiring..."
                 placeholderTextColor="#94A3B8"
                 value={rightsSearchQuery}
                 onChangeText={setRightsSearchQuery}
-                returnKeyType="search"
               />
               {rightsSearchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setRightsSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <TouchableOpacity
+                  onPress={() => setRightsSearchQuery('')}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Ionicons name="close-circle" size={18} color="#94A3B8" />
                 </TouchableOpacity>
               )}
             </View>
 
-            {/* 3. Filter Tabs (Pills) */}
+            {/* 3. Category Filter Tabs */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.rightsFilterScroll}
+              contentContainerStyle={styles.rightsCategoryScroll}
             >
-              {/* Pill 1: Barcha mavzular */}
               <TouchableOpacity
                 style={[
-                  styles.rightsFilterPill,
-                  rightsFilter === 'all' && styles.rightsFilterPillActive,
+                  styles.rightsCategoryPill,
+                  rightsFilter === 'all'
+                    ? styles.rightsCategoryPillActive
+                    : styles.rightsCategoryPillInactive,
                 ]}
                 activeOpacity={0.8}
                 onPress={() => setRightsFilter('all')}
@@ -639,19 +596,20 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
                 />
                 <Text
                   style={[
-                    styles.rightsFilterText,
-                    rightsFilter === 'all' && styles.rightsFilterTextActive,
+                    styles.rightsCategoryText,
+                    rightsFilter === 'all' && styles.rightsCategoryTextActive,
                   ]}
                 >
                   Barça mavzular
                 </Text>
               </TouchableOpacity>
 
-              {/* Pill 2: Asosiy huquqlar */}
               <TouchableOpacity
                 style={[
-                  styles.rightsFilterPill,
-                  rightsFilter === 'basic' && styles.rightsFilterPillActive,
+                  styles.rightsCategoryPill,
+                  rightsFilter === 'basic'
+                    ? styles.rightsCategoryPillActive
+                    : styles.rightsCategoryPillInactive,
                 ]}
                 activeOpacity={0.8}
                 onPress={() => setRightsFilter('basic')}
@@ -664,19 +622,20 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
                 />
                 <Text
                   style={[
-                    styles.rightsFilterText,
-                    rightsFilter === 'basic' && styles.rightsFilterTextActive,
+                    styles.rightsCategoryText,
+                    rightsFilter === 'basic' && styles.rightsCategoryTextActive,
                   ]}
                 >
                   Asosiy huquqlar
                 </Text>
               </TouchableOpacity>
 
-              {/* Pill 3: Ko‘p so‘raladigan */}
               <TouchableOpacity
                 style={[
-                  styles.rightsFilterPill,
-                  rightsFilter === 'popular' && styles.rightsFilterPillActive,
+                  styles.rightsCategoryPill,
+                  rightsFilter === 'popular'
+                    ? styles.rightsCategoryPillActive
+                    : styles.rightsCategoryPillInactive,
                 ]}
                 activeOpacity={0.8}
                 onPress={() => setRightsFilter('popular')}
@@ -689,8 +648,8 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
                 />
                 <Text
                   style={[
-                    styles.rightsFilterText,
-                    rightsFilter === 'popular' && styles.rightsFilterTextActive,
+                    styles.rightsCategoryText,
+                    rightsFilter === 'popular' && styles.rightsCategoryTextActive,
                   ]}
                 >
                   Köp söraladigan
@@ -698,79 +657,66 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
               </TouchableOpacity>
             </ScrollView>
 
-            {/* 4. 6 Rights Cards List matching screenshot */}
-            <View style={styles.rightsCardsList}>
-              {filteredRights.length === 0 ? (
-                <View style={styles.emptySearchBox}>
-                  <Ionicons name="search-outline" size={32} color="#CBD5E1" style={{ marginBottom: 6 }} />
-                  <Text style={styles.emptySearchTitle}>Mavzu topilmadi</Text>
-                  <Text style={styles.emptySearchSub}>«{rightsSearchQuery}» bo‘yicha hech qanday natija chiqmadi.</Text>
+            {/* 4. 6 Topic Cards List */}
+            <View style={styles.rightsListWrap}>
+              {filteredRightsTopics.length === 0 ? (
+                <View style={styles.rightsEmptyWrap}>
+                  <Ionicons name="search-outline" size={32} color="#CBD5E1" style={{ marginBottom: 8 }} />
+                  <Text style={styles.rightsEmptyTitle}>Mavzu topilmadi</Text>
+                  <Text style={styles.rightsEmptySub}>«{rightsSearchQuery}» böyiça heç qanday natija çiqmadi.</Text>
                 </View>
               ) : (
-                filteredRights.map((item) => (
+                filteredRightsTopics.map((item) => (
                   <TouchableOpacity
                     key={item.id}
-                    style={styles.rightCardItem}
-                    activeOpacity={0.8}
-                    onPress={() => setSelectedRightDetail(item)}
+                    style={styles.rightsCardItem}
+                    activeOpacity={0.78}
+                    onPress={() => handleTopicPress(item)}
                   >
-                    {/* Left Tinted Icon Wrap */}
                     <View
                       style={[
-                        styles.rightCardIconWrap,
-                        { backgroundColor: item.bgColor, borderColor: item.borderColor },
+                        styles.rightsCardIconWrap,
+                        { backgroundColor: item.iconBg, borderColor: item.iconBorder },
                       ]}
                     >
-                      <Ionicons name={item.icon} size={22} color={item.iconColor} />
+                      <Ionicons name={item.icon as any} size={22} color={item.iconColor} />
                     </View>
 
-                    {/* Middle: Title & Subtitle */}
-                    <View style={styles.rightCardTextCol}>
-                      <Text style={styles.rightCardTitle} numberOfLines={1}>
+                    <View style={styles.rightsCardTextCol}>
+                      <Text style={styles.rightsCardTitle} numberOfLines={1}>
                         {item.title}
                       </Text>
-                      <Text style={styles.rightCardSubtitle} numberOfLines={2}>
-                        {item.subtitle}
+                      <Text style={styles.rightsCardDesc} numberOfLines={2}>
+                        {item.desc}
                       </Text>
                     </View>
 
-                    {/* Right Chevron */}
-                    <Ionicons name="chevron-forward" size={17} color="#64748B" />
+                    <Ionicons name="chevron-forward" size={16} color="#64748B" />
                   </TouchableOpacity>
                 ))
               )}
             </View>
 
-            {/* 5. Bottom Callout Banner: Asosiy qonun va hujjatlar */}
+            {/* 5. Asosiy qonun va hujjatlar Featured Callout Banner */}
             <TouchableOpacity
-              style={styles.legalCalloutCard}
+              style={styles.rightsCalloutCard}
               activeOpacity={0.88}
-              onPress={() => setShowLegalDocsModal(true)}
+              onPress={handleOpenAsosiyQonunlar}
             >
-              <LinearGradient
-                colors={['#FFFDF2', '#FEF8DB', '#FEF3C7']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.legalCalloutGradient}
-              >
-                {/* Tarozi (Scale) Icon */}
-                <View style={styles.legalCalloutIconWrap}>
-                  <Ionicons name="scale-outline" size={26} color="#D97706" />
-                </View>
+              <View style={styles.rightsCalloutIconWrap}>
+                <Ionicons name="scale-outline" size={28} color="#D97706" />
+              </View>
 
-                {/* Text Col */}
-                <View style={styles.legalCalloutTextCol}>
-                  <Text style={styles.legalCalloutTitle}>Asosiy qonun va hujjatlar</Text>
-                  <Text style={styles.legalCalloutSubtitle} numberOfLines={2}>
-                    Iste’molçilar huquqlarini himoya qiluvçi asosiy qonunlar va rasmiy hujjatlar.
-                  </Text>
-                </View>
+              <View style={styles.rightsCalloutTextCol}>
+                <Text style={styles.rightsCalloutTitle}>Asosiy qonun va hujjatlar</Text>
+                <Text style={styles.rightsCalloutSubtitle}>
+                  Iste’molçilar huquqlarini himoya qiluvçi asosiy qonunlar va rasmiy hujjatlar.
+                </Text>
+              </View>
 
-                {/* Right CTA Text */}
-                <View style={styles.legalCalloutCtaWrap}>
-                  <Text style={styles.legalCalloutCtaText}>Köriş →</Text>
-                </View>
-              </LinearGradient>
+              <View style={styles.rightsCalloutCtaWrap}>
+                <Text style={styles.rightsCalloutCtaText}>Köriş →</Text>
+              </View>
             </TouchableOpacity>
           </View>
         )}
@@ -1003,172 +949,6 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           </Text>
         </TouchableOpacity>
       </View>
-
-      {/* ===================== MODAL: RIGHT DETAIL MODAL ===================== */}
-      {selectedRightDetail && (
-        <Modal
-          visible={!!selectedRightDetail}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setSelectedRightDetail(null)}
-        >
-          <View style={styles.modalBackdrop}>
-            <View style={[styles.modalCard, { paddingBottom: Math.max(insets.bottom, 16) + 10 }]}>
-              {/* Modal Drag Bar */}
-              <View style={styles.modalDragBar} />
-
-              {/* Modal Header */}
-              <View style={styles.modalHeaderRow}>
-                <View
-                  style={[
-                    styles.modalIconWrap,
-                    { backgroundColor: selectedRightDetail.bgColor, borderColor: selectedRightDetail.borderColor },
-                  ]}
-                >
-                  <Ionicons name={selectedRightDetail.icon} size={22} color={selectedRightDetail.iconColor} />
-                </View>
-
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.modalRightTitle}>{selectedRightDetail.title}</Text>
-                  <View style={styles.modalArticlePill}>
-                    <Text style={styles.modalArticlePillText}>{selectedRightDetail.legalArticle}</Text>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.modalCloseBtn}
-                  onPress={() => setSelectedRightDetail(null)}
-                >
-                  <Ionicons name="close" size={20} color="#64748B" />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                {/* Law Reference */}
-                <View style={styles.modalLawCard}>
-                  <Ionicons name="book-outline" size={16} color="#D97706" style={{ marginRight: 6 }} />
-                  <Text style={styles.modalLawText}>{selectedRightDetail.lawName}</Text>
-                </View>
-
-                {/* Explanation */}
-                <Text style={styles.modalSectionLabel}>Huquqiy kafolat tahlili</Text>
-                <Text style={styles.modalExplanationText}>{selectedRightDetail.explanation}</Text>
-
-                {/* Practical Steps */}
-                <Text style={[styles.modalSectionLabel, { marginTop: 14 }]}>Amaliy harakatlar ketma-ketligi</Text>
-                <View style={{ gap: 8, marginTop: 4 }}>
-                  {selectedRightDetail.practicalSteps.map((step, sIdx) => (
-                    <View key={sIdx} style={styles.modalStepRow}>
-                      <View style={styles.modalStepNum}>
-                        <Text style={styles.modalStepNumText}>{sIdx + 1}</Text>
-                      </View>
-                      <Text style={styles.modalStepText}>{step}</Text>
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
-
-              {/* Modal Actions */}
-              <View style={styles.modalActionsRow}>
-                <TouchableOpacity
-                  style={styles.modalAskAiBtn}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    const q = `«${selectedRightDetail.title}» bo‘yicha menga amaliy yuridik maslahat bering.`;
-                    setSelectedRightDetail(null);
-                    setActiveTab('ai');
-                    handleSendAi(q);
-                  }}
-                >
-                  <Ionicons name="sparkles" size={16} color="#4F46E5" style={{ marginRight: 5 }} />
-                  <Text style={styles.modalAskAiText}>AI bilan tahlil</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.modalCreateDocBtn}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setSelectedRightDetail(null);
-                    setActiveTab('documents');
-                  }}
-                >
-                  <Ionicons name="create-outline" size={16} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.modalCreateDocText}>Talabnoma yaratish</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
-
-      {/* ===================== MODAL: ASOSIY QONUN VA HUJJATLAR ===================== */}
-      <Modal
-        visible={showLegalDocsModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowLegalDocsModal(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.modalCard, { paddingBottom: Math.max(insets.bottom, 16) + 10 }]}>
-            <View style={styles.modalDragBar} />
-
-            <View style={styles.modalHeaderRow}>
-              <View style={styles.legalCalloutIconWrap}>
-                <Ionicons name="scale-outline" size={24} color="#D97706" />
-              </View>
-
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.modalRightTitle}>Asosiy qonun va hujjatlar</Text>
-                <Text style={{ fontSize: 11, color: '#64748B' }}>O‘zbekiston Respublikasi rasmiy qonunchilik bazasi</Text>
-              </View>
-
-              <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowLegalDocsModal(false)}>
-                <Ionicons name="close" size={20} color="#64748B" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-              {[
-                {
-                  title: 'O‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonuni',
-                  date: '1996-yil 26-aprel, 221-I-son (Yangi tahrir)',
-                  articlesCount: '30 ta modda',
-                  desc: 'Iste’molchilarning asosiy huquqlari, tovarlarni almashtirish, kafolat va zararni qoplashning fundamental qonuniy asosi.',
-                },
-                {
-                  title: 'Chakana savdo qoidalari (Vazirlar Mahkamasi qarori)',
-                  date: '2003-yil 13-fevral, 75-son',
-                  articlesCount: 'Savdo qoidalari',
-                  desc: 'Do‘konlar, bozorlar va elektron tijoratda xaridorga xizmat ko‘rsatish, kassa cheki berish va tovarlarni qaytarish tartibi.',
-                },
-                {
-                  title: 'Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasi to‘g‘risida Nizom',
-                  date: 'Prezident Farmoni (PF-110-son)',
-                  articlesCount: 'Nazorat vakolatlari',
-                  desc: 'Vakolatli davlat organiga murojaat qilish, tadbirkorlik subyektlariga nisbatan tekshiruv tayinlash va jarimalar qo‘llash.',
-                },
-              ].map((doc, dIdx) => (
-                <View key={dIdx} style={styles.legalDocCard}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text style={styles.legalDocDate}>{doc.date}</Text>
-                    <Text style={styles.legalDocArticles}>{doc.articlesCount}</Text>
-                  </View>
-                  <Text style={styles.legalDocCardTitle}>{doc.title}</Text>
-                  <Text style={styles.legalDocCardDesc}>{doc.desc}</Text>
-                </View>
-              ))}
-            </ScrollView>
-
-            <TouchableOpacity
-              style={styles.legalDocsCloseBtn}
-              activeOpacity={0.85}
-              onPress={() => setShowLegalDocsModal(false)}
-            >
-              <Text style={styles.legalDocsCloseBtnText}>Tushundim</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -1262,191 +1042,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     gap: 14,
-  },
-  // ===================== RIGHTS TAB (MATCHING SCREENSHOT) =====================
-  rightsRootContainer: {
-    gap: 12,
-    paddingTop: 2,
-  },
-  rightsHeaderBlock: {
-    marginBottom: 2,
-  },
-  rightsMainTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: -0.4,
-    marginBottom: 4,
-  },
-  rightsMainSubtitle: {
-    fontSize: 12.5,
-    color: '#64748B',
-    lineHeight: 18,
-    fontWeight: '500',
-  },
-  rightsSearchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  rightsSearchInput: {
-    flex: 1,
-    fontSize: 13.5,
-    color: '#0F172A',
-  },
-  rightsFilterScroll: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 2,
-  },
-  rightsFilterPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 15,
-    paddingVertical: 9,
-    borderRadius: 14,
-  },
-  rightsFilterPillActive: {
-    backgroundColor: '#0A192F',
-  },
-  rightsFilterText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  rightsFilterTextActive: {
-    color: '#FFFFFF',
-  },
-  rightsCardsList: {
-    gap: 10,
-    marginTop: 2,
-  },
-  rightCardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  rightCardIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  rightCardTextCol: {
-    flex: 1,
-    marginLeft: 12,
-    marginRight: 6,
-  },
-  rightCardTitle: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 3,
-  },
-  rightCardSubtitle: {
-    fontSize: 11.5,
-    color: '#64748B',
-    lineHeight: 16,
-    fontWeight: '500',
-  },
-  // Callout Banner: Asosiy qonun va hujjatlar
-  legalCalloutCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    marginTop: 4,
-    shadowColor: '#D97706',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  legalCalloutGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-  },
-  legalCalloutIconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#D97706',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  legalCalloutTextCol: {
-    flex: 1,
-    marginHorizontal: 12,
-  },
-  legalCalloutTitle: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  legalCalloutSubtitle: {
-    fontSize: 11,
-    color: '#64748B',
-    lineHeight: 15,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  legalCalloutCtaWrap: {
-    paddingLeft: 2,
-  },
-  legalCalloutCtaText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#D97706',
-  },
-  emptySearchBox: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  emptySearchTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 2,
-  },
-  emptySearchSub: {
-    fontSize: 12,
-    color: '#64748B',
-    textAlign: 'center',
   },
   // Hero Card
   heroCardOuter: {
@@ -1755,6 +1350,183 @@ const styles = StyleSheet.create({
     marginTop: 2,
     lineHeight: 17,
   },
+  // Rights Tab (1:1 Screenshot Design)
+  rightsTabRoot: {
+    paddingTop: 4,
+  },
+  rightsPageTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  rightsPageSub: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    fontWeight: '500',
+    marginBottom: 16,
+  },
+  rightsSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    height: 48,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  rightsSearchInput: {
+    flex: 1,
+    fontSize: 13.5,
+    color: '#0F172A',
+  },
+  rightsCategoryScroll: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  rightsCategoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  rightsCategoryPillActive: {
+    backgroundColor: '#0A192F',
+    borderColor: '#0A192F',
+  },
+  rightsCategoryPillInactive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+  },
+  rightsCategoryText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#0F172A',
+  },
+  rightsCategoryTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  rightsListWrap: {
+    gap: 10,
+    marginBottom: 14,
+  },
+  rightsEmptyWrap: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  rightsEmptyTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  rightsEmptySub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  rightsCardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  rightsCardIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  rightsCardTextCol: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  rightsCardTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 3,
+  },
+  rightsCardDesc: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+    fontWeight: '500',
+  },
+  rightsCalloutCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFDF0',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
+    borderColor: '#FEF3C7',
+    marginBottom: 14,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  rightsCalloutIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  rightsCalloutTextCol: {
+    flex: 1,
+    paddingRight: 6,
+  },
+  rightsCalloutTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  rightsCalloutSubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+    fontWeight: '500',
+  },
+  rightsCalloutCtaWrap: {
+    paddingLeft: 4,
+  },
+  rightsCalloutCtaText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#D97706',
+  },
   // AI Tab
   aiStatusBanner: {
     flexDirection: 'row',
@@ -1987,196 +1759,5 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '500',
   },
-  // Modal Styles
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    maxHeight: '85%',
-  },
-  modalDragBar: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#CBD5E1',
-    alignSelf: 'center',
-    marginBottom: 14,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  modalIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  modalRightTitle: {
-    fontSize: 15.5,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  modalArticlePill: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-    marginTop: 3,
-  },
-  modalArticlePillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#B45309',
-  },
-  modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalLawCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFBEB',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#FEF3C7',
-    marginBottom: 12,
-  },
-  modalLawText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#92400E',
-    flex: 1,
-  },
-  modalSectionLabel: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-  modalExplanationText: {
-    fontSize: 12.5,
-    color: '#475569',
-    lineHeight: 18,
-  },
-  modalStepRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  modalStepNum: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#0F172A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-    marginTop: 1,
-  },
-  modalStepNumText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  modalStepText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#334155',
-    lineHeight: 17,
-  },
-  modalActionsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    paddingTop: 12,
-  },
-  modalAskAiBtn: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#EEF2FF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalAskAiText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#4F46E5',
-  },
-  modalCreateDocBtn: {
-    flex: 1.3,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#0F172A',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalCreateDocText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  // Legal Docs Modal styles
-  legalDocCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 10,
-  },
-  legalDocDate: {
-    fontSize: 10.5,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  legalDocArticles: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#D97706',
-  },
-  legalDocCardTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-  legalDocCardDesc: {
-    fontSize: 11.5,
-    color: '#64748B',
-    lineHeight: 16,
-  },
-  legalDocsCloseBtn: {
-    backgroundColor: '#0F172A',
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-  },
-  legalDocsCloseBtnText: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
 });
+

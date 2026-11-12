@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -290,7 +290,7 @@ export const IstemolchiQonuniKitobScreen: React.FC<IstemolchiQonuniKitobScreenPr
   // Active Screen Mode
   const [activeTab, setActiveTab] = useState<BookTab>('book');
   const [theme, setTheme] = useState<BookTheme>('sepia');
-  const [fontSize, setFontSize] = useState<number>(15);
+  const fontSize = 15;
 
   const initialIdx = Math.max(0, Math.min(initialPage - 1, ISTEMOLCHI_QONUNI_PAGES.length - 1));
   const [currentPageIdx, setCurrentPageIdx] = useState<number>(initialIdx);
@@ -310,10 +310,6 @@ export const IstemolchiQonuniKitobScreen: React.FC<IstemolchiQonuniKitobScreenPr
 
   // Search State
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  // Audio Reading Simulation
-  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
-  const [audioWaveAnim] = useState(() => new Animated.Value(0));
 
   // Page Turn State & Smooth 3D Animation
   const [isTurning, setIsTurning] = useState<boolean>(false);
@@ -380,30 +376,6 @@ export const IstemolchiQonuniKitobScreen: React.FC<IstemolchiQonuniKitobScreenPr
     [handleTurnPage]
   );
 
-  // Trigger audio wave animation when active
-  useEffect(() => {
-    if (isPlayingAudio) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(audioWaveAnim, {
-            toValue: 1,
-            duration: 500,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-          Animated.timing(audioWaveAnim, {
-            toValue: 0,
-            duration: 500,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      audioWaveAnim.setValue(0);
-    }
-  }, [isPlayingAudio, audioWaveAnim]);
-
   const currentPage = ISTEMOLCHI_QONUNI_PAGES[currentPageIdx];
   const activeDisplayPage = isTurning ? ISTEMOLCHI_QONUNI_PAGES[targetPageIdx] : currentPage;
   const isBookmarked = bookmarkedPages.includes(activeDisplayPage.pageNumber);
@@ -416,19 +388,6 @@ export const IstemolchiQonuniKitobScreen: React.FC<IstemolchiQonuniKitobScreenPr
     } else {
       setBookmarkedPages((prev) => [...prev, pageNum]);
       Alert.alert('Xatcho‘p qo‘shildi 🔖', `${pageNum}-bet xatcho‘plarga saqlandi.`);
-    }
-  };
-
-  const handleToggleAudio = () => {
-    if (isPlayingAudio) {
-      setIsPlayingAudio(false);
-      Alert.alert('Ovozli o‘qish to‘xtatildi', 'Matnni ovozli ijro etish to‘xtatildi.');
-    } else {
-      setIsPlayingAudio(true);
-      Alert.alert(
-        'Ovozli o‘qish faollashtirildi 🔊',
-        `«${currentPage.title}» bo‘limi sun’iy intellekt diktori tomonidan tiniq ovozda o‘qilmoqda.`
-      );
     }
   };
 
@@ -744,31 +703,6 @@ export const IstemolchiQonuniKitobScreen: React.FC<IstemolchiQonuniKitobScreenPr
 
         {/* Action Controls */}
         <View style={styles.headerRightActions}>
-          {/* Audio TTS Mock */}
-          <TouchableOpacity
-            style={[
-              styles.headerActionBtn,
-              { backgroundColor: isPlayingAudio ? '#DC2626' : themeStyles.badgeBg },
-            ]}
-            onPress={handleToggleAudio}
-          >
-            <Ionicons
-              name={isPlayingAudio ? 'volume-high' : 'volume-medium-outline'}
-              size={17}
-              color={isPlayingAudio ? '#FFFFFF' : themeStyles.textPrimary}
-            />
-          </TouchableOpacity>
-
-          {/* Font Sizing Toggle */}
-          <TouchableOpacity
-            style={[styles.headerActionBtn, { backgroundColor: themeStyles.badgeBg }]}
-            onPress={() => setFontSize((prev) => (prev === 14 ? 16 : prev === 16 ? 18 : 14))}
-          >
-            <Text style={[styles.fontSizeBtnText, { color: themeStyles.textPrimary }]}>
-              {fontSize === 14 ? 'A' : fontSize === 16 ? 'A+' : 'A++'}
-            </Text>
-          </TouchableOpacity>
-
           {/* Theme Switcher */}
           <TouchableOpacity
             style={[styles.headerActionBtn, { backgroundColor: themeStyles.badgeBg }]}
@@ -1316,10 +1250,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fontSizeBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
   },
 
   // 2. Tab switcher

@@ -23,6 +23,7 @@ import { AiChatScreen } from './AiChat/AiChatScreen';
 import { ContractAiScreen } from './ContractAi/ContractAiScreen';
 import { LegalMapNavigator } from '../features/legal-map/LegalMapNavigator';
 import { FraudRadarNavigator } from '../features/fraud-radar/FraudRadarNavigator';
+import { YuristOnlineNavigator } from '../features/yurist-online/YuristOnlineNavigator';
 
 const { width } = Dimensions.get('window');
 
@@ -380,6 +381,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   const [isLegalMapOpen, setIsLegalMapOpen] = useState(false);
   const [isFraudRadarOpen, setIsFraudRadarOpen] = useState(false);
 
+  // Yurist Online Mini App State
+  const [isYuristOnlineOpen, setIsYuristOnlineOpen] = useState(false);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
@@ -399,6 +403,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     }
     if (item.id === 'legal_map') {
       setIsLegalMapOpen(true);
+      return;
+    }
+    if (item.id === 'yurist_online') {
+      setIsYuristOnlineOpen(true);
       return;
     }
     // Find matching detailed service or show modal
@@ -434,6 +442,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       setIsLegalMapOpen(true);
     } else if (sId === 'firibgarlik_radari') {
       setIsFraudRadarOpen(true);
+    } else if (sId === 'yurist_online') {
+      setIsYuristOnlineOpen(true);
     } else if (sId === 'bank_kredit_himoyasi') {
       Alert.alert(
         'Bank Kreditlari Himoyasi',
@@ -504,6 +514,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
 
   if (isFraudRadarOpen) {
     return <FraudRadarNavigator onBack={() => setIsFraudRadarOpen(false)} />;
+  }
+
+  if (isYuristOnlineOpen) {
+    return <YuristOnlineNavigator onBack={() => setIsYuristOnlineOpen(false)} />;
   }
 
   // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran

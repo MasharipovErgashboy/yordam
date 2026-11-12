@@ -489,7 +489,14 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   }
 
   if (isIstemolchiOpen) {
-    return <IstemolchiHuquqlariScreen onBack={() => setIsIstemolchiOpen(false)} />;
+    return (
+      <IstemolchiHuquqlariScreen
+        onBack={() => {
+          setIsIstemolchiOpen(false);
+          setActiveTab('services');
+        }}
+      />
+    );
   }
 
   if (isHujjatlarHamyoniOpen) {
@@ -789,7 +796,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                 >
                   <Ionicons name="search" size={15} color="#0284C7" />
                   <Text style={styles.homeSearchQuickText}>
-                    "{searchQuery}" böyiça xizmatlar katalogida qidiriş →
+                    «{searchQuery}» böyiça xizmatlar katalogida qidiriş →
                   </Text>
                 </TouchableOpacity>
               )}

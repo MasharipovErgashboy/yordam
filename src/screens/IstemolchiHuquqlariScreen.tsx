@@ -33,13 +33,9 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   const [activeTab, setActiveTab] = useState<IstemolchiTab>('home');
   const [heroSlideIdx, setHeroSlideIdx] = useState<number>(0);
 
-  // Handle Header Back
+  // Handle Header Back - 4 ta asosiy bo'limda ham asosiy ilovaning Xizmatlar sahifasiga qaytish
   const handleHeaderBack = () => {
-    if (activeTab !== 'home') {
-      setActiveTab('home');
-    } else {
-      onBack();
-    }
+    onBack();
   };
 
   // Rights Tab Search & Category Filter

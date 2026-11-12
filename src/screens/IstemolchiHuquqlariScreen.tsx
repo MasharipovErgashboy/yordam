@@ -14,7 +14,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -32,8 +32,15 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<IstemolchiTab>('home');
   const [heroSlideIdx, setHeroSlideIdx] = useState<number>(0);
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
-  const [hasUnreadNotification, setHasUnreadNotification] = useState<boolean>(true);
+
+  // Handle Header Back
+  const handleHeaderBack = () => {
+    if (activeTab !== 'home') {
+      setActiveTab('home');
+    } else {
+      onBack();
+    }
+  };
 
   // Rights Tab Search & Category Filter
   const [rightsSearchQuery, setRightsSearchQuery] = useState<string>('');
@@ -42,7 +49,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   // AI Chat Input state
   const [aiQuestion, setAiQuestion] = useState<string>('');
   const [aiChatMessages, setAiChatMessages] = useState<
-    Array<{ id: string; sender: 'user' | 'bot'; text: string; time: string }>
+    { id: string; sender: 'user' | 'bot'; text: string; time: string }[]
   >([
     {
       id: 'm1',
@@ -122,24 +129,27 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     const q = textToSend || aiQuestion;
     if (!q.trim()) return;
 
-    const userMsg = {
-      id: Date.now().toString(),
-      sender: 'user' as const,
-      text: q,
-      time: 'Hozir',
-    };
-
-    setAiChatMessages((prev) => [...prev, userMsg]);
+    setAiChatMessages((prev) => [
+      ...prev,
+      {
+        id: `msg_u_${prev.length + 1}`,
+        sender: 'user' as const,
+        text: q,
+        time: 'Hozir',
+      },
+    ]);
     setAiQuestion('');
 
     setTimeout(() => {
-      const botReply = {
-        id: (Date.now() + 1).toString(),
-        sender: 'bot' as const,
-        text: `«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 14 va 18-moddalariga muvofiq, xaridor nuqsonli tovar sotilganda uni maqbul sifatlisiga almashtirish yoki to‘langan pulni to‘liq qaytarib olishga haqli.\n\nSotuvchi tovar sifatini tekshirish uchun ekspertizani o‘z hisobidan o‘tkazishi shart. Agar 10 kun ichida talab qanoatlantirilmasa, har bir kun uchun tovar narxining 1 foizi miqdorida penya to‘laydi.`,
-        time: 'Hozir',
-      };
-      setAiChatMessages((prev) => [...prev, botReply]);
+      setAiChatMessages((prev) => [
+        ...prev,
+        {
+          id: `msg_b_${prev.length + 1}`,
+          sender: 'bot' as const,
+          text: `«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 14 va 18-moddalariga muvofiq, xaridor nuqsonli tovar sotilganda uni maqbul sifatlisiga almashtirish yoki to‘langan pulni to‘liq qaytarib olishga haqli.\n\nSotuvchi tovar sifatini tekshirish uchun ekspertizani o‘z hisobidan o‘tkazishi shart. Agar 10 kun ichida talab qanoatlantirilmasa, har bir kun uchun tovar narxining 1 foizi miqdorida penya to‘laydi.`,
+          time: 'Hozir',
+        },
+      ]);
     }, 450);
   };
 
@@ -233,46 +243,25 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
 
       {/* ===================== 1. TOP HEADER BAR ===================== */}
       <View style={styles.topHeader}>
-        {/* Left: Navy Circle with Bag Icon + Title & Subtitle */}
+        {/* Left: Back Button + Navy Circle with Bag Icon + Title & Subtitle */}
         <View style={styles.headerLeftGroup}>
-          <TouchableOpacity style={styles.headerIconCircle} activeOpacity={0.8} onPress={onBack}>
-            <Ionicons name="bag-handle" size={20} color="#FFFFFF" />
+          <TouchableOpacity
+            style={styles.headerBackBtn}
+            activeOpacity={0.7}
+            onPress={handleHeaderBack}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="arrow-back" size={20} color="#0F172A" />
           </TouchableOpacity>
+
+          <View style={styles.headerIconCircle}>
+            <Ionicons name="bag-handle" size={19} color="#FFFFFF" />
+          </View>
 
           <View style={styles.headerTitlesCol}>
             <Text style={styles.headerMainTitle}>Iste’molçi huquqlari</Text>
             <Text style={styles.headerSubtitle}>Xaridorlar uçun huquqiy yordam</Text>
           </View>
-        </View>
-
-        {/* Right: Notification Bell + Bookmark */}
-        <View style={styles.headerRightGroup}>
-          <TouchableOpacity
-            style={styles.headerActionBtn}
-            activeOpacity={0.7}
-            onPress={() => {
-              setHasUnreadNotification(false);
-              Alert.alert('Bildirişnomalar', 'Xaridorlar uçun yangi qonunçilik yangiliklari va talabnomangiz holati: Barcha xabarlar o‘qildi.');
-            }}
-          >
-            <Ionicons name="notifications-outline" size={19} color="#0F172A" />
-            {hasUnreadNotification && <View style={styles.notificationRedDot} />}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.headerActionBtn}
-            activeOpacity={0.7}
-            onPress={() => {
-              setIsBookmarked(!isBookmarked);
-              Alert.alert('Xatchöp', isBookmarked ? 'Xatchöplardan öçirildi.' : 'Uşbu ilova xatchöplaringizga saqlandi.');
-            }}
-          >
-            <Ionicons
-              name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
-              size={19}
-              color={isBookmarked ? '#F59E0B' : '#0F172A'}
-            />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -546,13 +535,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         {/* ===================== TAB 2: HUQUQLAR SAHIFASI (1:1 Screenshot Design) ===================== */}
         {activeTab === 'rights' && (
           <View style={styles.rightsTabRoot}>
-            {/* 1. Page Title & Subtitle */}
-            <Text style={styles.rightsPageTitle}>Huquqlar</Text>
-            <Text style={styles.rightsPageSub}>
-              Iste’molçi sifatida sizning asosiy huquqlaringiz va qonuniy kafolatlaringiz.
-            </Text>
-
-            {/* 2. Fully Rounded Pill Search Bar */}
+            {/* Fully Rounded Pill Search Bar */}
             <View style={styles.rightsSearchBox}>
               <Ionicons name="search" size={18} color="#0F172A" style={{ marginRight: 10 }} />
               <TextInput
@@ -973,6 +956,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  headerBackBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   headerIconCircle: {
     width: 38,

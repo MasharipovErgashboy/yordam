@@ -105,23 +105,25 @@ export default function ConsultationScreen() {
           {/* TODO: Keyinchalik backenddan keladigan konsultant jinsi va rasmiga qarab dinamik almashtiriladi */}
           <Image source={FEMALE_LAWYER_VIDEO_IMAGE} style={styles.idleBackdropImage} resizeMode="cover" blurRadius={6} />
           <View style={styles.idleBackdropOverlay} />
-          <View style={styles.idleTop}>
-            <View style={styles.readyTag}><View style={styles.readyDot} /><Text style={styles.readyText}>ALOQAGA TAYYOR</Text></View>
-            <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>45 daqiqa</Text></View>
-          </View>
-          <View style={styles.idleCenter}>
-            <Avatar initials={initials} color={lawyer?.avatarColor} size={58} />
-            <Text style={styles.idleTitle}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text>
-            <Text style={styles.idleSub}>Hali qo‘ng‘iroq boshlanmagan. Audio yoki video aloqani boshlang.</Text>
-            <View style={styles.callButtons}>
-              <Pressable accessibilityRole="button" accessibilityLabel="Audio qo‘ng‘iroq qilish" onPress={() => startCall(false)} style={({ pressed }) => [styles.audioCallBtn, pressed && { opacity: 0.85 }]}>
-                <Phone size={15} color="#fff" />
-                <Text style={styles.callBtnText} numberOfLines={1}>Qo‘ng‘iroq qilish</Text>
-              </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel="Video qo‘ng‘iroq qilish" onPress={() => startCall(true)} style={({ pressed }) => [styles.videoCallBtn, pressed && { opacity: 0.85 }]}>
-                <Video size={16} color="#fff" />
-                <Text style={styles.callBtnText} numberOfLines={1}>Video qo‘ng‘iroq</Text>
-              </Pressable>
+          <View style={styles.idleContent}>
+            <View style={styles.idleTop}>
+              <View style={styles.readyTag}><View style={styles.readyDot} /><Text style={styles.readyText}>ALOQAGA TAYYOR</Text></View>
+              <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>45 daqiqa</Text></View>
+            </View>
+            <View style={styles.idleCenter}>
+              <Avatar initials={initials} color={lawyer?.avatarColor} size={58} />
+              <Text style={styles.idleTitle}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text>
+              <Text style={styles.idleSub}>Hali qo‘ng‘iroq boshlanmagan. Audio yoki video aloqani boshlang.</Text>
+              <View style={styles.callButtons}>
+                <Pressable accessibilityRole="button" accessibilityLabel="Audio qo‘ng‘iroq qilish" onPress={() => startCall(false)} style={({ pressed }) => [styles.audioCallBtn, pressed && { opacity: 0.85 }]}>
+                  <Phone size={15} color="#fff" />
+                  <Text style={styles.callBtnText} numberOfLines={1}>Qo‘ng‘iroq qilish</Text>
+                </Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel="Video qo‘ng‘iroq qilish" onPress={() => startCall(true)} style={({ pressed }) => [styles.videoCallBtn, pressed && { opacity: 0.85 }]}>
+                  <Video size={16} color="#fff" />
+                  <Text style={styles.callBtnText} numberOfLines={1}>Video qo‘ng‘iroq</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
         </View>
@@ -146,7 +148,8 @@ const styles = StyleSheet.create({
   secureTag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 99, backgroundColor: colors.primaryLight, flexShrink: 0 },
   secureText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 10.5 },
   videoStage: { overflow: 'hidden', borderRadius: 15, backgroundColor: '#1B303F', minHeight: 235 },
-  idleStage: { position: 'relative', overflow: 'hidden', borderRadius: 15, backgroundColor: '#13314A', padding: 12, gap: 14, minHeight: 225, justifyContent: 'space-between' },
+  idleStage: { position: 'relative', overflow: 'hidden', borderRadius: 15, backgroundColor: '#13314A', minHeight: 225 },
+  idleContent: { zIndex: 2, padding: 12, gap: 14, flex: 1, justifyContent: 'space-between' },
   idleBackdropImage: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, width: '100%', height: '100%', opacity: 0.55 },
   idleBackdropOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#0E2438A6' },
   idleTop: { zIndex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },

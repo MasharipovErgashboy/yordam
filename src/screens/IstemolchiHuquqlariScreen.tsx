@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { IstemolchiQonuniKitobScreen } from './IstemolchiQonuniKitobScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +33,10 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<IstemolchiTab>('home');
   const [heroSlideIdx, setHeroSlideIdx] = useState<number>(0);
+
+  // Online Book Screen State
+  const [showKitob, setShowKitob] = useState<boolean>(false);
+  const [kitobInitialPage, setKitobInitialPage] = useState<number>(1);
 
   // Handle Header Back - 4 ta asosiy bo'limda ham asosiy ilovaning Xizmatlar sahifasiga qaytish
   const handleHeaderBack = () => {
@@ -57,11 +62,24 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
 
   // Handle Quick Issue Press
   const handleQuickIssuePress = (issueTitle: string) => {
+    let pageNum = 1;
+    if (issueTitle.includes('Sifatsiz')) pageNum = 4;
+    else if (issueTitle.includes('Kafolat')) pageNum = 6;
+    else if (issueTitle.includes('Qaytariş') || issueTitle.includes('Qaytarish')) pageNum = 5;
+    else if (issueTitle.includes('Xizmat')) pageNum = 7;
+
     Alert.alert(
       issueTitle,
-      `«${issueTitle}» böyiça iste’molçi huquqlarini himoya qiliş tartibi:\n\n1. Sotuvçiga 10 kunlik muddat bilan rasmiy talabnoma taqdim etiladi.\n2. Mahsulot çeki yoki guvohlar körsatmasi dalil sifatida ilova qilinadi.\n3. Agar sotuvçi rad etsa, Raqobatni rivojlantiriş va iste’molçilar huquqlarini himoya qiliş qömitasiga (1159) murojaat qilinadi.\n\nSotuvçiga tayyor talabnoma andozasini generatsiya qilişni xohlaysizmi?`,
+      `«${issueTitle}» bo‘yicha qonuniy huquqlaringiz va tartib-qoidalar bilan to‘liq tanishish uchun qonun kitobini ochishingiz yoki tayyor talabnoma yaratishingiz mumkin.`,
       [
-        { text: 'Bekor qiliş', style: 'cancel' },
+        { text: 'Yopish', style: 'cancel' },
+        {
+          text: '📖 Qonunni o‘qish',
+          onPress: () => {
+            setKitobInitialPage(pageNum);
+            setShowKitob(true);
+          },
+        },
         {
           text: 'Talabnoma yaratish',
           onPress: () => {
@@ -96,28 +114,24 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     }
   };
 
-  // Handle Rights Topic Press
+  // Handle Rights Topic Press - opens interactive online book and video guide
   const handleTopicPress = (topic: any) => {
-    Alert.alert(
-      topic.title,
-      `📘 Qonuniy asos: ${topic.articles}\n\n${topic.fullDesc}\n\n💡 Amaliy tavsiya: Agar sotuvchi talabni qanoatlantirishdan bosh tortsa, 10 kun ichida yozma talabnoma topshiriladi yoki 1159 (Raqobat qo‘mitasi) orqali chora ko‘riladi.\n\nUshbu holat bo‘yicha tayyor talabnoma yaratilsinmi?`,
-      [
-        { text: 'Yopiş', style: 'cancel' },
-        {
-          text: 'Talabnoma yaratish',
-          onPress: () => setActiveTab('documents'),
-        },
-      ]
-    );
+    let targetPage = 1;
+    if (topic.id === 'r1') targetPage = 2; // Sifatli mahsulot huquqi (2-bob)
+    else if (topic.id === 'r2') targetPage = 6; // Kafolat (garantiya) huquqi (6-bob)
+    else if (topic.id === 'r3') targetPage = 5; // Qaytarish va almashtirish (5-bob, 18-modda)
+    else if (topic.id === 'r4') targetPage = 7; // Xizmat sifatiga oid huquqlar (7-bob)
+    else if (topic.id === 'r5') targetPage = 3; // To‘liq va aniq ma’lumot olish (3-bob)
+    else if (topic.id === 'r6') targetPage = 8; // Huquq buzilganda himoya, 1159, sud (8-bob)
+
+    setKitobInitialPage(targetPage);
+    setShowKitob(true);
   };
 
   // Handle Open Asosiy Qonunlar Callout
   const handleOpenAsosiyQonunlar = () => {
-    Alert.alert(
-      'Asosiy qonun va rasmiy hujjatlar',
-      '⚖️ O‘zbekiston Respublikasida iste’molchilar huquqlarini himoya qiluvchi asosiy me’yoriy baza:\n\n1. «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonun (N 221-I)\n2. Chakana savdo qoidalari (VM 75-son qarori)\n3. Maishiy xizmat ko‘rsatish qoidalari (VM 386-son qarori)\n4. O‘zbekiston Respublikasi Fuqarolik Kodeksi (Oldi-sotdi va kafolat boblari)\n5. «Muvofiqlikni baholash to‘g‘risida»gi Qonun va GOST standartlari',
-      [{ text: 'Tuşundim' }]
-    );
+    setKitobInitialPage(1);
+    setShowKitob(true);
   };
 
   // Handle Send AI message
@@ -232,6 +246,15 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
       item.desc.toLowerCase().includes(rightsSearchQuery.toLowerCase());
     return matchesFilter && matchesQuery;
   });
+
+  if (showKitob) {
+    return (
+      <IstemolchiQonuniKitobScreen
+        initialPage={kitobInitialPage}
+        onBack={() => setShowKitob(false)}
+      />
+    );
+  }
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>

@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../components/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -71,7 +71,7 @@ export default function DetailsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
@@ -295,7 +295,7 @@ export default function DetailsScreen() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

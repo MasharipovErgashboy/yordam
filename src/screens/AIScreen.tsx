@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, StatusBar, KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../components/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -149,7 +149,7 @@ export default function AIScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -324,7 +324,7 @@ export default function AIScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

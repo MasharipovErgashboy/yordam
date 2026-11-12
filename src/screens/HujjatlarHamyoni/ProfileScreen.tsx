@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Switch, Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from './ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -57,7 +57,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
       {/* ── HEADER ── */}
@@ -243,7 +243,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

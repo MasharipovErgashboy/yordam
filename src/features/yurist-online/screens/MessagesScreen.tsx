@@ -16,29 +16,29 @@ export default function MessagesScreen() {
     <SearchField value={query} onChangeText={setQuery} placeholder="Suhbat yoki yuristni qidiring..." />
     <Card style={styles.secure}><View style={styles.secureIcon}><ShieldCheck size={16} color={colors.primary} /></View><View style={{ flex: 1 }}><Text style={styles.secureTitle}>Maxfiy va xavfsiz aloqa</Text><Text style={styles.secureText}>Xabarlar demo qurilmangizda saqlanadi.</Text></View></Card>
     <SectionTitle title="Suhbatlar" subtitle={`${conversations.length} ta suhbat`} />
-    <View style={styles.list}>{conversations.map((request) => <Pressable key={request.id} style={({ pressed }) => [styles.conversation, pressed && { opacity: 0.8 }]} onPress={() => router.push({ pathname: '/consultation/[id]', params: { id: request.id } })}><Avatar initials={request.lawyerName.split(' ').map((part) => part[0]).join('').slice(0, 2)} color={request.lawyerId === '15' ? '#3D6F94' : '#B86B78'} size={43} /><View style={styles.conversationCopy}><View style={styles.conversationTop}><Text style={styles.name}>{request.lawyerName}</Text><Text style={styles.date}>{request.date}</Text></View><Text style={styles.message} numberOfLines={1}>{request.subject}</Text><View style={styles.conversationStatus}><View style={[styles.dot, request.status === 'Yakunlangan' && { backgroundColor: colors.muted }]} /><Text style={styles.status}>{request.status}</Text></View></View></Pressable>)}</View>
-    <Pressable style={styles.support} onPress={() => router.push({ pathname: '/consultation/[id]', params: { id: 'support' } })}><View style={styles.supportIcon}><Headphones size={17} color="#fff" /></View><View style={{ flex: 1 }}><Text style={styles.supportTitle}>Yordam xizmati</Text><Text style={styles.supportText}>Texnik va umumiy savollar · 24/7</Text></View><MessageCircle size={16} color={colors.primary} /></Pressable>
+    <View style={styles.list}>{conversations.map((request) => <Pressable key={request.id} style={({ pressed }) => [styles.conversation, pressed && { opacity: 0.8 }]} onPress={() => router.push({ pathname: '/consultation/[id]', params: { id: request.id } })}><Avatar initials={request.lawyerName.split(' ').map((part) => part[0]).join('').slice(0, 2)} color={request.lawyerId === '15' ? '#3D6F94' : '#B86B78'} size={44} /><View style={styles.conversationCopy}><View style={styles.conversationTop}><Text style={styles.name} numberOfLines={1}>{request.lawyerName}</Text><Text style={styles.date}>{request.date}</Text></View><Text style={styles.message} numberOfLines={1}>{request.subject}</Text><View style={styles.conversationStatus}><View style={[styles.dot, request.status === 'Yakunlangan' && { backgroundColor: colors.muted }]} /><Text style={styles.status}>{request.status}</Text></View></View></Pressable>)}</View>
+    <Pressable style={styles.support} onPress={() => router.push({ pathname: '/consultation/[id]', params: { id: 'support' } })}><View style={styles.supportIcon}><Headphones size={17} color="#fff" /></View><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.supportTitle}>Yordam xizmati</Text><Text style={styles.supportText}>Texnik va umumiy savollar · 24/7</Text></View><MessageCircle size={17} color={colors.primary} /></Pressable>
   </Page></View>
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  secure: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10 },
-  secureIcon: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', borderRadius: 9, backgroundColor: colors.primaryLight },
-  secureTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 9 },
-  secureText: { color: colors.muted, fontFamily: fonts.body, fontSize: 7, marginTop: 3 },
-  list: { gap: 7 },
-  conversation: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 10, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
+  secure: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 12 },
+  secureIcon: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: colors.primaryLight },
+  secureTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 13.5 },
+  secureText: { color: colors.muted, fontFamily: fonts.body, fontSize: 12, marginTop: 2 },
+  list: { gap: 8 },
+  conversation: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
   conversationCopy: { flex: 1, minWidth: 0, gap: 4 },
-  conversationTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 5 },
-  name: { color: colors.text, fontFamily: fonts.heading, fontSize: 9 },
-  date: { color: colors.muted, fontFamily: fonts.body, fontSize: 6 },
-  message: { color: '#66798D', fontFamily: fonts.body, fontSize: 8 },
-  conversationStatus: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dot: { width: 5, height: 5, borderRadius: 4, backgroundColor: colors.tertiary },
-  status: { color: colors.muted, fontFamily: fonts.medium, fontSize: 6 },
-  support: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
-  supportIcon: { width: 31, height: 31, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: colors.primary },
-  supportTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 8 },
-  supportText: { color: colors.muted, fontFamily: fonts.body, fontSize: 7, marginTop: 3 },
+  conversationTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
+  name: { flex: 1, color: colors.text, fontFamily: fonts.heading, fontSize: 14 },
+  date: { color: colors.muted, fontFamily: fonts.body, fontSize: 11, flexShrink: 0 },
+  message: { color: '#66798D', fontFamily: fonts.body, fontSize: 12.5 },
+  conversationStatus: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  dot: { width: 6, height: 6, borderRadius: 4, backgroundColor: colors.tertiary },
+  status: { color: colors.muted, fontFamily: fonts.medium, fontSize: 11 },
+  support: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
+  supportIcon: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: colors.primary },
+  supportTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 13.5 },
+  supportText: { color: colors.muted, fontFamily: fonts.body, fontSize: 12, marginTop: 2 },
 })

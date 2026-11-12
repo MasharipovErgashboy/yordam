@@ -10,8 +10,8 @@ import {
   Image,
   FlatList,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import ScreenContainer from './ScreenContainer';
 
 // ─── COLORS ────────────────────────────────────────────────
 const C = {
@@ -66,7 +66,7 @@ export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
       {/* ── HEADER ── */}
@@ -80,20 +80,6 @@ export default function HomeScreen() {
             <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
           </View>
         </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity
-            style={styles.bellBtn}
-            onPress={() => navigation.navigate('Reminders')}
-          >
-            <Text style={styles.bellIcon}>🔔</Text>
-            <View style={styles.badgeDot} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <View style={styles.avatar}>
-              <Text style={{ fontSize: 20 }}>👤</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <ScrollView
@@ -105,9 +91,6 @@ export default function HomeScreen() {
         }}
         scrollEventThrottle={16}
       >
-        {/* ── GREETING ── */}
-        <Text style={styles.greeting}>Assalomu alaykum{'\n'}Sardorbek! 👋</Text>
-
         {/* ── SEARCH ── */}
         <View style={styles.searchBox}>
           <Text style={styles.searchIcon}>🔍</Text>
@@ -268,7 +251,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+      </ScreenContainer>
   );
 }
 
@@ -283,8 +266,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 16,
+    paddingBottom: 12,
     backgroundColor: C.bg,
     zIndex: 10,
   },
@@ -302,21 +285,13 @@ const styles = StyleSheet.create({
   logoIcon: { fontSize: 18 },
   appName: { fontSize: 14, fontWeight: '700', color: C.textDark },
   appSub: { fontSize: 11, color: C.textGrey },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  bellBtn: { position: 'relative' },
-  bellIcon: { fontSize: 22 },
-  badgeDot: { position: 'absolute', top: 0, right: 0, width: 8, height: 8, borderRadius: 4, backgroundColor: C.red },
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
 
   // Date
   dateRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 4 },
   dateIcon: { fontSize: 13 },
   dateText: { fontSize: 13, color: C.textGrey },
-  // Greeting
-  greeting: { fontSize: 26, fontWeight: '800', color: C.textDark, lineHeight: 34, marginTop: 6 },
-
   // Search
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 6, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: C.textDark },
   micIcon: { fontSize: 18 },

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput,
+  View, Text, StyleSheet, TextInput,
   TouchableOpacity, FlatList, StatusBar, Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from './ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -27,15 +27,6 @@ const C = {
 };
 
 // ─── DUMMY DATA ──────────────────────────────────────────────
-const CATEGORIES = [
-  { id: '1', label: 'Barchasi', count: 24, icon: '📁' },
-  { id: '2', label: 'Shartnomalar', count: 5, icon: '📄' },
-  { id: '3', label: 'Cheklar', count: 8, icon: '🧾' },
-  { id: '4', label: 'Kafolat', count: 6, icon: '🛡️' },
-  { id: '5', label: 'Guvohnoma', count: 3, icon: '🪪' },
-  { id: '6', label: "Sug'urta", count: 2, icon: '🚗' },
-];
-
 const DOCS = [
   {
     id: '1',
@@ -118,7 +109,6 @@ const DOCS = [
 export default function DocumentsScreen() {
   const navigation = useNavigation<any>();
   const [search, setSearch] = useState('');
-  const [selectedCat, setSelectedCat] = useState('1');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortType, setSortType] = useState<'newest' | 'oldest' | 'name'>('newest');
 
@@ -141,13 +131,9 @@ export default function DocumentsScreen() {
     return "↕ Nomi bo'yicha (A-Z)";
   };
 
-  const filtered = DOCS.filter(d => {
-    const matchText = d.name.toLowerCase().includes(search.toLowerCase());
-    const matchCat =
-      selectedCat === '1' ||
-      CATEGORIES.find(c => c.id === selectedCat)?.label === d.type;
-    return matchText && matchCat;
-  }).sort((a, b) => {
+  const filtered = DOCS.filter(d =>
+    d.name.toLowerCase().includes(search.toLowerCase())
+  ).sort((a, b) => {
     if (sortType === 'newest') return Number(b.id) - Number(a.id);
     if (sortType === 'oldest') return Number(a.id) - Number(b.id);
     if (sortType === 'name') return a.name.localeCompare(b.name);
@@ -155,7 +141,7 @@ export default function DocumentsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
       {/* ── HEADER ── */}
@@ -170,15 +156,6 @@ export default function DocumentsScreen() {
           <View>
             <Text style={styles.appName}>Hujjatlarim</Text>
             <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-          </View>
-        </View>
-        <View style={styles.headerRight}>
-          <View style={styles.syncBadge}>
-            <Text style={styles.syncDot}>●</Text>
-            <Text style={styles.syncText}>Sinxronlangan</Text>
-          </View>
-          <View style={styles.avatar}>
-            <Text style={{ fontSize: 18 }}>👤</Text>
           </View>
         </View>
       </View>
@@ -202,30 +179,6 @@ export default function DocumentsScreen() {
           onChangeText={setSearch}
           returnKeyType="search"
         />
-      </View>
-
-      {/* ── CATEGORIES ── */}
-      <View style={styles.catWrapper}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.catScrollContent}
-        >
-          {CATEGORIES.map(cat => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[styles.catChip, selectedCat === cat.id && styles.catChipActive]}
-              onPress={() => setSelectedCat(cat.id)}
-            >
-              <Text style={[styles.catIcon, selectedCat === cat.id && styles.catIconActive]}>
-                {cat.icon}
-              </Text>
-              <Text style={[styles.catText, selectedCat === cat.id && styles.catTextActive]}>
-                {cat.label} ({cat.count})
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
 
       {/* ── SORT + VIEW MODE ── */}
@@ -359,7 +312,7 @@ export default function DocumentsScreen() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -375,11 +328,6 @@ const styles = StyleSheet.create({
   logoBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
   appName: { fontSize: 13, fontWeight: '700', color: C.textDark },
   appSub: { fontSize: 11, color: C.textGrey },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  syncBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-  syncDot: { fontSize: 8, color: C.green, marginRight: 4 },
-  syncText: { fontSize: 11, color: C.green, fontWeight: '600' },
-  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
 
   // Title
   titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, gap: 10 },
@@ -391,41 +339,8 @@ const styles = StyleSheet.create({
   searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 6, marginHorizontal: 16, marginBottom: 14, elevation: 2 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 13, color: C.textDark, paddingVertical: 6 },
-  // Categories
-  catWrapper: {
-    height: 52,
-    marginVertical: 4,
-    justifyContent: 'center',
-  },
-  catScrollContent: {
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    gap: 8,
-  },
-  catChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 40,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#E2E8F0',
-    gap: 6,
-  },
-  catChipActive: {
-    backgroundColor: C.primary,
-    elevation: 2,
-    shadowColor: C.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  catIcon: { fontSize: 14 },
-  catIconActive: {},
-  catText: { fontSize: 13, color: '#334155', fontWeight: '600' },
-  catTextActive: { color: C.white, fontWeight: '700' },
-
   // Sort
-  sortRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, marginTop: 8 },
+  sortRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12 },
   sortBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   sortText: { fontSize: 13, color: '#334155', fontWeight: '600' },
   sortArrow: { fontSize: 11, color: C.primary, fontWeight: '700' },

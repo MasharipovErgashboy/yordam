@@ -11,25 +11,21 @@ export function Page({ children, scroll = true, contentStyle, ...props }: { chil
   return <View style={styles.page} {...props}>{body}</View>
 }
 
-export function Header({ onBack, showBrand = false }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
+export function Header({ onBack }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
   const insets = useSafeAreaInsets()
-  if (!onBack && !showBrand) {
-    return <View style={{ paddingTop: Math.max(insets.top, 8) + 4, backgroundColor: colors.canvas }} />
-  }
   return <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
-    {onBack ? (
-      <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
-        <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
-      </Pressable>
-    ) : (
-      <View style={styles.headerLeft}>
-        <View style={styles.brandIcon}><Scale size={18} color="#fff" /></View>
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle}>YURIST ONLINE</Text>
-          <Text style={styles.headerSubtitle}>Huquqiy yordam — yaqinroq</Text>
-        </View>
+    <View style={styles.headerLeft}>
+      {onBack ? (
+        <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
+          <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
+        </Pressable>
+      ) : null}
+      <View style={styles.brandIcon}><Scale size={18} color="#fff" /></View>
+      <View style={styles.headerText}>
+        <Text style={styles.headerTitle}>YURIST ONLINE</Text>
+        <Text style={styles.headerSubtitle}>Huquqiy yordam — yaqinroq</Text>
       </View>
-    )}
+    </View>
   </View>
 }
 

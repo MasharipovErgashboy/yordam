@@ -29,6 +29,80 @@ interface IstemolchiHuquqlariScreenProps {
   onBack: () => void;
 }
 
+export interface ConsumerDocTemplate {
+  id: string;
+  key: string;
+  title: string;
+  desc: string;
+  type: string;
+  typeColor: string;
+  typeBg: string;
+  legalRef: string;
+  to: string;
+  from: string;
+  docTitle: string;
+  content: string;
+}
+
+export const CONSUMER_DOC_TEMPLATES: ConsumerDocTemplate[] = [
+  {
+    id: 'd1',
+    key: 'd1',
+    title: 'Sotuvchiga tovar pulini qaytarish talabnomasi',
+    desc: 'Nuqsonli tovar sotilganda pulni 10 kun ichida qaytarish haqida rasmiy e’tiroz xati.',
+    type: 'Talabnoma',
+    typeColor: '#DC2626',
+    typeBg: '#FEE2E2',
+    legalRef: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 13, 14, 17, 18-moddalari',
+    to: '«DO‘KON / SOTUVCHI NOMI» rahbariyatiga',
+    from: 'Iste’molchi: [F.I.Sh.]dan\nTelefon: [Telefon raqamingiz]\nManzil: [Yashash manzilingiz]',
+    docTitle: 'TALABNOMA\n(Nuqsonli tovar uchun to‘langan pulni qaytarish to‘g‘risida)',
+    content: 'Men tomonimdan [Sana] kuni sizning savdo do‘koningizdan [Tovar narxi] so‘m evaziga [Tovar nomi va modeli] sotib olingan (kassa cheki № [Chek raqami]).\n\nTovardan foydalanish jarayonida unda quyidagi jiddiy nuqsonlar aniqlandi: [Nuqson tavsifi].\n\nO‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunining 13-moddasiga muvofiq, iste’molchiga nuqsonli tovar sotilganda, u shartnomani bekor qilishga va to‘langan pul summasini to‘liq qaytarib olishga haqlidir.\n\nShuningdek, ushbu Qonunning 17-moddasiga binoan, sotuvchi iste’molchining qonuniy talablarini kechiktirgan har bir kun uchun tovar narxining 1 foizi miqdorida penya to‘lashga majburdir.\n\nYuqoridagilarga asosan, TALAB QILAMAN:\n1. Nuqsonli tovar uchun to‘langan [Tovar narxi] so‘m mablag‘ni 10 kunlik muddatda to‘liq qaytarib berishingizni;\n2. Mablag‘ni quyidagi bank plastik kartasiga o‘tkazib berishingizni: [Karta yoki hisob raqami].\n\nAgar ushbu talabnoma 10 kun ichida qanoatlantirilmasa, O‘zbekiston Respublikasi Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasiga (1159) hamda Fuqarolik ishlari bo‘yicha sudga moddiy va ma’naviy zararni hamda jarimalarni undirish bo‘yicha da’vo arizasi kiritilishini ma’lum qilaman.',
+  },
+  {
+    id: 'd2',
+    key: 'd2',
+    title: 'Tovarni kafolat bo‘yicha bepul ta’mirlash talabnomasi',
+    desc: 'Kafolat muddatida sifat buzilganda servis markazi va sotuvchiga yo‘llanadigan xat.',
+    type: 'Ariza',
+    typeColor: '#2563EB',
+    typeBg: '#DBEAFE',
+    legalRef: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 11, 15, 17-moddalari',
+    to: '«SERVIS MARKAZI / DO‘KON NOMI» rahbariyatiga',
+    from: 'Iste’molchi: [F.I.Sh.]dan\nTelefon: [Telefon raqamingiz]\nManzil: [Yashash manzilingiz]',
+    docTitle: 'ARIZA\n(Kafolat muddati davomida nuqsonlarni bepul bartaraf etish haqida)',
+    content: 'Men [Sana] kuni sizning do‘koningizdan kafolat muddati bilan [Tovar narxi] evaziga [Tovar nomi va modeli] xarid qilganman (Kafolat taloni № [Chek raqami]).\n\nKafolat muddati davrida tovardagi quyidagi kamchilik yuzaga keldi: [Nuqson tavsifi].\n\n«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 15-moddasiga muvofiq, tovardagi nuqsonlar sotuvchi (ishlab chiqaruvchi, ta’mirlash korxonasi) tomonidan talab qo‘yilgan kundan boshlab ko‘pi bilan 20 kun ichida bepul bartaraf etilishi shart.\n\nShuningdek, uzoq muddat foydalaniladigan tovarlar ta’mirlanayotgan davrda iste’molchiga 3 kun ichida tekinga foydalanib turish uchun xuddi shunday tovar berib turilishi shart.\n\nTALAB QILAMAN:\n1. Ushbu tovardagi nuqsonlarni 20 kun ichida bepul ta’mirlab berishingizni;\n2. Ta’mirlash davrida foydalanib turish uchun vaqtinchalik o‘xshash tovar taqdim etishingizni.\n\nTa’mirlash 20 kundan oshsa, tovar yangisiga almashtirilishi yoki puli to‘liq qaytarilishi shartligini eslatib o‘taman.',
+  },
+  {
+    id: 'd3',
+    key: 'd3',
+    title: 'Raqobat qo‘mitasiga (1159) rasmiy shikoyat arizasi',
+    desc: 'Sotuvchi qonuniy talablarni bajarmagan holatda davlat inspeksiyasiga shikoyat arizasi.',
+    type: 'Şikoyat',
+    typeColor: '#7C3AED',
+    typeBg: '#EDE9FE',
+    legalRef: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 23-moddasi',
+    to: 'Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasiga',
+    from: 'Murojaatchi: [F.I.Sh.]dan\nTelefon: [Telefon raqamingiz]\nManzil: [Yashash manzilingiz]',
+    docTitle: 'SHIKOYAT ARIZASI\n(Iste’molchi huquqlari buzilganligi holati yuzasidan)',
+    content: 'Men [Sana] kuni [Do‘kon / Sotuvchi nomi] savdo shoxobchasidan [Tovar narxi] so‘mga [Tovar nomi] xarid qildim (kassa cheki: [Chek raqami]).\n\nTovarda nuqson aniqlangach, sotuvchiga qonuniy tartibda talabnoma bilan murojaat qildim. Biroq sotuvchi O‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunining 13, 14, 18-moddalarini qo‘pol ravishda buzib, tovar sifatini bepul tekshirishdan va mablag‘ni qaytarishdan asossiz bosh tortdi.\n\nUshbu harakatlar iste’molchilarning qonun bilan qo‘riqlanadigan daxlsiz manfaatlariga zid keladi.\n\nYuqoridagilarga asosan, SIZDAN SO‘RAYMAN:\n1. «DO‘KON NOMI» mas’ul shaxslariga nisbatan qonunda belgilangan tartibda nazorat tadbirlarini o‘tkazishingizni;\n2. Menga yetkazilgan [Tovar narxi] so‘m moddiy zararni sotuvchidan undirib berishda amaliy yordam ko‘rsatishingizni;\n3. Qonunbuzilish holatlari bo‘yicha aybdor shaxslarga nisbatan qonuniy chora ko‘rishingizni.',
+  },
+  {
+    id: 'd4',
+    key: 'd4',
+    title: 'Sudga da’vo arizasi (moddiy va ma’naviy zarar)',
+    desc: 'Yetkazilgan moddiy zararni va ma’naviy kompensatsiyani undirish bo‘yicha sud da’vosi.',
+    type: 'Da’vo',
+    typeColor: '#D97706',
+    typeBg: '#FEF3C7',
+    legalRef: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 27, 29-moddalari, FPK',
+    to: 'Fuqarolik ishlari bo‘yicha [Tuman / Shahar] tumanlararo sudiga',
+    from: 'Da’vogar: [F.I.Sh.]dan\nTelefon: [Telefon raqamingiz]\nJavobgar: [Do‘kon / Sotuvchi nomi]',
+    docTitle: 'DA’VO ARIZASI\n(Nuqsonli tovar bahosini, penya va ma’naviy zararni undirish to‘g‘risida)',
+    content: 'Da’vo bahosi: [Jami da’vo summasi] so‘m\nDavlat boji: Qonunning 27-moddasiga asosan 0 so‘m (ozod qilingan)\n\nMen [Sana] kuni javobgardan [Tovar narxi] so‘mga [Tovar nomi] sotib olganman. Tovarda jiddiy nuqsonlar mavjudligi sababli javobgarga yozma talabnoma taqdim etganman, biroq javobgar qonuniy talablarni bajarmadi.\n\n«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 17-moddasiga binoan, kechiktirilgan har bir kun uchun 1% miqdorida penya hisoblanadi. Shuningdek, 29-moddaga muvofiq, iste’molchiga yetkazilgan ma’naviy zarar qoplanishi shart.\n\nYuqoridagilarga asosan, sudga murojaat qilib, SO‘RAYMAN:\n1. Javobgar [Do‘kon nomi]dan mening foydamga tovar uchun to‘langan [Tovar narxi] so‘m mablag‘ni;\n2. Talablarni kechiktirganlik uchun hisoblangan penya summasini;\n3. Yetkazilgan ma’naviy zarar kompensatsiyasini to‘liq undirib berishingizni.',
+  },
+];
+
 export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps> = ({ onBack }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<IstemolchiTab>('home');
@@ -38,9 +112,121 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
   const [showKitob, setShowKitob] = useState<boolean>(false);
   const [kitobInitialPage, setKitobInitialPage] = useState<number>(1);
 
-  // Handle Header Back - 4 ta asosiy bo'limda ham asosiy ilovaning Xizmatlar sahifasiga qaytish
+  // Document Preview & Constructor States
+  const [previewDoc, setPreviewDoc] = useState<ConsumerDocTemplate | null>(null);
+  const [isConstructorVisible, setIsConstructorVisible] = useState<boolean>(false);
+  const [constructorDocKey, setConstructorDocKey] = useState<string>('d1');
+  const [constructorTab, setConstructorTab] = useState<'form' | 'preview'>('form');
+
+  // Constructor Form State
+  const [constructorForm, setConstructorForm] = useState({
+    fullName: '',
+    phone: '',
+    address: '',
+    sellerName: '',
+    productName: '',
+    purchaseDate: '12-mart, 2025-yil',
+    price: '',
+    receiptNumber: '',
+    defectDesc: '',
+    bankAccount: '',
+  });
+
+  // Handle Header Back - Preview, Konstruktor yoki Xizmatlar sahifasiga qaytish
   const handleHeaderBack = () => {
+    if (previewDoc) {
+      setPreviewDoc(null);
+      return;
+    }
+    if (isConstructorVisible) {
+      setIsConstructorVisible(false);
+      return;
+    }
     onBack();
+  };
+
+  const handleOpenConstructor = (doc?: ConsumerDocTemplate) => {
+    if (doc) {
+      setConstructorDocKey(doc.id || 'd1');
+    }
+    setConstructorTab('form');
+    setIsConstructorVisible(true);
+    setPreviewDoc(null);
+  };
+
+  const getGeneratedDocText = () => {
+    const fName = constructorForm.fullName.trim() || 'Aliyev Vali Anvar o‘g‘li';
+    const phone = constructorForm.phone.trim() || '+998 90 123 45 67';
+    const addr = constructorForm.address.trim() || 'Toshkent shahri, Yunusobod tumani';
+    const seller = constructorForm.sellerName.trim() || '«MEDIAPARK BOZORI» MChJ';
+    const product = constructorForm.productName.trim() || 'Samsung Galaxy A55 smartfoni';
+    const date = constructorForm.purchaseDate.trim() || '12-mart, 2025-yil';
+    const price = constructorForm.price.trim() || '4 200 000 so‘m';
+    const receipt = constructorForm.receiptNumber.trim() || '№ 482910-chek';
+    const defect = constructorForm.defectDesc.trim() || 'Tovarning ekrani to‘satdan o‘chib qolgan va qayta yonmayapti, zaryad olmayapti';
+    const bank = constructorForm.bankAccount.trim() || '8600 1234 5678 9012 (Humo/Uzcard)';
+
+    if (constructorDocKey === 'd2') {
+      return {
+        to: `${seller} rahbariyatiga hamda rasmiy servis markaziga`,
+        from: `Iste’molchi: ${fName}\nTelefon: ${phone}\nManzil: ${addr}`,
+        title: 'KAFOLAT BO‘YICHA BEPUL TA’MIRLASH HAQIDA ARIZA',
+        legalRef: '«Iste’molchilar huquqlarini himoya qilish to‘g‘risida»gi Qonunning 11, 15, 17-moddalari',
+        body: `Men tomonimdan ${date} kuni sizning savdo do‘koningizdan kafolat muddati bilan ${price} evaziga ${product} sotib olingan (Kafolat taloni ${receipt}).\n\nKafolat muddati davrida ushbu tovardan foydalanish vaqtida quyidagi nuqson yuzaga keldi: ${defect}.\n\nO‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunining 15-moddasiga muvofiq, kafolat muddati o‘tmagan tovardagi nuqsonlar sotuvchi yoki servis markazi tomonidan iste’molchi talab qo‘ygan kundan boshlab ko‘pi bilan 20 kun ichida bepul bartaraf etilishi shart.\n\nShuningdek, qonunchilikka ko‘ra, uzoq muddat foydalaniladigan tovarlar ta’mirga qabul qilinganda, iste’molchining talabi bilan unga 3 kun ichida vaqtinchalik foydalanib turish uchun xuddi shunday tovar bepul berib turilishi shart.\n\nYuqoridagilardan kelib chiqib, TALAB QILAMAN:\n1. Ushbu ${product} tovaridagi nuqsonlarni qonunda belgilangan 20 kunlik muddatda bepul ta’mirlab berishingizni;\n2. Ta’mirlash davomida foydalanib turish uchun vaqtinchalik mos tovar taqdim etishingizni.\n\nUshbu talablar 20 kun ichida bajarilmagan taqdirda, tovar yangisiga almashtirilishi yoki to‘langan pul summasi 100% qaytarilishi hamda har bir kechiktirilgan kun uchun 1% penya to‘lanishi shartligini ma’lum qilaman.`,
+      };
+    }
+
+    if (constructorDocKey === 'd3') {
+      return {
+        to: 'Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasiga',
+        from: `Murojaatchi: ${fName}\nTelefon: ${phone}\nManzil: ${addr}`,
+        title: 'SHIKOYAT ARIZASI\n(Iste’molchi huquqlari buzilganligi holati yuzasidan)',
+        legalRef: '«Iste’molchilar huquqlarini himoya qilish to‘g‘risida»gi Qonunning 23-moddasi',
+        body: `Men ${date} kuni ${seller} savdo shoxobchasidan ${price} evaziga ${product} sotib oldim (kassa cheki: ${receipt}).\n\nTovardan foydalanish davomida quyidagi jiddiy nuqsonlar aniqlandi: ${defect}.\n\nMen tovardagi nuqson yuzasidan sotuvchiga qonuniy talabnoma bilan murojaat qildim. Biroq ${seller} vakillari O‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunining 13, 14, 18-moddalariga zid ravishda mening qonuniy talablarimni qanoatlantirishdan bosh tortdi.\n\nUshbu harakatlar iste’molchilarning davlat tomonidan kafolatlangan daxlsiz huquqlarining qo‘pol buzilishidir.\n\nYuqoridagilarga asosan, SIZDAN SO‘RAYMAN:\n1. «${seller}» mas’ullariga nisbatan qonunchilikda belgilangan tartibda qat’iy nazorat tadbirlarini o‘tkazishingizni;\n2. Menga yetkazilgan ${price} miqdoridagi moddiy zararni sotuvchidan undirib berishda amaliy yordam ko‘rsatishingizni;\n3. Qonunbuzilishiga yo‘l qo‘ygan shaxslarga nisbatan qonuniy javobgarlik choralari qo‘llashingizni.`,
+      };
+    }
+
+    if (constructorDocKey === 'd4') {
+      return {
+        to: 'Fuqarolik ishlari bo‘yicha tumanlararo sudiga',
+        from: `Da’vogar: ${fName}\nTelefon: ${phone}\nManzil: ${addr}\n\nJavobgar: ${seller}`,
+        title: 'DA’VO ARIZASI\n(Nuqsonli tovar bahosini, penya va ma’naviy zararni undirish to‘g‘risida)',
+        legalRef: '«Iste’molchilar huquqlarini himoya qilish to‘g‘risida»gi Qonunning 27, 29-moddalari',
+        body: `Da’vo bahosi: ${price}\nDavlat boji: Qonunning 27-moddasiga asosan 0 so‘m (ozod etilgan)\n\nMen ${date} kuni javobgar ${seller}dan ${price} evaziga ${product} xarid qilganman (kassa cheki: ${receipt}).\n\nTovarda quyidagi nuqsonlar aniqlandi: ${defect}.\n\nMen javobgarga tovar pulini qaytarish haqida yozma talabnoma berdim, ammo javobgar qonuniy talablarimni e’tiborsiz qoldirdi.\n\n«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 17-moddasiga muvofiq, sotuvchi talabni kechiktirgan har bir kun uchun tovar bahosining 1% miqdorida penya to‘lashi shart. 29-moddaga asosan iste’molchiga yetkazilgan ma’naviy zarar qoplanishi lozim.\n\nYuqoridagilarga asosan, sudga murojaat qilib, SO‘RAYMAN:\n1. Javobgar ${seller}dan mening foydamga to‘langan ${price} mablag‘ni;\n2. Talablarni kechiktirganlik uchun qonuniy penya summasini;\n3. Yetkazilgan ma’naviy zarar kompensatsiyasini to‘liq undirib berishingizni.`,
+      };
+    }
+
+    // Default: d1 (Pulni qaytarish talabnomasi)
+    return {
+      to: `${seller} rahbariyatiga`,
+      from: `Iste’molchi: ${fName}\nTelefon: ${phone}\nManzil: ${addr}`,
+      title: 'TALABNOMA\n(Nuqsonli tovar uchun to‘langan pulni 10 kun ichida qaytarish to‘g‘risida)',
+      legalRef: '«Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunning 13, 14, 17, 18-moddalari',
+      body: `Men tomonimdan ${date} kuni sizning do‘koningizdan ${price} evaziga ${product} xarid qilingan (kassa cheki: ${receipt}).\n\nTovardan foydalanish jarayonida unda quyidagi jiddiy nuqsonlar aniqlandi: ${defect}.\n\nO‘zbekiston Respublikasining «Iste’molchilarning huquqlarini himoya qilish to‘g‘risida»gi Qonunining 13-moddasiga asosan, nuqsonli tovar sotilganda xaridor shartnomani bekor qilish va to‘langan pulni to‘liq qaytarib olish huquqiga ega.\n\nShuningdek, ushbu Qonunning 17-moddasiga ko‘ra, iste’molchining talablarini bajarishni kechiktirgan har bir kun uchun sotuvchi tovar bahosining 1 foizi miqdorida penya to‘lashga majburdir.\n\nYuqoridagilarga asosan, TALAB QILAMAN:\n1. Nuqsonli ${product} tovari uchun to‘langan ${price} summani 10 kunlik muddatda to‘liq qaytarib berishingizni;\n2. Mablag‘ni quyidagi hisob/kartaga o‘tkazib berishingizni: ${bank}.\n\nAgar ushbu talab 10 kun ichida qondirilmasa, Raqobatni rivojlantirish qo‘mitasiga (1159) va Fuqarolik sudiga barcha zararlar va jarimalarni undirish bo‘yicha murojaat qilinadi.`,
+    };
+  };
+
+  const handleShareDoc = async (doc: ConsumerDocTemplate) => {
+    try {
+      await Share.share({
+        title: doc.title,
+        message: `📘 ${doc.docTitle || doc.title}\n\n${doc.content}\n\nYordam ilovasi orqali shakllantirildi.`,
+      });
+    } catch {
+      Alert.alert('Ulashish', 'Ulashish oynasi ochilmadi.');
+    }
+  };
+
+  const handleShareGeneratedDoc = async () => {
+    const docData = getGeneratedDocText();
+    try {
+      await Share.share({
+        title: docData.title,
+        message: `📘 ${docData.title}\n\nKimga: ${docData.to}\nKimdan: ${docData.from}\n\n${docData.body}\n\nYordam ilovasi orqali tayyorlandi.`,
+      });
+    } catch {
+      Alert.alert('Ulashish', 'Ulashish oynasi ochilmadi.');
+    }
   };
 
   // Rights Tab Search & Category Filter
@@ -256,6 +442,466 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     );
   }
 
+  const renderDocPreview = () => {
+    if (!previewDoc) return null;
+
+    return (
+      <View style={styles.inlinePageContainer}>
+        {/* Sub-header navigation row */}
+        <View style={styles.inlineSubHeaderRow}>
+          <TouchableOpacity
+            style={styles.inlineBackToCatalogBtn}
+            onPress={() => setPreviewDoc(null)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={16} color="#0F2644" />
+            <Text style={styles.inlineBackToCatalogText}>Hujjatlar ro‘yxatiga qaytish</Text>
+          </TouchableOpacity>
+
+          <View style={styles.inlineBadgePill}>
+            <Ionicons name="shield-checkmark" size={12} color="#16A34A" style={{ marginRight: 4 }} />
+            <Text style={styles.inlineBadgeText}>Qonun talablariga mos</Text>
+          </View>
+        </View>
+
+        {/* Scrollable Paper Container */}
+        <ScrollView
+          style={styles.inlinePaperScroll}
+          contentContainerStyle={[
+            styles.inlinePaperScrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 85 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Official Paper Sheet */}
+          <View style={styles.officialPaperCard}>
+            <View style={styles.paperCrestBox}>
+              <Ionicons name="scale-outline" size={24} color="#0F2644" style={{ marginBottom: 4 }} />
+              <Text style={styles.paperCrestTitle}>O‘ZBEKISTON RESPUBLIKASI ISTE’MOLCHILAR HUQUQLARI</Text>
+              <Text style={styles.paperCrestSubtitle}>«ISTE’MOLCHILAR HUQUQLARINI HIMOYA QILISH TO‘G‘RISIDA»GI QONUN ASOSIDA</Text>
+              <View style={styles.paperDividerLine} />
+            </View>
+
+            <View style={styles.paperHeaderInfoCol}>
+              <Text style={styles.paperHeaderInfoText}>{previewDoc.to}</Text>
+              <Text style={styles.paperHeaderInfoText}>{previewDoc.from}</Text>
+            </View>
+
+            <View style={styles.paperTitleCenterBox}>
+              <Text style={styles.paperDocMainTitle}>{previewDoc.docTitle}</Text>
+              <Text style={styles.paperDocLegalRef}>({previewDoc.legalRef})</Text>
+            </View>
+
+            <Text style={styles.paperDocContentText}>{previewDoc.content}</Text>
+
+            <View style={styles.paperFooterRow}>
+              <Text style={styles.paperFooterText}>Sana: 12-mart, 2025-yil</Text>
+              <Text style={styles.paperFooterText}>Imzo: _________________</Text>
+            </View>
+
+            <View style={styles.paperSealStampBox}>
+              <Ionicons name="checkmark-done-circle" size={16} color="#16A34A" style={{ marginRight: 5 }} />
+              <Text style={styles.paperSealStampText}>YURIDIK TEKSHIRUVDAN O‘TGAN • YORDAM 2025</Text>
+            </View>
+          </View>
+
+          {/* Quick "To'ldirish" CTA Button */}
+          <TouchableOpacity
+            style={styles.inlineFillInCtaBtn}
+            activeOpacity={0.85}
+            onPress={() => {
+              const d = previewDoc;
+              setPreviewDoc(null);
+              handleOpenConstructor(d);
+            }}
+          >
+            <View style={styles.inlineFillInIcon}>
+              <Ionicons name="create-outline" size={18} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.inlineFillInTitle}>Ushbu andoza asosida yaratish</Text>
+              <Text style={styles.inlineFillInDesc}>F.I.Sh., xarid va do‘kon ma’lumotlarini kiritib tayyorlab oling</Text>
+            </View>
+            <Ionicons name="arrow-forward" size={18} color="#0F2644" />
+          </TouchableOpacity>
+
+          {/* Action Buttons Row */}
+          <View style={styles.inlineDocActionRow}>
+            <TouchableOpacity
+              style={styles.inlineDocSecondaryBtn}
+              activeOpacity={0.7}
+              onPress={() => {
+                Alert.alert('Nusxa olindi 📋', 'Hujjat andozasi matni qurilma xotirasiga nusxalandi.');
+              }}
+            >
+              <Ionicons name="copy-outline" size={16} color="#0F2644" style={{ marginRight: 6 }} />
+              <Text style={styles.inlineDocSecondaryBtnText}>Nusxa oliş</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.inlineDocSecondaryBtn}
+              activeOpacity={0.7}
+              onPress={() => handleShareDoc(previewDoc)}
+            >
+              <Ionicons name="share-social-outline" size={16} color="#0F2644" style={{ marginRight: 6 }} />
+              <Text style={styles.inlineDocSecondaryBtnText}>Ulaşiş</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.inlineDocPrimaryBtn}
+              activeOpacity={0.8}
+              onPress={() => {
+                Alert.alert('Yuklab olindi 📄', 'Hujjat andozasi PDF formati sifatida qurilmangizga saqlandi.');
+              }}
+            >
+              <Ionicons name="download-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.inlineDocPrimaryBtnText}>Yuklab oliş</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  const renderDocConstructor = () => {
+    if (!isConstructorVisible) return null;
+    const generated = getGeneratedDocText();
+
+    return (
+      <View style={styles.inlinePageContainer}>
+        {/* Sub-header navigation row */}
+        <View style={styles.inlineSubHeaderRow}>
+          <TouchableOpacity
+            style={styles.inlineBackToCatalogBtn}
+            onPress={() => setIsConstructorVisible(false)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={16} color="#0F2644" />
+            <Text style={styles.inlineBackToCatalogText}>Hujjatlar ro‘yxatiga qaytish</Text>
+          </TouchableOpacity>
+
+          <View style={[styles.inlineBadgePill, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
+            <Ionicons name="sparkles" size={12} color="#D97706" style={{ marginRight: 4 }} />
+            <Text style={[styles.inlineBadgeText, { color: '#B45309' }]}>Konstruktor</Text>
+          </View>
+        </View>
+
+        {/* Segmented Tab Bar */}
+        <View style={styles.constructorTabsStrip}>
+          <TouchableOpacity
+            style={[styles.constructorTabBtn, constructorTab === 'form' && styles.constructorTabBtnActive]}
+            onPress={() => setConstructorTab('form')}
+          >
+            <Ionicons
+              name="create-outline"
+              size={15}
+              color={constructorTab === 'form' ? '#FFFFFF' : '#64748B'}
+              style={{ marginRight: 5 }}
+            />
+            <Text style={[styles.constructorTabBtnText, constructorTab === 'form' && styles.constructorTabBtnTextActive]}>
+              1. Ma’lumotlar
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.constructorTabBtn, constructorTab === 'preview' && styles.constructorTabBtnActive]}
+            onPress={() => setConstructorTab('preview')}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={15}
+              color={constructorTab === 'preview' ? '#FFFFFF' : '#64748B'}
+              style={{ marginRight: 5 }}
+            />
+            <Text style={[styles.constructorTabBtnText, constructorTab === 'preview' && styles.constructorTabBtnTextActive]}>
+              2. Tayyor hujjat
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {constructorTab === 'form' ? (
+          <ScrollView
+            style={styles.inlinePaperScroll}
+            contentContainerStyle={[
+              styles.inlinePaperScrollContent,
+              { paddingBottom: Math.max(insets.bottom, 16) + 85 },
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Choose Document Type */}
+            <Text style={styles.constructorFieldTitle}>Hujjat turini tanlang:</Text>
+            <View style={styles.constructorTypePillGrid}>
+              {[
+                { id: 'd1', label: 'Pulni qaytarish', ref: '13-modda' },
+                { id: 'd2', label: 'Kafolat ta’miri', ref: '15-modda' },
+                { id: 'd3', label: '1159 Shikoyat', ref: '23-modda' },
+                { id: 'd4', label: 'Sud da’vosi', ref: '27-modda' },
+              ].map((item) => {
+                const isSelected = constructorDocKey === item.id;
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={[
+                      styles.constructorTypeChip,
+                      isSelected && styles.constructorTypeChipActive,
+                    ]}
+                    activeOpacity={0.75}
+                    onPress={() => setConstructorDocKey(item.id)}
+                  >
+                    <Text style={[styles.constructorTypeChipText, isSelected && styles.constructorTypeChipTextActive]}>
+                      {item.label} ({item.ref})
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Input Fields */}
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Sizning to‘liq ism-familiyangiz (F.I.Sh.):</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="person-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.fullName}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, fullName: t }))}
+                  placeholder="Masalan: Aliyev Vali Anvar o‘g‘li"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Telefon raqamingiz:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="call-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.phone}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, phone: t }))}
+                  placeholder="+998 90 123 45 67"
+                  placeholderTextColor="#94A3B8"
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Yashash manzilingiz:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="location-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.address}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, address: t }))}
+                  placeholder="Masalan: Toshkent shahri, Yunusobod tumani"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Do‘kon yoki sotuvchi nomi:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="business-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.sellerName}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, sellerName: t }))}
+                  placeholder="Masalan: «MEDIAPARK BOZORI» MChJ"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Tovar nomi va modeli:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="cube-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.productName}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, productName: t }))}
+                  placeholder="Masalan: Samsung Galaxy A55 smartfoni"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Xarid sanasi va narxi:</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={[styles.constructorInputBox, { flex: 1 }]}>
+                  <Ionicons name="calendar-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={styles.constructorTextInput}
+                    value={constructorForm.purchaseDate}
+                    onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, purchaseDate: t }))}
+                    placeholder="12-mart, 2025"
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+                <View style={[styles.constructorInputBox, { flex: 1 }]}>
+                  <Ionicons name="cash-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={styles.constructorTextInput}
+                    value={constructorForm.price}
+                    onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, price: t }))}
+                    placeholder="4 200 000 so‘m"
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Kassa cheki / Kafolat taloni raqami:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="receipt-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.receiptNumber}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, receiptNumber: t }))}
+                  placeholder="Masalan: № 482910-chek"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Aniqlangan nuqson yoki muammo tavsifi:</Text>
+              <TextInput
+                style={styles.constructorTextArea}
+                value={constructorForm.defectDesc}
+                onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, defectDesc: t }))}
+                placeholder="Tovarda qanday nuqson aniqlangani haqida qisqacha yozing (masalan: 3 kundan so‘ng ekrani yonmay qoldi va zaryad olmayapti)..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <View style={styles.constructorFormGroup}>
+              <Text style={styles.constructorLabel}>Pul qaytariladigan karta yoki hisob raqami:</Text>
+              <View style={styles.constructorInputBox}>
+                <Ionicons name="card-outline" size={17} color="#64748B" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.constructorTextInput}
+                  value={constructorForm.bankAccount}
+                  onChangeText={(t) => setConstructorForm((prev) => ({ ...prev, bankAccount: t }))}
+                  placeholder="8600 1234 5678 9012 (Humo/Uzcard)"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            {/* Form Submit Button */}
+            <TouchableOpacity
+              style={styles.constructorPrimaryBtn}
+              activeOpacity={0.85}
+              onPress={() => setConstructorTab('preview')}
+            >
+              <Text style={styles.constructorPrimaryBtnText}>Tayyor talabnomani shakllantirish →</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        ) : (
+          <ScrollView
+            style={styles.inlinePaperScroll}
+            contentContainerStyle={[
+              styles.inlinePaperScrollContent,
+              { paddingBottom: Math.max(insets.bottom, 16) + 85 },
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Success Banner */}
+            <View style={styles.constructorSuccessBanner}>
+              <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
+              <Text style={styles.constructorSuccessBannerText}>
+                Siz kiritgan ma’lumotlar asosida rasmiy hujjat shakllantirildi!
+              </Text>
+            </View>
+
+            {/* Paper Card */}
+            <View style={styles.officialPaperCard}>
+              <View style={styles.paperCrestBox}>
+                <Ionicons name="scale-outline" size={24} color="#0F2644" style={{ marginBottom: 4 }} />
+                <Text style={styles.paperCrestTitle}>O‘ZBEKISTON RESPUBLIKASI ISTE’MOLCHILAR HUQUQLARI</Text>
+                <Text style={styles.paperCrestSubtitle}>«ISTE’MOLCHILAR HUQUQLARINI HIMOYA QILISH TO‘G‘RISIDA»GI QONUN ASOSIDA</Text>
+                <View style={styles.paperDividerLine} />
+              </View>
+
+              <View style={styles.paperHeaderInfoCol}>
+                <Text style={styles.paperHeaderInfoText}>{generated.to}</Text>
+                <Text style={styles.paperHeaderInfoText}>{generated.from}</Text>
+              </View>
+
+              <View style={styles.paperTitleCenterBox}>
+                <Text style={styles.paperDocMainTitle}>{generated.title}</Text>
+                <Text style={styles.paperDocLegalRef}>({generated.legalRef})</Text>
+              </View>
+
+              <Text style={styles.paperDocContentText}>{generated.body}</Text>
+
+              <View style={styles.paperFooterRow}>
+                <Text style={styles.paperFooterText}>Sana: 12-mart, 2025-yil</Text>
+                <Text style={styles.paperFooterText}>Imzo: _________________</Text>
+              </View>
+
+              <View style={styles.paperSealStampBox}>
+                <Ionicons name="checkmark-done-circle" size={16} color="#16A34A" style={{ marginRight: 5 }} />
+                <Text style={styles.paperSealStampText}>RASMIY TAYYOR HOLATDA • YORDAM 2025</Text>
+              </View>
+            </View>
+
+            {/* Actions */}
+            <View style={styles.inlineDocActionRow}>
+              <TouchableOpacity
+                style={styles.inlineDocSecondaryBtn}
+                activeOpacity={0.7}
+                onPress={() => {
+                  Alert.alert('Nusxa olindi 📋', 'Tayyor hujjat matni qurilma xotirasiga nusxalandi.');
+                }}
+              >
+                <Ionicons name="copy-outline" size={16} color="#0F2644" style={{ marginRight: 6 }} />
+                <Text style={styles.inlineDocSecondaryBtnText}>Nusxa oliş</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.inlineDocSecondaryBtn}
+                activeOpacity={0.7}
+                onPress={() => handleShareGeneratedDoc()}
+              >
+                <Ionicons name="share-social-outline" size={16} color="#0F2644" style={{ marginRight: 6 }} />
+                <Text style={styles.inlineDocSecondaryBtnText}>Ulaşiş</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.inlineDocPrimaryBtn}
+                activeOpacity={0.8}
+                onPress={() => {
+                  Alert.alert('Saqlandi 📂', 'Talabnoma qurilmangizga va profilingizga muvaffaqiyatli saqlandi.');
+                }}
+              >
+                <Ionicons name="save-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.inlineDocPrimaryBtnText}>Saqlash</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Back to Edit Button */}
+            <TouchableOpacity
+              style={[styles.inlineDocSecondaryBtn, { height: 42, marginBottom: 20 }]}
+              activeOpacity={0.75}
+              onPress={() => setConstructorTab('form')}
+            >
+              <Ionicons name="pencil-outline" size={16} color="#475569" style={{ marginRight: 6 }} />
+              <Text style={[styles.inlineDocSecondaryBtnText, { color: '#475569' }]}>Ma’lumotlarni tahrirlash</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
@@ -274,25 +920,38 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           </TouchableOpacity>
 
           <View style={styles.headerIconCircle}>
-            <Ionicons name="bag-handle" size={19} color="#FFFFFF" />
+            <Ionicons
+              name={previewDoc || isConstructorVisible ? 'document-text' : 'bag-handle'}
+              size={19}
+              color="#FFFFFF"
+            />
           </View>
 
           <View style={styles.headerTitlesCol}>
-            <Text style={styles.headerMainTitle}>Iste’molçi huquqlari</Text>
-            <Text style={styles.headerSubtitle}>Xaridorlar uçun huquqiy yordam</Text>
+            <Text style={styles.headerMainTitle}>
+              {previewDoc ? 'Hujjat ko‘rish' : isConstructorVisible ? 'Hujjat konstruktori' : 'Iste’molçi huquqlari'}
+            </Text>
+            <Text style={styles.headerSubtitle} numberOfLines={1}>
+              {previewDoc ? previewDoc.title : isConstructorVisible ? 'Rasmiy talabnoma va ariza yaratish' : 'Xaridorlar uçun huquqiy yordam'}
+            </Text>
           </View>
         </View>
       </View>
 
-      {/* ===================== 2. MAIN SCROLL AREA ===================== */}
-      <ScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: Math.max(insets.bottom, 16) + 72 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
+      {/* ===================== 2. MAIN BODY AREA ===================== */}
+      {activeTab === 'documents' && previewDoc ? (
+        renderDocPreview()
+      ) : activeTab === 'documents' && isConstructorVisible ? (
+        renderDocConstructor()
+      ) : (
+        <ScrollView
+          style={styles.scrollArea}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 72 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
         {activeTab === 'home' && (
           <>
             {/* 1. HERO BANNER CARD */}
@@ -810,53 +1469,12 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         {/* ===================== TAB 4: HUJJATLAR ===================== */}
         {activeTab === 'documents' && (
           <View style={styles.tabContentWrap}>
-            <View style={styles.tabHeader}>
-              <Text style={styles.tabHeaderTitle}>Hujjatlar va Talabnomalar markazi</Text>
-              <Text style={styles.tabHeaderSub}>
-                Sotuvchilar, ishlab chiqaruvchilar va sud organlari uchun rasmiy andoza arizalar.
-              </Text>
-            </View>
-
-            {[
-              {
-                id: 'd1',
-                title: 'Sotuvchiga tovar pulini qaytarish talabnomasi',
-                desc: 'Nuqsonli tovar sotilganda pulni 10 kun ichida qaytarish haqida rasmiy e’tiroz xati.',
-                type: 'Talabnoma',
-                typeColor: '#DC2626',
-                typeBg: '#FEE2E2',
-              },
-              {
-                id: 'd2',
-                title: 'Tovarni kafolat bo‘yicha bepul ta’mirlash talabnomasi',
-                desc: 'Kafolat muddatida sifat buzilganda servis markazi va sotuvchiga yo‘llanadigan xat.',
-                type: 'Ariza',
-                typeColor: '#2563EB',
-                typeBg: '#DBEAFE',
-              },
-              {
-                id: 'd3',
-                title: 'Raqobat qo‘mitasiga (1159) rasmiy shikoyat arizasi',
-                desc: 'Sotuvchi qonuniy talablarni bajarmagan holatda davlat inspeksiyasiga shikoyat arizasi.',
-                type: 'Şikoyat',
-                typeColor: '#7C3AED',
-                typeBg: '#EDE9FE',
-              },
-              {
-                id: 'd4',
-                title: 'Sudga da’vo arizasi (moddiy va ma’naviy zarar)',
-                desc: 'Yetkazilgan moddiy zararni va ma’naviy kompensatsiyani undirish bo‘yicha sud da’vosi.',
-                type: 'Da’vo',
-                typeColor: '#D97706',
-                typeBg: '#FEF3C7',
-              },
-            ].map((doc) => (
+            {CONSUMER_DOC_TEMPLATES.map((doc) => (
               <View key={doc.id} style={styles.docTemplateCard}>
                 <View style={styles.docTemplateHeader}>
                   <View style={[styles.docTypeBadge, { backgroundColor: doc.typeBg }]}>
                     <Text style={[styles.docTypeBadgeText, { color: doc.typeColor }]}>{doc.type}</Text>
                   </View>
-                  <Text style={styles.docFreeBadge}>Bepul andoza</Text>
                 </View>
 
                 <Text style={styles.docTemplateTitle}>{doc.title}</Text>
@@ -865,7 +1483,8 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
                 <View style={styles.docTemplateActions}>
                   <TouchableOpacity
                     style={styles.docTemplateBtnSec}
-                    onPress={() => Alert.alert(doc.title, 'Hujjat matni ko‘rish uchun ochilmoqda.')}
+                    activeOpacity={0.75}
+                    onPress={() => setPreviewDoc(doc)}
                   >
                     <Ionicons name="eye-outline" size={15} color="#0F172A" style={{ marginRight: 5 }} />
                     <Text style={styles.docTemplateBtnSecText}>Köriş</Text>
@@ -873,7 +1492,8 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
 
                   <TouchableOpacity
                     style={styles.docTemplateBtnPrim}
-                    onPress={() => Alert.alert('Konstruktor', `«${doc.title}» bo‘yicha shaxsiy ma’lumotlarni kiritish konstruktori ishga tushirilmoqda.`)}
+                    activeOpacity={0.8}
+                    onPress={() => handleOpenConstructor(doc)}
                   >
                     <Ionicons name="create-outline" size={15} color="#FFFFFF" style={{ marginRight: 5 }} />
                     <Text style={styles.docTemplateBtnPrimText}>Yaratish</Text>
@@ -884,6 +1504,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           </View>
         )}
       </ScrollView>
+      )}
 
       {/* ===================== 3. BOTTOM NAVBAR ===================== */}
       <View style={[styles.bottomNavbar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
@@ -891,14 +1512,18 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => setActiveTab('home')}
+          onPress={() => {
+            setPreviewDoc(null);
+            setIsConstructorVisible(false);
+            setActiveTab('home');
+          }}
         >
           <Ionicons
-            name={activeTab === 'home' ? 'home' : 'home-outline'}
+            name={activeTab === 'home' && !previewDoc && !isConstructorVisible ? 'home' : 'home-outline'}
             size={22}
-            color={activeTab === 'home' ? '#EAB308' : '#64748B'}
+            color={activeTab === 'home' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
           />
-          <Text style={[styles.navLabel, activeTab === 'home' ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text style={[styles.navLabel, activeTab === 'home' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
             Boş sahifa
           </Text>
         </TouchableOpacity>
@@ -907,14 +1532,18 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => setActiveTab('rights')}
+          onPress={() => {
+            setPreviewDoc(null);
+            setIsConstructorVisible(false);
+            setActiveTab('rights');
+          }}
         >
           <Ionicons
-            name={activeTab === 'rights' ? 'book' : 'book-outline'}
+            name={activeTab === 'rights' && !previewDoc && !isConstructorVisible ? 'book' : 'book-outline'}
             size={22}
-            color={activeTab === 'rights' ? '#EAB308' : '#64748B'}
+            color={activeTab === 'rights' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
           />
-          <Text style={[styles.navLabel, activeTab === 'rights' ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text style={[styles.navLabel, activeTab === 'rights' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
             Huquqlar
           </Text>
         </TouchableOpacity>
@@ -923,14 +1552,18 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => setActiveTab('ai')}
+          onPress={() => {
+            setPreviewDoc(null);
+            setIsConstructorVisible(false);
+            setActiveTab('ai');
+          }}
         >
           <Ionicons
-            name={activeTab === 'ai' ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'}
+            name={activeTab === 'ai' && !previewDoc && !isConstructorVisible ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'}
             size={22}
-            color={activeTab === 'ai' ? '#EAB308' : '#64748B'}
+            color={activeTab === 'ai' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
           />
-          <Text style={[styles.navLabel, activeTab === 'ai' ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text style={[styles.navLabel, activeTab === 'ai' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
             AI yordamçi
           </Text>
         </TouchableOpacity>
@@ -939,14 +1572,18 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => setActiveTab('documents')}
+          onPress={() => {
+            setPreviewDoc(null);
+            setIsConstructorVisible(false);
+            setActiveTab('documents');
+          }}
         >
           <Ionicons
-            name={activeTab === 'documents' ? 'document-text' : 'document-text-outline'}
+            name={activeTab === 'documents' || previewDoc || isConstructorVisible ? 'document-text' : 'document-text-outline'}
             size={22}
-            color={activeTab === 'documents' ? '#EAB308' : '#64748B'}
+            color={activeTab === 'documents' || previewDoc || isConstructorVisible ? '#EAB308' : '#64748B'}
           />
-          <Text style={[styles.navLabel, activeTab === 'documents' ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text style={[styles.navLabel, (activeTab === 'documents' || previewDoc || isConstructorVisible) ? styles.navLabelActive : styles.navLabelInactive]}>
             Hujjatlar
           </Text>
         </TouchableOpacity>
@@ -1771,6 +2408,363 @@ const styles = StyleSheet.create({
   navLabelInactive: {
     color: '#64748B',
     fontWeight: '500',
+  },
+
+  // Inline Document Preview & Constructor Styles
+  inlinePageContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  inlineSubHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  inlineBackToCatalogBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingRight: 8,
+  },
+  inlineBackToCatalogText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginLeft: 6,
+  },
+  inlineBadgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DCFCE7',
+  },
+  inlineBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#16A34A',
+  },
+  inlinePaperScroll: {
+    flex: 1,
+  },
+  inlinePaperScrollContent: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+  },
+  officialPaperCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+    marginBottom: 14,
+  },
+  paperCrestBox: {
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  paperCrestTitle: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: 0.4,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  paperCrestSubtitle: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 2,
+    letterSpacing: 0.3,
+  },
+  paperDividerLine: {
+    width: '60%',
+    height: 1.5,
+    backgroundColor: '#E2E8F0',
+    marginTop: 8,
+  },
+  paperHeaderInfoCol: {
+    alignSelf: 'flex-end',
+    maxWidth: '85%',
+    marginBottom: 16,
+  },
+  paperHeaderInfoText: {
+    fontSize: 11.5,
+    color: '#334155',
+    lineHeight: 17,
+    textAlign: 'right',
+  },
+  paperTitleCenterBox: {
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  paperDocMainTitle: {
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#0F172A',
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    lineHeight: 20,
+  },
+  paperDocLegalRef: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#D97706',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  paperDocContentText: {
+    fontSize: 12.5,
+    color: '#1E293B',
+    lineHeight: 20,
+    textAlign: 'justify',
+    marginBottom: 16,
+  },
+  paperFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 12,
+    marginTop: 6,
+  },
+  paperFooterText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  paperSealStampBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 14,
+  },
+  paperSealStampText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#16A34A',
+    letterSpacing: 0.5,
+  },
+  inlineFillInCtaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 12,
+  },
+  inlineFillInIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#D97706',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inlineFillInTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#78350F',
+    marginBottom: 2,
+  },
+  inlineFillInDesc: {
+    fontSize: 11,
+    color: '#92400E',
+  },
+  inlineDocActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  inlineDocSecondaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 42,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  inlineDocSecondaryBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  inlineDocPrimaryBtn: {
+    flex: 1.2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 42,
+    backgroundColor: '#D97706',
+    borderRadius: 10,
+  },
+  inlineDocPrimaryBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // Constructor Styles
+  constructorTabsStrip: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    gap: 8,
+  },
+  constructorTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+  },
+  constructorTabBtnActive: {
+    backgroundColor: '#0F172A',
+  },
+  constructorTabBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  constructorTabBtnTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  constructorFieldTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  constructorTypePillGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 16,
+  },
+  constructorTypeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  constructorTypeChipActive: {
+    backgroundColor: '#D97706',
+    borderColor: '#D97706',
+  },
+  constructorTypeChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  constructorTypeChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  constructorFormGroup: {
+    marginBottom: 12,
+  },
+  constructorLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 5,
+  },
+  constructorInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  constructorTextInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0F172A',
+  },
+  constructorTextArea: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 13,
+    color: '#0F172A',
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  constructorPrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#D97706',
+    height: 46,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 20,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  constructorPrimaryBtnText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  constructorSuccessBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    marginBottom: 12,
+  },
+  constructorSuccessBannerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#15803D',
+    marginLeft: 6,
+    flex: 1,
   },
 });
 

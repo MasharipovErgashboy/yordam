@@ -39,7 +39,7 @@ export default function HomeScreen() {
       <Pressable onPress={() => openLawyer(lawyers[4])} style={({ pressed }) => [styles.hero, { backgroundColor: palette.hero }, pressed && styles.pressed]}>
         <View style={styles.heroOrb} /><View style={styles.heroTop}><View style={styles.liveDot} /><Text style={styles.heroLabel}>24/7 TEZKOR YORDAM</Text><Sparkles size={14} color="#FFD98A" /></View>
         <Text style={styles.heroTitle}>Huquqiy savolingiz{ '\n' }bormi?</Text><Text style={styles.heroCopy}>Yurist bilan maslahat vaqtini belgilang</Text>
-        <View style={styles.heroLawyer}><Avatar initials="NK" color="#4B83A6" size={32} /><View><Text style={styles.heroLawyerName}>Nodirbek Karimov</Text><Text style={styles.heroLawyerStatus}>● Onlayn yurist</Text></View><View style={styles.heroCta}><Text style={styles.heroCtaText}>Maslahat olish</Text><ArrowRight size={14} color={colors.primary} /></View></View>
+        <View style={styles.heroLawyer}><Avatar initials="NK" color="#4B83A6" size={36} /><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.heroLawyerName} numberOfLines={1}>Nodirbek Karimov</Text><Text style={styles.heroLawyerStatus} numberOfLines={1}>● Onlayn yurist</Text></View><View style={styles.heroCta}><Text style={styles.heroCtaText} numberOfLines={1}>Maslahat olish</Text><ArrowRight size={14} color={colors.primary} /></View></View>
         <View style={styles.heroFooter}><Bell size={12} color="#D4E7F7" /><Text style={styles.heroFooterText}>Bugun, 15:30</Text><View style={styles.separator} /><Text style={styles.heroFooterText}>Javob 5 daqiqada</Text></View>
       </Pressable>
 
@@ -56,7 +56,7 @@ export default function HomeScreen() {
       <View style={styles.list}>{featuredLawyers.map((lawyer) => <LawyerCard key={lawyer.id} lawyer={lawyer} compact onPress={() => openLawyer(lawyer)} />)}</View>
 
       <SectionTitle title="Ommabop xizmatlar" action="Ko‘rish" onAction={() => router.push('/document')} />
-      <View style={styles.list}>{popularServices.map((service) => { const Icon = service.icon; return <Pressable key={service.title} style={styles.serviceCard} onPress={() => service.lawyerId ? router.push({ pathname: '/lawyer/[id]', params: { id: service.lawyerId } }) : router.push('/document')}><View style={styles.serviceIcon}><Icon size={17} color={colors.primary} /></View><View style={{ flex: 1 }}><Text style={styles.serviceTitle}>{service.title}</Text><Text style={styles.serviceSubtitle}>{service.subtitle}</Text></View><View style={styles.servicePrice}><Text style={styles.servicePriceText}>{formatMoney(service.price)}</Text><ArrowRight size={13} color={colors.muted} /></View></Pressable> })}</View>
+      <View style={styles.list}>{popularServices.map((service) => { const Icon = service.icon; return <Pressable key={service.title} style={styles.serviceCard} onPress={() => service.lawyerId ? router.push({ pathname: '/lawyer/[id]', params: { id: service.lawyerId } }) : router.push('/document')}><View style={styles.serviceIcon}><Icon size={18} color={colors.primary} /></View><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.serviceTitle}>{service.title}</Text><Text style={styles.serviceSubtitle}>{service.subtitle}</Text></View><View style={styles.servicePrice}><Text style={styles.servicePriceText}>{formatMoney(service.price)}</Text><ArrowRight size={13} color={colors.muted} /></View></Pressable> })}</View>
       <View style={[styles.demoNote, { backgroundColor: palette.soft }]}><ShieldCheck size={15} color={colors.primary} /><Text style={styles.demoText}>Demo yuristlar va narxlar — haqiqiy tekshirilgan xizmat emas.</Text></View>
     </Page>
   </View>
@@ -64,41 +64,41 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  welcome: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 5 },
-  kicker: { color: '#8797A8', fontFamily: fonts.semibold, fontSize: 8, letterSpacing: 0.8 },
-  greeting: { marginTop: 6, color: colors.neutral, fontFamily: fonts.heading, fontSize: 22, lineHeight: 26 },
-  greetingName: { color: colors.primary, fontFamily: fonts.headingExtra, fontSize: 23, lineHeight: 27 },
-  welcomeText: { marginTop: 5, maxWidth: 250, color: colors.muted, fontFamily: fonts.body, fontSize: 10, lineHeight: 15 },
-  welcomeIcon: { width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
-  hero: { position: 'relative', overflow: 'hidden', padding: 15, paddingBottom: 0, borderRadius: radius.xl, backgroundColor: colors.primary, gap: 7 },
+  welcome: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 5, gap: 10 },
+  kicker: { color: '#8797A8', fontFamily: fonts.semibold, fontSize: 11, letterSpacing: 0.7 },
+  greeting: { marginTop: 6, color: colors.neutral, fontFamily: fonts.heading, fontSize: 22, lineHeight: 28 },
+  greetingName: { color: colors.primary, fontFamily: fonts.headingExtra, fontSize: 24, lineHeight: 30 },
+  welcomeText: { marginTop: 5, maxWidth: 270, color: colors.muted, fontFamily: fonts.body, fontSize: 13, lineHeight: 19 },
+  welcomeIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
+  hero: { position: 'relative', overflow: 'hidden', padding: 16, paddingBottom: 0, borderRadius: radius.xl, backgroundColor: colors.primary, gap: 8 },
   heroOrb: { position: 'absolute', top: -50, right: -25, width: 170, height: 170, borderRadius: 90, borderWidth: 1, borderColor: '#FFFFFF20' },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveDot: { width: 7, height: 7, borderRadius: 5, backgroundColor: colors.tertiary },
-  heroLabel: { flex: 1, color: '#C6DFF1', fontFamily: fonts.semibold, fontSize: 8, letterSpacing: 0.7 },
-  heroTitle: { marginTop: 3, color: '#fff', fontFamily: fonts.headingExtra, fontSize: 19, lineHeight: 23 },
-  heroCopy: { color: '#D5E7F5', fontFamily: fonts.body, fontSize: 9 },
-  heroLawyer: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 5, marginBottom: 11 },
-  heroLawyerName: { color: '#fff', fontFamily: fonts.semibold, fontSize: 9 },
-  heroLawyerStatus: { marginTop: 2, color: '#B9D7EC', fontFamily: fonts.body, fontSize: 7 },
-  heroCta: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 9, backgroundColor: '#fff' },
-  heroCtaText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 8 },
-  heroFooter: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 29, marginHorizontal: -15, paddingHorizontal: 15, backgroundColor: '#FFFFFF12' },
-  heroFooterText: { color: '#D3E5F3', fontFamily: fonts.body, fontSize: 7 },
-  separator: { width: 1, height: 10, backgroundColor: '#FFFFFF50' },
-  categoryRow: { gap: 8, paddingRight: 20 },
-  categoryTile: { width: 76, minHeight: 89, alignItems: 'center', padding: 9, borderRadius: 13, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff' },
+  heroLabel: { flex: 1, color: '#C6DFF1', fontFamily: fonts.semibold, fontSize: 11, letterSpacing: 0.6 },
+  heroTitle: { marginTop: 3, color: '#fff', fontFamily: fonts.headingExtra, fontSize: 21, lineHeight: 27 },
+  heroCopy: { color: '#D5E7F5', fontFamily: fonts.body, fontSize: 13, lineHeight: 18 },
+  heroLawyer: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 6, marginBottom: 12 },
+  heroLawyerName: { color: '#fff', fontFamily: fonts.semibold, fontSize: 13 },
+  heroLawyerStatus: { marginTop: 2, color: '#B9D7EC', fontFamily: fonts.body, fontSize: 11 },
+  heroCta: { marginLeft: 'auto', flexShrink: 0, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 10, backgroundColor: '#fff' },
+  heroCtaText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 12 },
+  heroFooter: { flexDirection: 'row', alignItems: 'center', gap: 7, minHeight: 34, paddingVertical: 8, marginHorizontal: -16, paddingHorizontal: 16, backgroundColor: '#FFFFFF12' },
+  heroFooterText: { color: '#D3E5F3', fontFamily: fonts.body, fontSize: 11 },
+  separator: { width: 1, height: 11, backgroundColor: '#FFFFFF50' },
+  categoryRow: { gap: 9, paddingRight: 20 },
+  categoryTile: { width: 98, minHeight: 102, alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff' },
   categorySelected: { borderColor: '#9CC1DF', backgroundColor: '#F1F8FD' },
-  categoryIcon: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
-  categoryName: { color: '#30465C', fontFamily: fonts.semibold, fontSize: 8 },
-  categoryCount: { color: '#96A2AE', fontFamily: fonts.body, fontSize: 7, marginTop: 3 },
-  list: { gap: 8 },
-  serviceCard: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 10, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
-  serviceIcon: { width: 35, height: 35, borderRadius: 10, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  serviceTitle: { color: '#2F455C', fontFamily: fonts.semibold, fontSize: 9 },
-  serviceSubtitle: { color: colors.muted, fontFamily: fonts.body, fontSize: 7, marginTop: 3 },
-  servicePrice: { alignItems: 'flex-end', gap: 4 },
-  servicePriceText: { color: colors.primary, fontFamily: fonts.bold, fontSize: 8 },
-  demoNote: { flexDirection: 'row', alignItems: 'center', gap: 7, padding: 10, borderRadius: 10, backgroundColor: '#ECF2F8' },
-  demoText: { flex: 1, color: '#718295', fontFamily: fonts.body, fontSize: 8, lineHeight: 13 },
+  categoryIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 7 },
+  categoryName: { color: '#30465C', fontFamily: fonts.semibold, fontSize: 12, textAlign: 'center' },
+  categoryCount: { color: '#96A2AE', fontFamily: fonts.body, fontSize: 11, marginTop: 3, textAlign: 'center' },
+  list: { gap: 9 },
+  serviceCard: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, backgroundColor: '#fff' },
+  serviceIcon: { width: 38, height: 38, borderRadius: 11, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  serviceTitle: { color: '#2F455C', fontFamily: fonts.semibold, fontSize: 13.5, lineHeight: 18 },
+  serviceSubtitle: { color: colors.muted, fontFamily: fonts.body, fontSize: 11.5, marginTop: 3 },
+  servicePrice: { alignItems: 'flex-end', gap: 4, flexShrink: 0 },
+  servicePriceText: { color: colors.primary, fontFamily: fonts.bold, fontSize: 12.5 },
+  demoNote: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 11, borderRadius: 10, backgroundColor: '#ECF2F8' },
+  demoText: { flex: 1, color: '#718295', fontFamily: fonts.body, fontSize: 12, lineHeight: 17 },
   pressed: { opacity: 0.86 },
 })

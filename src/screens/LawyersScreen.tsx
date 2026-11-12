@@ -48,12 +48,12 @@ export default function LawyersScreen() {
   }
 
   return <View style={styles.screen}><Header title="Yuristlar" subtitle="Mutaxassislar katalogi" onProfile={() => router.push('/(tabs)/profile')} /><Page>
-    <View style={styles.titleRow}><View><Text style={styles.heading}>Yuristlar</Text><Text style={styles.subheading}>Sizga mos mutaxassisni toping</Text></View><Text style={styles.total}>{results.length} mutaxassis</Text></View>
+    <View style={styles.titleRow}><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.heading}>Yuristlar</Text><Text style={styles.subheading}>Sizga mos mutaxassisni toping</Text></View><Text style={styles.total}>{results.length} mutaxassis</Text></View>
     <SearchField value={query} onChangeText={setQuery} placeholder="Ism yoki mutaxassislik bo‘yicha qidiring..." />
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
       {['Barchasi', 'Oila huquqi', 'Biznes va soliq', 'Fuqarolik', 'Jinoyat huquqi', 'Uy-joy masalalari'].map((item) => <Pill key={item} label={item === 'Barchasi' ? 'Barchasi (142)' : item} selected={category === item} onPress={() => setCategory(item)} />)}
     </ScrollView>
-    <View style={styles.filtersRow}><Pressable onPress={() => setFiltersVisible(true)} style={styles.filterButton}><Filter size={13} color={colors.primary} /><Text style={styles.filterText}>Filtrlar</Text><View style={styles.filterCount}><Text style={styles.filterCountText}>{(onlineOnly ? 1 : 0) + (minimumExperience ? 1 : 0)}</Text></View></Pressable><Pressable onPress={() => setFiltersVisible(true)} style={styles.controlButton}><Wallet size={12} color={colors.primary} /><Text style={styles.controlText}>{priceRange}</Text><ChevronDown size={12} color={colors.muted} /></Pressable><Pressable onPress={() => setFiltersVisible(true)} style={styles.sortButton}><ArrowDownUp size={12} color={colors.primary} /><Text style={styles.sortText}>{sortBy}</Text></Pressable></View>
+    <View style={styles.filtersRow}><Pressable onPress={() => setFiltersVisible(true)} style={styles.filterButton}><Filter size={14} color={colors.primary} /><Text style={styles.filterText} numberOfLines={1}>Filtrlar</Text><View style={styles.filterCount}><Text style={styles.filterCountText}>{(onlineOnly ? 1 : 0) + (minimumExperience ? 1 : 0)}</Text></View></Pressable><Pressable onPress={() => setFiltersVisible(true)} style={styles.controlButton}><Wallet size={13} color={colors.primary} /><Text style={styles.controlText} numberOfLines={1}>{priceRange}</Text><ChevronDown size={13} color={colors.muted} /></Pressable><Pressable onPress={() => setFiltersVisible(true)} style={styles.sortButton}><ArrowDownUp size={13} color={colors.primary} /><Text style={styles.sortText} numberOfLines={1}>{sortBy}</Text></Pressable></View>
     <View style={styles.licenseBanner}><View style={styles.licenseIcon}><ShieldCheckIcon /></View><View style={{ flex: 1 }}><Text style={styles.licenseTitle}>Demo litsenziya ma’lumotlari</Text><Text style={styles.licenseText}>Mutaxassislarning malakasi haqiqiy xizmatda alohida tekshirilishi kerak.</Text></View></View>
     <SectionTitle title="Topilgan yuristlar" subtitle={`${results.length} ta namunaviy profil`} />
     {results.length ? <View style={styles.list}>{results.map((lawyer) => <LawyerCard key={lawyer.id} lawyer={lawyer} saved={savedLawyers.includes(lawyer.id)} onSave={() => toggleSavedLawyer(lawyer.id)} onPress={() => openLawyer(lawyer)} onApply={() => router.push({ pathname: '/application', params: { lawyerId: lawyer.id } })} />)}</View> : <View style={styles.empty}><Text style={styles.emptyTitle}>Yurist topilmadi</Text><Text style={styles.emptyText}>Filtrlarni o‘zgartirib qayta urinib ko‘ring.</Text><ActionButton title="Filtrlarni tozalash" variant="outline" onPress={() => { resetFilters(); setQuery('') }} /></View>}
@@ -67,38 +67,38 @@ function ShieldCheckIcon() { return <Check size={16} color={colors.primary} /> }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  titleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 2 },
-  heading: { color: colors.neutral, fontFamily: fonts.headingExtra, fontSize: 21 },
-  subheading: { color: colors.muted, fontFamily: fonts.body, fontSize: 10, marginTop: 3 },
-  total: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 9, paddingBottom: 3 },
-  chips: { gap: 6, paddingRight: 20 },
-  filtersRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  filterButton: { height: 31, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, borderWidth: 1, borderColor: '#DDE8F0', borderRadius: 8, backgroundColor: '#fff' },
-  filterText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 8 },
-  filterCount: { width: 15, height: 15, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.secondary },
-  filterCountText: { color: '#fff', fontFamily: fonts.bold, fontSize: 7 },
-  controlButton: { flex: 1, minWidth: 0, height: 31, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: '#fff' },
-  controlText: { flex: 1, color: '#52687E', fontFamily: fonts.medium, fontSize: 7 },
-  sortButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 5, height: 31 },
-  sortText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 7 },
-  licenseBanner: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 11, borderRadius: radius.md, backgroundColor: colors.primary },
-  licenseIcon: { width: 28, height: 28, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF20' },
-  licenseTitle: { color: '#fff', fontFamily: fonts.semibold, fontSize: 9 },
-  licenseText: { color: '#C8DDEC', fontFamily: fonts.body, fontSize: 7, lineHeight: 11, marginTop: 3 },
-  list: { gap: 9 },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10, marginBottom: 2 },
+  heading: { color: colors.neutral, fontFamily: fonts.headingExtra, fontSize: 22 },
+  subheading: { color: colors.muted, fontFamily: fonts.body, fontSize: 13, marginTop: 3 },
+  total: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 12, paddingBottom: 3, flexShrink: 0 },
+  chips: { gap: 8, paddingRight: 20 },
+  filtersRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+  filterButton: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 11, paddingVertical: 6, borderWidth: 1, borderColor: '#DDE8F0', borderRadius: 9, backgroundColor: '#fff' },
+  filterText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 12 },
+  filterCount: { minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.secondary },
+  filterCountText: { color: '#fff', fontFamily: fonts.bold, fontSize: 10.5 },
+  controlButton: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: colors.line, borderRadius: 9, backgroundColor: '#fff', maxWidth: '100%' },
+  controlText: { color: '#52687E', fontFamily: fonts.medium, fontSize: 12, flexShrink: 1 },
+  sortButton: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: colors.line, borderRadius: 9, backgroundColor: '#fff', maxWidth: '100%' },
+  sortText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 12, flexShrink: 1 },
+  licenseBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.md, backgroundColor: colors.primary },
+  licenseIcon: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF20' },
+  licenseTitle: { color: '#fff', fontFamily: fonts.semibold, fontSize: 13 },
+  licenseText: { color: '#C8DDEC', fontFamily: fonts.body, fontSize: 11.5, lineHeight: 16, marginTop: 3 },
+  list: { gap: 10 },
   empty: { alignItems: 'center', gap: 9, padding: 20, borderRadius: radius.lg, backgroundColor: '#fff' },
-  emptyTitle: { color: colors.text, fontFamily: fonts.heading, fontSize: 14 },
-  emptyText: { color: colors.muted, fontFamily: fonts.body, fontSize: 10, textAlign: 'center' },
-  helpCard: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: radius.md, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
-  helpIcon: { width: 28, height: 28, borderRadius: 9, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  helpIconText: { color: colors.primary, fontFamily: fonts.bold, fontSize: 14 },
-  helpTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 8 },
-  helpText: { color: colors.muted, fontFamily: fonts.body, fontSize: 7, marginTop: 3 },
-  helpAction: { color: colors.primary, fontFamily: fonts.bold, fontSize: 8 },
-  sheetTitle: { color: colors.neutral, fontFamily: fonts.headingExtra, fontSize: 17 },
-  sheetLabel: { color: colors.text, fontFamily: fonts.semibold, fontSize: 10 },
-  sheetHint: { color: colors.muted, fontFamily: fonts.body, fontSize: 8, marginTop: 3 },
-  optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  emptyTitle: { color: colors.text, fontFamily: fonts.heading, fontSize: 16 },
+  emptyText: { color: colors.muted, fontFamily: fonts.body, fontSize: 13, textAlign: 'center' },
+  helpCard: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.md, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
+  helpIcon: { width: 32, height: 32, borderRadius: 10, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  helpIconText: { color: colors.primary, fontFamily: fonts.bold, fontSize: 15 },
+  helpTitle: { color: colors.text, fontFamily: fonts.semibold, fontSize: 13 },
+  helpText: { color: colors.muted, fontFamily: fonts.body, fontSize: 11.5, marginTop: 2 },
+  helpAction: { color: colors.primary, fontFamily: fonts.bold, fontSize: 13, flexShrink: 0 },
+  sheetTitle: { color: colors.neutral, fontFamily: fonts.headingExtra, fontSize: 18 },
+  sheetLabel: { color: colors.text, fontFamily: fonts.semibold, fontSize: 13 },
+  sheetHint: { color: colors.muted, fontFamily: fonts.body, fontSize: 11.5, marginTop: 3 },
+  optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   onlineRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 5 },
   sheetActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
 })

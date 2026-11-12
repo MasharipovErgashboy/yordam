@@ -12,13 +12,13 @@ export default function TabLayout() {
     tabBarActiveTintColor: colors.primary,
     tabBarInactiveTintColor: '#8795A4',
     tabBarStyle: {
-      height: 60 + insets.bottom,
+      height: 64 + insets.bottom,
       paddingTop: 6,
       paddingBottom: Math.max(8, insets.bottom),
       backgroundColor: '#FFFFFF',
       borderTopColor: '#E7EDF4'
     },
-    tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 8 },
+    tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 10.5 },
     sceneStyle: { backgroundColor: colors.canvas }
   }}>
     <Tabs.Screen name="index" options={{ title: 'Bosh sahifa', tabBarIcon: ({ color, size }) => <House size={size} color={color} /> }} />

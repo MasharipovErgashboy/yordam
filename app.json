@@ -1,36 +1,51 @@
 {
   "expo": {
-    "name": "YuristOnlineMobile",
-    "slug": "YuristOnlineMobile",
+    "name": "Yurist Online",
+    "slug": "yurist-online-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "yuristonlinemobile",
-    "userInterfaceStyle": "automatic",
+    "scheme": "yuristonline",
+    "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "uz.yuristonline.mobile",
+      "supportsTablet": true
     },
     "android": {
+      "package": "uz.yuristonline.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#004B86",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
+    "androidNavigationBar": {
+      "visible": "sticky-immersive"
+    },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "lang": "uz-UZ",
+      "themeColor": "#004B86",
+      "backgroundColor": "#F5F7FB"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#004B86"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Hujjat uchun rasm tanlashga ruxsat bering.",
+          "cameraPermission": "Hujjatni suratga olish uchun kameraga ruxsat bering.",
+          "microphonePermission": false
         }
       ]
     ],

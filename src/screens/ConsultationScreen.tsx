@@ -102,6 +102,9 @@ export default function ConsultationScreen() {
         </View>
       ) : (
         <View style={styles.idleStage}>
+          {/* TODO: Keyinchalik backenddan keladigan konsultant jinsi va rasmiga qarab dinamik almashtiriladi */}
+          <Image source={FEMALE_LAWYER_VIDEO_IMAGE} style={styles.idleBackdropImage} resizeMode="cover" blurRadius={6} />
+          <View style={styles.idleBackdropOverlay} />
           <View style={styles.idleTop}>
             <View style={styles.readyTag}><View style={styles.readyDot} /><Text style={styles.readyText}>ALOQAGA TAYYOR</Text></View>
             <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>45 daqiqa</Text></View>
@@ -143,12 +146,14 @@ const styles = StyleSheet.create({
   secureTag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 99, backgroundColor: colors.primaryLight, flexShrink: 0 },
   secureText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 10.5 },
   videoStage: { overflow: 'hidden', borderRadius: 15, backgroundColor: '#1B303F', minHeight: 235 },
-  idleStage: { overflow: 'hidden', borderRadius: 15, backgroundColor: '#13314A', padding: 12, gap: 14, minHeight: 215, justifyContent: 'space-between' },
-  idleTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  readyTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 7, backgroundColor: '#FFFFFF1A' },
+  idleStage: { position: 'relative', overflow: 'hidden', borderRadius: 15, backgroundColor: '#13314A', padding: 12, gap: 14, minHeight: 225, justifyContent: 'space-between' },
+  idleBackdropImage: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, width: '100%', height: '100%', opacity: 0.55 },
+  idleBackdropOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#0E2438A6' },
+  idleTop: { zIndex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  readyTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 7, backgroundColor: '#FFFFFF24' },
   readyDot: { width: 6, height: 6, borderRadius: 4, backgroundColor: '#4ED392' },
   readyText: { color: '#DCEBFA', fontFamily: fonts.bold, fontSize: 10.5 },
-  idleCenter: { alignItems: 'center', gap: 8, paddingVertical: 8 },
+  idleCenter: { zIndex: 2, alignItems: 'center', gap: 8, paddingVertical: 8 },
   idleTitle: { color: '#fff', fontFamily: fonts.heading, fontSize: 16, textAlign: 'center' },
   idleSub: { color: '#BFD5E8', fontFamily: fonts.body, fontSize: 12, lineHeight: 17, textAlign: 'center', maxWidth: 280 },
   callButtons: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginTop: 6, width: '100%' },

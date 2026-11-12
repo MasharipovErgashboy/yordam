@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewProps, type ViewStyle } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewProps, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Bell, ChevronRight, Scale, Search, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react-native'
+import { ChevronRight, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
 
 import { colors, fonts, radius, spacing } from '@/constants/tokens'
 
@@ -11,17 +11,15 @@ export function Page({ children, scroll = true, contentStyle, ...props }: { chil
   return <View style={styles.page} {...props}>{body}</View>
 }
 
-export function Header({ title, subtitle, onProfile, onBack, onNotifications, showBrand = false, showActions = true }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
+export function Header({ onBack }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
   const insets = useSafeAreaInsets()
-  return <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 5 }]}>
-    <View style={styles.headerLeft}>
-      {onBack ? <Pressable onPress={onBack} hitSlop={10} style={styles.backButton}><ChevronRight size={20} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} /></Pressable> : <View style={styles.brandIcon}><Scale size={17} color="#fff" /></View>}
-      <View style={styles.headerText}><Text style={styles.headerTitle}>{showBrand ? 'YURIST ONLINE' : title ?? 'Yurist Online'}</Text>{subtitle ? <Text style={styles.headerSubtitle}>{subtitle}</Text> : showBrand ? <Text style={styles.headerSubtitle}>Huquqiy yordam — yaqinroq</Text> : null}</View>
-    </View>
-    {showActions && <View style={styles.headerActions}>
-      {!onBack && <Pressable style={styles.headerIcon} accessibilityRole="button" accessibilityLabel="Bildirishnomalar" onPress={onNotifications ?? (() => Alert.alert('Bildirishnomalar', 'Hozircha yangi bildirishnomalar yo‘q · demo'))}><Bell size={17} color={colors.text} /><View style={styles.notificationDot} /></Pressable>}
-      <Pressable style={styles.profileButton} onPress={onProfile} accessibilityLabel="Profil"><UserRound size={16} color={colors.primary} /></Pressable>
-    </View>}
+  if (!onBack) {
+    return <View style={{ paddingTop: Math.max(insets.top, 8) + 4, backgroundColor: colors.canvas }} />
+  }
+  return <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
+    <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
+      <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
+    </Pressable>
   </View>
 }
 
@@ -71,17 +69,8 @@ const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.canvas },
   scrollContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.md },
   fixedContent: { flex: 1, paddingHorizontal: spacing.lg },
-  header: { minHeight: 62, paddingHorizontal: spacing.lg, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 9, flex: 1, minWidth: 0 },
-  brandIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  backButton: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  headerText: { flex: 1, minWidth: 0 },
-  headerTitle: { color: colors.primary, fontFamily: fonts.heading, fontSize: 16, letterSpacing: 0.1 },
-  headerSubtitle: { color: colors.muted, fontFamily: fonts.body, fontSize: 12, marginTop: 1 },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerIcon: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  notificationDot: { position: 'absolute', top: 5, right: 6, width: 6, height: 6, borderRadius: 4, backgroundColor: colors.secondary },
-  profileButton: { width: 34, height: 34, borderRadius: 18, borderWidth: 1, borderColor: '#DDE6EF', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E8F0F6' },
+  header: { minHeight: 46, paddingHorizontal: spacing.lg, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  backButton: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   text: { color: colors.text, fontFamily: fonts.body, fontSize: 14 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 },
   sectionTitle: { color: colors.neutral, fontFamily: fonts.heading, fontSize: 17, letterSpacing: -0.2 },

@@ -3,7 +3,7 @@ import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, St
 import * as DocumentPicker from 'expo-document-picker'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Check, FileText, Image as ImageIcon, LockKeyhole, Mic, MicOff, PhoneOff, Send, ShieldCheck, Speaker, Star, Video, VideoOff } from 'lucide-react-native'
+import { Check, FileText, Image as ImageIcon, LockKeyhole, Mic, MicOff, Phone, PhoneOff, Send, ShieldCheck, Speaker, Star, Video, VideoOff } from 'lucide-react-native'
 
 const FEMALE_LAWYER_VIDEO_IMAGE = require('../../assets/images/lawyer-female-call.jpg')
 
@@ -26,9 +26,15 @@ export default function ConsultationScreen() {
   const lawyer = findLawyer(request?.lawyerId)
   const [messages, setMessages] = useState(initialMessages)
   const [draft, setDraft] = useState('')
+  const [callActive, setCallActive] = useState(false)
   const [muted, setMuted] = useState(false)
   const [camera, setCamera] = useState(true)
   const [speaker, setSpeaker] = useState(true)
+
+  function startCall(withVideo: boolean) {
+    setCamera(withVideo)
+    setCallActive(true)
+  }
 
   function send(text = draft) {
     const value = text.trim()
@@ -47,44 +53,76 @@ export default function ConsultationScreen() {
   }
 
   function endCall() {
-    Alert.alert('Konsultatsiyani yakunlaysizmi?', 'Bu demo video xonasi. Chat yozishmalari hozircha faqat shu sessiyada saqlanadi.', [{ text: 'Davom etish', style: 'cancel' }, { text: 'Yakunlash', style: 'destructive', onPress: () => { if (request) updateRequest(request.id, { status: 'Yakunlangan' }); router.replace({ pathname: '/review', params: { lawyerId: request?.lawyerId ?? '11' } }) } }])
+    Alert.alert(
+      'Qo‘ng‘iroqni yakunlaysizmi?',
+      'Qo‘ng‘iroqni tugatib chatda davom etishingiz yoki konsultatsiyani yakunlashingiz mumkin.',
+      [
+        { text: 'Bekor qilish', style: 'cancel' },
+        { text: 'Qo‘ng‘iroqni uzish', onPress: () => setCallActive(false) },
+        { text: 'Konsultatsiyani yakunlash', style: 'destructive', onPress: () => { if (request) updateRequest(request.id, { status: 'Yakunlangan' }); router.replace({ pathname: '/review', params: { lawyerId: request?.lawyerId ?? '11' } }) } },
+      ],
+    )
   }
 
   const initials = useMemo(() => lawyer?.initials ?? 'SR', [lawyer])
 
   return <View style={styles.screen}><Header title="Jonli konsultatsiya" onBack={() => router.back()} /><KeyboardAvoidingView style={styles.body} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={4}>
     <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-      <View style={styles.lawyerBanner}><Avatar initials={initials} color={lawyer?.avatarColor} size={38} /><View style={{ flex: 1 }}><View style={styles.lawyerNameLine}><Text style={styles.lawyerName}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text><Star size={11} color={colors.secondary} fill={colors.secondary} /></View><Text style={styles.lawyerSub}>● Onlayn konsultatsiya · demo xona</Text></View><View style={styles.secureTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.secureText}>TLS demo</Text></View></View>
-      <View style={styles.videoStage}>
-        <View style={styles.videoHeader}>
-          <View style={styles.liveTag}><View style={styles.liveDot} /><Text style={styles.liveText}>VIDEO DEMO</Text></View>
-          <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>24:17 qoldi</Text></View>
-        </View>
-        <View style={styles.videoScene}>
-          {camera ? (
-            <View style={styles.videoFeedWrap}>
-              {/* TODO: Keyinchalik backenddan keladigan konsultant jinsi va rasmiga qarab dinamik almashtiriladi */}
-              <Image source={FEMALE_LAWYER_VIDEO_IMAGE} style={styles.videoFeedImage} resizeMode="cover" />
-              <View style={styles.personLabelBadge}>
-                <View style={styles.personOnlineDot} />
-                <Text style={styles.personName}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text>
+      <View style={styles.lawyerBanner}><Avatar initials={initials} color={lawyer?.avatarColor} size={38} /><View style={{ flex: 1, minWidth: 0 }}><View style={styles.lawyerNameLine}><Text style={styles.lawyerName} numberOfLines={1}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text><Star size={11} color={colors.secondary} fill={colors.secondary} /></View><Text style={styles.lawyerSub}>{callActive ? '● Jonli aloqa faol · demo xona' : '● Aloqaga tayyor · qo‘ng‘iroq qilinmagan'}</Text></View><View style={styles.secureTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.secureText}>TLS demo</Text></View></View>
+      {callActive ? (
+        <View style={styles.videoStage}>
+          <View style={styles.videoHeader}>
+            <View style={styles.liveTag}><View style={styles.liveDot} /><Text style={styles.liveText}>{camera ? 'VIDEO DEMO' : 'AUDIO DEMO'}</Text></View>
+            <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>24:17 qoldi</Text></View>
+          </View>
+          <View style={styles.videoScene}>
+            {camera ? (
+              <View style={styles.videoFeedWrap}>
+                {/* TODO: Keyinchalik backenddan keladigan konsultant jinsi va rasmiga qarab dinamik almashtiriladi */}
+                <Image source={FEMALE_LAWYER_VIDEO_IMAGE} style={styles.videoFeedImage} resizeMode="cover" />
+                <View style={styles.personLabelBadge}>
+                  <View style={styles.personOnlineDot} />
+                  <Text style={styles.personName}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text>
+                </View>
               </View>
-            </View>
-          ) : (
-            <View style={styles.cameraOff}>
-              <Avatar initials={initials} color={lawyer?.avatarColor} size={64} />
-              <Text style={styles.cameraOffText}>Kamera o‘chirilgan</Text>
-            </View>
-          )}
-          <View style={styles.selfView}><Text style={styles.selfInitial}>AQ</Text><Text style={styles.selfLabel}>Siz</Text></View>
+            ) : (
+              <View style={styles.cameraOff}>
+                <Avatar initials={initials} color={lawyer?.avatarColor} size={64} />
+                <Text style={styles.cameraOffText}>Kamera o‘chirilgan</Text>
+              </View>
+            )}
+            <View style={styles.selfView}><Text style={styles.selfInitial}>AQ</Text><Text style={styles.selfLabel}>Siz</Text></View>
+          </View>
+          <View style={styles.controls}>
+            <Pressable accessibilityRole="button" accessibilityLabel={muted ? 'Mikrofonni yoqish' : 'Mikrofonni o‘chirish'} onPress={() => setMuted(!muted)} style={[styles.control, muted && styles.controlOff]}>{muted ? <MicOff size={17} color="#fff" /> : <Mic size={17} color="#fff" />}</Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={camera ? 'Kamerani o‘chirish' : 'Kamerani yoqish'} onPress={() => setCamera(!camera)} style={[styles.control, !camera && styles.controlOff]}>{camera ? <Video size={18} color="#fff" /> : <VideoOff size={18} color="#fff" />}</Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={speaker ? 'Ovozni o‘chirish' : 'Ovozni yoqish'} onPress={() => setSpeaker(!speaker)} style={[styles.control, !speaker && styles.controlOff]}><Speaker size={18} color="#fff" /></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Qo‘ng‘iroqni yakunlash" onPress={endCall} style={styles.hangup}><PhoneOff size={17} color="#fff" /></Pressable>
+          </View>
         </View>
-        <View style={styles.controls}>
-          <Pressable accessibilityRole="button" accessibilityLabel={muted ? 'Mikrofonni yoqish' : 'Mikrofonni o‘chirish'} onPress={() => setMuted(!muted)} style={[styles.control, muted && styles.controlOff]}>{muted ? <MicOff size={17} color="#fff" /> : <Mic size={17} color="#fff" />}</Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={camera ? 'Kamerani o‘chirish' : 'Kamerani yoqish'} onPress={() => setCamera(!camera)} style={[styles.control, !camera && styles.controlOff]}>{camera ? <Video size={18} color="#fff" /> : <VideoOff size={18} color="#fff" />}</Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={speaker ? 'Ovozni o‘chirish' : 'Ovozni yoqish'} onPress={() => setSpeaker(!speaker)} style={[styles.control, !speaker && styles.controlOff]}><Speaker size={18} color="#fff" /></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Qo‘ng‘iroqni yakunlash" onPress={endCall} style={styles.hangup}><PhoneOff size={17} color="#fff" /></Pressable>
+      ) : (
+        <View style={styles.idleStage}>
+          <View style={styles.idleTop}>
+            <View style={styles.readyTag}><View style={styles.readyDot} /><Text style={styles.readyText}>ALOQAGA TAYYOR</Text></View>
+            <View style={styles.timeTag}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.timeLeft}>45 daqiqa</Text></View>
+          </View>
+          <View style={styles.idleCenter}>
+            <Avatar initials={initials} color={lawyer?.avatarColor} size={58} />
+            <Text style={styles.idleTitle}>{request?.lawyerName ?? 'Shahnoza Rahimova'}</Text>
+            <Text style={styles.idleSub}>Hali qo‘ng‘iroq boshlanmagan. Audio yoki video aloqani boshlang.</Text>
+            <View style={styles.callButtons}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Audio qo‘ng‘iroq qilish" onPress={() => startCall(false)} style={({ pressed }) => [styles.audioCallBtn, pressed && { opacity: 0.85 }]}>
+                <Phone size={15} color="#fff" />
+                <Text style={styles.callBtnText} numberOfLines={1}>Qo‘ng‘iroq qilish</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel="Video qo‘ng‘iroq qilish" onPress={() => startCall(true)} style={({ pressed }) => [styles.videoCallBtn, pressed && { opacity: 0.85 }]}>
+                <Video size={16} color="#fff" />
+                <Text style={styles.callBtnText} numberOfLines={1}>Video qo‘ng‘iroq</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
-      </View>
+      )}
       <View style={styles.secureChannel}><LockKeyhole size={10} color={colors.primary} /><Text style={styles.secureChannelText}>Shifrlangan demo kanal · Murojaat {request?.id}</Text></View>
       <View style={styles.messages}>{messages.map((message) => <View key={message.id} style={[styles.messageWrap, message.from === 'client' && styles.clientWrap]}>{message.from === 'lawyer' ? <Text style={styles.sender}>{request?.lawyerName ?? 'Shahnoza Rahimova'} · {message.time}</Text> : null}<View style={[styles.bubble, message.from === 'client' ? styles.clientBubble : styles.lawyerBubble]}><Text style={[styles.messageText, message.from === 'client' && styles.clientText]}>{message.text}</Text>{message.file ? <Pressable onPress={() => Alert.alert('Demo fayl', 'Fayl mobil demo ichida tanlangan yoki namunaviy.') } style={styles.attachment}><View style={styles.pdf}><FileText size={15} color="#fff" /></View><View style={{ flex: 1 }}><Text style={styles.fileName}>{message.file}</Text><Text style={styles.fileMeta}>Namuna fayl · serverga yuborilmagan</Text></View><Check size={12} color={colors.tertiary} /></Pressable> : null}{message.from === 'client' ? <Text style={styles.messageTime}>{message.time}  ✓✓</Text> : null}</View></View>)}</View>
       <View style={styles.quickReplies}><Pressable style={styles.quickReply} onPress={() => send('Tushundim, rahmat!')}><Text style={styles.quickReplyText}>👍 Tushundim, rahmat</Text></Pressable><Pressable style={styles.quickReply} onPress={() => send('Kadastr faylini jo‘nataman.')}><Text style={styles.quickReplyText}>📄 Kadastrni yuboraymi?</Text></Pressable></View>
@@ -105,6 +143,18 @@ const styles = StyleSheet.create({
   secureTag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 99, backgroundColor: colors.primaryLight, flexShrink: 0 },
   secureText: { color: colors.primary, fontFamily: fonts.semibold, fontSize: 10.5 },
   videoStage: { overflow: 'hidden', borderRadius: 15, backgroundColor: '#1B303F', minHeight: 235 },
+  idleStage: { overflow: 'hidden', borderRadius: 15, backgroundColor: '#13314A', padding: 12, gap: 14, minHeight: 215, justifyContent: 'space-between' },
+  idleTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  readyTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 7, backgroundColor: '#FFFFFF1A' },
+  readyDot: { width: 6, height: 6, borderRadius: 4, backgroundColor: '#4ED392' },
+  readyText: { color: '#DCEBFA', fontFamily: fonts.bold, fontSize: 10.5 },
+  idleCenter: { alignItems: 'center', gap: 8, paddingVertical: 8 },
+  idleTitle: { color: '#fff', fontFamily: fonts.heading, fontSize: 16, textAlign: 'center' },
+  idleSub: { color: '#BFD5E8', fontFamily: fonts.body, fontSize: 12, lineHeight: 17, textAlign: 'center', maxWidth: 280 },
+  callButtons: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginTop: 6, width: '100%' },
+  audioCallBtn: { minHeight: 42, paddingHorizontal: 15, paddingVertical: 9, borderRadius: 11, backgroundColor: '#1F9D68', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, flexGrow: 1, minWidth: 140 },
+  videoCallBtn: { minHeight: 42, paddingHorizontal: 15, paddingVertical: 9, borderRadius: 11, backgroundColor: '#1775C2', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, flexGrow: 1, minWidth: 140 },
+  callBtnText: { color: '#fff', fontFamily: fonts.semibold, fontSize: 13 },
   videoHeader: { position: 'absolute', zIndex: 4, top: 8, right: 8, left: 8, flexDirection: 'row', justifyContent: 'space-between' },
   liveTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 7, backgroundColor: '#17374CCF' },
   liveDot: { width: 6, height: 6, borderRadius: 4, backgroundColor: '#EF4C4D' },

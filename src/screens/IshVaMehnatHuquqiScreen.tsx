@@ -63,6 +63,7 @@ export const IshVaMehnatHuquqiScreen: React.FC<IshVaMehnatHuquqiScreenProps> = (
   // Hujjatlar Markazi Tab State
   const [docSearchQuery, setDocSearchQuery] = useState('');
   const [docCategoryFilter, setDocCategoryFilter] = useState<'all' | 'applications' | 'contracts' | 'claims' | 'complaints'>('all');
+  const [docSubTab, setDocSubTab] = useState<'templates' | 'my_docs'>('templates');
 
   // Document Preview Modal State
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
@@ -3497,46 +3498,34 @@ Yordam ilovasi orqali rasmiy andozani oling: https://yordam.uz/docs/${doc.id || 
           style={styles.scrollArea}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 16) + 75 },
+            { paddingBottom: Math.max(insets.bottom, 16) + 85 },
           ]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Top Title & Subtitle with Trust Badge */}
-          <View style={styles.docHeaderBlock}>
-            <View style={styles.docTrustBadgeRow}>
-              <Ionicons name="shield-checkmark" size={13} color="#16A34A" style={{ marginRight: 5 }} />
-              <Text style={styles.docTrustBadgeText}>2025 YANGI TAHRIR • YURIDIK BAZA</Text>
+          {/* Minimalist Top Header */}
+          <View style={styles.miniDocHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.miniDocTitle}>Hujjatlar</Text>
+              <Text style={styles.miniDocSubtitle}>
+                Rasmiy mehnat arizalari va şartnomalar
+              </Text>
             </View>
-            <Text style={styles.docMainTitle}>Hujjatlar markazi 📑</Text>
-            <Text style={styles.docMainSubtitle}>
-              Yangi Mehnat kodeksiga mos rasmiy arizalar, talabnomalar va mehnat şartnomalari andozalari.
-            </Text>
+            <TouchableOpacity
+              style={styles.miniDocCreateBtn}
+              activeOpacity={0.8}
+              onPress={() => handleOpenConstructorForDoc()}
+            >
+              <Ionicons name="add" size={17} color="#FFFFFF" />
+              <Text style={styles.miniDocCreateBtnText}>Yangi ariza</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Quick Stats Strip */}
-          <View style={styles.docStatsStrip}>
-            <View style={styles.docStatCard}>
-              <Text style={styles.docStatNumber}>24+</Text>
-              <Text style={styles.docStatLabel}>Rasmiy andoza</Text>
-            </View>
-            <View style={styles.docStatDivider} />
-            <View style={styles.docStatCard}>
-              <Text style={[styles.docStatNumber, { color: '#16A34A' }]}>100%</Text>
-              <Text style={styles.docStatLabel}>Qonuniy kafolat</Text>
-            </View>
-            <View style={styles.docStatDivider} />
-            <View style={styles.docStatCard}>
-              <Text style={[styles.docStatNumber, { color: '#0284C7' }]}>48 ming+</Text>
-              <Text style={styles.docStatLabel}>Yuklab olingan</Text>
-            </View>
-          </View>
-
-          {/* Search Box */}
-          <View style={styles.docSearchBox}>
-            <Ionicons name="search-outline" size={18} color="#94A3B8" style={{ marginRight: 8 }} />
+          {/* Minimalist Search Bar */}
+          <View style={styles.miniDocSearchBox}>
+            <Ionicons name="search" size={16} color="#94A3B8" style={{ marginRight: 8 }} />
             <TextInput
-              style={styles.docSearchInput}
-              placeholder="Hujjat nomi yoki kalit sözni qidiring..."
+              style={styles.miniDocSearchInput}
+              placeholder="Hujjat nomini qidiring..."
               placeholderTextColor="#94A3B8"
               value={docSearchQuery}
               onChangeText={setDocSearchQuery}
@@ -3546,360 +3535,262 @@ Yordam ilovasi orqali rasmiy andozani oling: https://yordam.uz/docs/${doc.id || 
                 onPress={() => setDocSearchQuery('')}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close-circle" size={17} color="#94A3B8" />
+                <Ionicons name="close-circle" size={16} color="#94A3B8" />
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Category Filter Pills */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.docFilterScroll}
-          >
-            {[
-              { id: 'all', label: `Barçasi (${documentsCatalog.length})`, icon: 'grid-outline' },
-              {
-                id: 'applications',
-                label: `Arizalar (${documentsCatalog.filter((d) => d.category === 'applications').length})`,
-                icon: 'document-text-outline',
-              },
-              {
-                id: 'contracts',
-                label: `Şartnomalar (${documentsCatalog.filter((d) => d.category === 'contracts').length})`,
-                icon: 'briefcase-outline',
-              },
-              {
-                id: 'claims',
-                label: `Talabnomalar (${documentsCatalog.filter((d) => d.category === 'claims').length})`,
-                icon: 'alert-circle-outline',
-              },
-              {
-                id: 'complaints',
-                label: `Şikoyatlar (${documentsCatalog.filter((d) => d.category === 'complaints').length})`,
-                icon: 'shield-outline',
-              },
-            ].map((cat) => {
-              const isActive = docCategoryFilter === cat.id;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[
-                    styles.docFilterPill,
-                    isActive ? styles.docFilterPillActive : styles.docFilterPillInactive,
-                  ]}
-                  activeOpacity={0.75}
-                  onPress={() => setDocCategoryFilter(cat.id as any)}
-                >
-                  <Ionicons
-                    name={cat.icon as any}
-                    size={14}
-                    color={isActive ? '#FFFFFF' : '#64748B'}
-                    style={{ marginRight: 5 }}
-                  />
-                  <Text
-                    style={[
-                      styles.docFilterPillText,
-                      isActive ? styles.docFilterPillTextActive : styles.docFilterPillTextInactive,
-                    ]}
-                  >
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* AI Document Constructor Card */}
+          {/* Compact AI Ariza Generator Pill/Banner */}
           <TouchableOpacity
-            style={styles.docConstructorCard}
-            activeOpacity={0.9}
+            style={styles.miniAiBanner}
+            activeOpacity={0.85}
             onPress={() => handleOpenConstructorForDoc()}
           >
-            <LinearGradient
-              colors={['#0F2644', '#1E3A8A', '#2563EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.docConstructorGradient}
-            >
-              <View style={styles.docConstructorTagPill}>
-                <Ionicons name="sparkles" size={11} color="#FBBF24" style={{ marginRight: 4 }} />
-                <Text style={styles.docConstructorTagText}>AQLLI GENERATOR • 2025</Text>
-              </View>
-              <Text style={styles.docConstructorTitle}>2 daqiqada tayyor rasmiy ariza yarating</Text>
-              <Text style={styles.docConstructorSubtitle}>
-                Ism-familiyangiz va korxona ma’lumotlarini kiriting — tizim 2025-yilgi Mehnat Kodeksiga mos tayyor rasmiy arizani avtomatik tayyorlab beradi.
-              </Text>
-              <View style={styles.docConstructorFeaturesRow}>
-                <View style={styles.docConstructorFeatureItem}>
-                  <Ionicons name="checkmark-circle" size={13} color="#4ADE80" style={{ marginRight: 4 }} />
-                  <Text style={styles.docConstructorFeatureText}>MK 2025 moddalari</Text>
-                </View>
-                <View style={styles.docConstructorFeatureItem}>
-                  <Ionicons name="checkmark-circle" size={13} color="#4ADE80" style={{ marginRight: 4 }} />
-                  <Text style={styles.docConstructorFeatureText}>PDF va DOCX</Text>
-                </View>
-                <View style={styles.docConstructorFeatureItem}>
-                  <Ionicons name="checkmark-circle" size={13} color="#4ADE80" style={{ marginRight: 4 }} />
-                  <Text style={styles.docConstructorFeatureText}>100% Bepul</Text>
-                </View>
-              </View>
-              <View style={styles.docConstructorCtaBtn}>
-                <Ionicons name="flash" size={14} color="#0F172A" style={{ marginRight: 6 }} />
-                <Text style={styles.docConstructorCtaBtnText}>Hujjat yaratiş ⚡</Text>
-              </View>
-            </LinearGradient>
+            <View style={styles.miniAiIconWrap}>
+              <Ionicons name="sparkles" size={16} color="#D97706" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.miniAiTitle}>Avtomatik ariza tayyorlash</Text>
+              <Text style={styles.miniAiDesc}>Rekvizitlarni kiriting — tayyor hujjat oling</Text>
+            </View>
+            <View style={styles.miniAiArrow}>
+              <Ionicons name="chevron-forward" size={16} color="#0F172A" />
+            </View>
           </TouchableOpacity>
 
-          {/* Mening hujjatlarim Section */}
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.docSectionTitleWithBadge}>
-              <Text style={styles.sectionTitle}>Mening hujjatlarim</Text>
-              <View style={styles.docCountBadgeSmall}>
-                <Text style={styles.docCountBadgeSmallText}>{myDocsList.length}</Text>
-              </View>
-            </View>
-            <TouchableOpacity onPress={() => handleOpenConstructorForDoc()}>
-              <Text style={styles.sectionSeeAllLink}>+ Yangi ariza</Text>
+          {/* Segment Switcher: Andozalar | Mening hujjatlarim */}
+          <View style={styles.miniDocSegmentRow}>
+            <TouchableOpacity
+              style={[
+                styles.miniDocSegmentBtn,
+                docSubTab === 'templates' && styles.miniDocSegmentBtnActive,
+              ]}
+              onPress={() => setDocSubTab('templates')}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.miniDocSegmentText,
+                  docSubTab === 'templates' && styles.miniDocSegmentTextActive,
+                ]}
+              >
+                Andozalar ({documentsCatalog.length})
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.miniDocSegmentBtn,
+                docSubTab === 'my_docs' && styles.miniDocSegmentBtnActive,
+              ]}
+              onPress={() => setDocSubTab('my_docs')}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.miniDocSegmentText,
+                  docSubTab === 'my_docs' && styles.miniDocSegmentTextActive,
+                ]}
+              >
+                Mening hujjatlarim ({myDocsList.length})
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.docRecentContainer}>
-            {myDocsList.map((myDoc) => (
-              <TouchableOpacity
-                key={myDoc.id}
-                style={styles.docRecentCard}
-                activeOpacity={0.8}
-                onPress={() => setPreviewDoc(myDoc)}
+          {/* Tab 1: Andozalar */}
+          {docSubTab === 'templates' ? (
+            <>
+              {/* Category Filter Pills */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.miniDocFilterScroll}
               >
-                <View
-                  style={[
-                    styles.docRecentBadge,
-                    { backgroundColor: myDoc.badgeBg },
-                  ]}
-                >
-                  <Text style={styles.docRecentBadgeText}>{myDoc.type}</Text>
-                </View>
-                <View style={styles.docRecentInfoCol}>
-                  <Text style={styles.docRecentTitle} numberOfLines={1}>
-                    {myDoc.title}
-                  </Text>
-                  <Text style={styles.docRecentMeta}>
-                    {myDoc.date} • {myDoc.size}
-                  </Text>
-                </View>
-
-                {/* Inline Quick Action Icons */}
-                <View style={styles.docRecentActionsRow}>
-                  <TouchableOpacity
-                    style={styles.docRecentActionIconBtn}
-                    onPress={() => setPreviewDoc(myDoc)}
-                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                  >
-                    <Ionicons name="eye-outline" size={16} color="#0284C7" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.docRecentActionIconBtn}
-                    onPress={() => handleShareDoc(myDoc)}
-                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                  >
-                    <Ionicons name="share-social-outline" size={16} color="#64748B" />
-                  </TouchableOpacity>
-
-                  <View
-                    style={[
-                      styles.docRecentStatusPill,
-                      { backgroundColor: myDoc.statusBg },
-                    ]}
-                  >
-                    <Text
+                {[
+                  { id: 'all', label: 'Barçasi' },
+                  { id: 'applications', label: 'Arizalar' },
+                  { id: 'contracts', label: 'Şartnomalar' },
+                  { id: 'claims', label: 'Talabnomalar' },
+                  { id: 'complaints', label: 'Şikoyatlar' },
+                ].map((cat) => {
+                  const isActive = docCategoryFilter === cat.id;
+                  return (
+                    <TouchableOpacity
+                      key={cat.id}
                       style={[
-                        styles.docRecentStatusText,
-                        { color: myDoc.statusColor },
+                        styles.miniFilterPill,
+                        isActive ? styles.miniFilterPillActive : styles.miniFilterPillInactive,
+                      ]}
+                      activeOpacity={0.75}
+                      onPress={() => setDocCategoryFilter(cat.id as any)}
+                    >
+                      <Text
+                        style={[
+                          styles.miniFilterPillText,
+                          isActive ? styles.miniFilterPillTextActive : styles.miniFilterPillTextInactive,
+                        ]}
+                      >
+                        {cat.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Minimalist Document Cards */}
+              <View style={styles.miniDocList}>
+                {filteredDocuments.length === 0 ? (
+                  <View style={styles.miniEmptyBox}>
+                    <Ionicons name="document-text-outline" size={38} color="#CBD5E1" />
+                    <Text style={styles.miniEmptyTitle}>Hujjat topilmadi</Text>
+                    <Text style={styles.miniEmptyDesc}>Boşqa kalit söz bilan qidiring</Text>
+                  </View>
+                ) : (
+                  filteredDocuments.map((doc) => {
+                    const isPdf = doc.type === 'PDF';
+                    return (
+                      <TouchableOpacity
+                        key={doc.id}
+                        style={styles.miniDocCard}
+                        activeOpacity={0.7}
+                        onPress={() => setPreviewDoc(doc)}
+                      >
+                        {/* File Type Badge */}
+                        <View
+                          style={[
+                            styles.miniDocBadge,
+                            {
+                              backgroundColor: isPdf ? '#FEF2F2' : '#EFF6FF',
+                            },
+                          ]}
+                        >
+                          <Ionicons
+                            name={isPdf ? 'document-text' : 'document'}
+                            size={18}
+                            color={isPdf ? '#EF4444' : '#2563EB'}
+                          />
+                          <Text
+                            style={[
+                              styles.miniDocBadgeLabel,
+                              { color: isPdf ? '#EF4444' : '#2563EB' },
+                            ]}
+                          >
+                            {doc.type}
+                          </Text>
+                        </View>
+
+                        {/* Title & Metadata */}
+                        <View style={styles.miniDocInfo}>
+                          <Text style={styles.miniDocItemTitle} numberOfLines={1}>
+                            {doc.title}
+                          </Text>
+                          <Text style={styles.miniDocItemMeta}>
+                            {doc.categoryLabel} • {doc.size}
+                            {doc.legalRef ? ` • ${doc.legalRef}` : ''}
+                          </Text>
+                        </View>
+
+                        {/* Quick Action Icons */}
+                        <View style={styles.miniDocActions}>
+                          <TouchableOpacity
+                            style={styles.miniDocIconAction}
+                            onPress={() => handleDownloadDoc(doc)}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          >
+                            <Ionicons name="arrow-down-circle-outline" size={21} color="#0284C7" />
+                          </TouchableOpacity>
+                          <Ionicons name="chevron-forward" size={16} color="#CBD5E1" style={{ marginLeft: 2 }} />
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
+              </View>
+            </>
+          ) : (
+            /* Tab 2: Mening hujjatlarim */
+            <View style={styles.miniDocList}>
+              {myDocsList.length === 0 ? (
+                <View style={styles.miniEmptyBox}>
+                  <Ionicons name="folder-open-outline" size={38} color="#CBD5E1" />
+                  <Text style={styles.miniEmptyTitle}>Saqlangan hujjatlar yöq</Text>
+                  <Text style={styles.miniEmptyDesc}>
+                    «Yangi ariza» tugmasi orqali şaxsiy rasmiy hujjat yarating
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.miniEmptyActionBtn}
+                    onPress={() => handleOpenConstructorForDoc()}
+                  >
+                    <Text style={styles.miniEmptyActionBtnText}>+ Yangi ariza yaratiş</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                myDocsList.map((myDoc) => (
+                  <TouchableOpacity
+                    key={myDoc.id}
+                    style={styles.miniDocCard}
+                    activeOpacity={0.7}
+                    onPress={() => setPreviewDoc(myDoc)}
+                  >
+                    <View
+                      style={[
+                        styles.miniDocBadge,
+                        { backgroundColor: myDoc.type === 'PDF' ? '#FEF2F2' : '#EFF6FF' },
                       ]}
                     >
-                      {myDoc.status}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Rasmiy andozalar katalogi */}
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.docSectionTitleWithBadge}>
-              <Text style={styles.sectionTitle}>Rasmiy andozalar katalogi</Text>
-              <View style={styles.docCountBadgeSmall}>
-                <Text style={styles.docCountBadgeSmallText}>{filteredDocuments.length}</Text>
-              </View>
-            </View>
-            <Text style={styles.docCatalogFilterLabel}>2025 Yangi tahrir</Text>
-          </View>
-
-          <View style={styles.docCatalogList}>
-            {filteredDocuments.length === 0 ? (
-              <View style={styles.docEmptyStateCard}>
-                <Ionicons
-                  name="search-outline"
-                  size={42}
-                  color="#94A3B8"
-                  style={{ marginBottom: 10 }}
-                />
-                <Text style={styles.docEmptyStateTitle}>Hujjat topilmadi</Text>
-                <Text style={styles.docEmptyStateDesc}>
-                  Qidiruv sözini yoki tanlangan kategoriyani özgartirib köring.
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setDocSearchQuery('');
-                    setDocCategoryFilter('all');
-                  }}
-                  style={styles.docEmptyResetBtn}
-                >
-                  <Text style={styles.docEmptyResetBtnText}>Filtrni tozalaş</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              filteredDocuments.map((doc) => (
-                <View key={doc.id} style={styles.docCatalogModernCard}>
-                  {/* Card Header Row */}
-                  <View style={styles.docCardTopRow}>
-                    <View style={[styles.docCatalogBadgeBox, { backgroundColor: doc.badgeColor }]}>
-                      <Text style={styles.docCatalogBadgeText}>{doc.type}</Text>
-                    </View>
-                    <View style={styles.docCardHeaderMetaCol}>
-                      <View style={styles.docCardCategoryRow}>
-                        <Text style={styles.docCardCategoryBadge}>{doc.categoryLabel}</Text>
-                        <View style={styles.docCardLegalBadge}>
-                          <Ionicons name="shield-checkmark" size={10} color="#16A34A" style={{ marginRight: 3 }} />
-                          <Text style={styles.docCardLegalBadgeText}>{doc.legalRef || 'MK 2025'}</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.docCatalogItemTitle} numberOfLines={2}>
-                        {doc.title}
+                      <Ionicons
+                        name="document-text"
+                        size={18}
+                        color={myDoc.type === 'PDF' ? '#EF4444' : '#2563EB'}
+                      />
+                      <Text
+                        style={[
+                          styles.miniDocBadgeLabel,
+                          { color: myDoc.type === 'PDF' ? '#EF4444' : '#2563EB' },
+                        ]}
+                      >
+                        {myDoc.type}
                       </Text>
                     </View>
-                  </View>
 
-                  {/* Card Description */}
-                  <Text style={styles.docCatalogItemDesc}>
-                    {doc.desc}
-                  </Text>
-
-                  {/* Download stats strip */}
-                  <View style={styles.docCardStatsRow}>
-                    <View style={styles.docCardStatItem}>
-                      <Ionicons name="download-outline" size={12} color="#64748B" style={{ marginRight: 4 }} />
-                      <Text style={styles.docCardStatText}>{doc.downloads} marta yuklangan</Text>
+                    <View style={styles.miniDocInfo}>
+                      <Text style={styles.miniDocItemTitle} numberOfLines={1}>
+                        {myDoc.title}
+                      </Text>
+                      <Text style={styles.miniDocItemMeta}>
+                        {myDoc.date} • {myDoc.size}
+                      </Text>
                     </View>
-                    <Text style={styles.docCatalogMetaDot}>•</Text>
-                    <Text style={styles.docCardStatText}>{doc.size}</Text>
-                    <Text style={styles.docCatalogMetaDot}>•</Text>
-                    <Text style={[styles.docCardStatText, { color: '#16A34A', fontWeight: '700' }]}>Yuridik tasdiq</Text>
-                  </View>
 
-                  {/* 4 Interactive Action Buttons */}
-                  <View style={styles.docCardActionsGrid}>
-                    <TouchableOpacity
-                      style={styles.docActionBtnView}
-                      activeOpacity={0.7}
-                      onPress={() => setPreviewDoc(doc)}
-                    >
-                      <Ionicons name="eye-outline" size={14} color="#0F2644" style={{ marginRight: 5 }} />
-                      <Text style={styles.docActionBtnViewText}>Köriş</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.docActionBtnDownload}
-                      activeOpacity={0.7}
-                      onPress={() => handleDownloadDoc(doc)}
-                    >
-                      <Ionicons name="download-outline" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
-                      <Text style={styles.docActionBtnDownloadText}>Yuklab oliş</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.docActionBtnShare}
-                      activeOpacity={0.7}
-                      onPress={() => handleShareDoc(doc)}
-                    >
-                      <Ionicons name="share-social-outline" size={14} color="#64748B" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.docActionBtnFill}
-                      activeOpacity={0.7}
-                      onPress={() => handleOpenConstructorForDoc(doc)}
-                    >
-                      <Ionicons name="flash" size={13} color="#D97706" style={{ marginRight: 4 }} />
-                      <Text style={styles.docActionBtnFillText}>Töldiriş</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))
-            )}
-          </View>
-
-          {/* Legal Instruction Box & Hotline Callout */}
-          <View style={styles.docRuleCalloutBox}>
-            <View style={styles.docRuleHeaderRow}>
-              <Ionicons
-                name="shield-checkmark"
-                size={20}
-                color="#16A34A"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.docRuleTitle}>Qonuniy rasmiylaştiriş tartibi (4 qadam)</Text>
+                    <View style={styles.miniDocActions}>
+                      <View style={styles.miniDocStatusPill}>
+                        <Text style={styles.miniDocStatusText}>{myDoc.status || 'Tayyor'}</Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.miniDocIconAction}
+                        onPress={() => handleShareDoc(myDoc)}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons name="share-social-outline" size={18} color="#64748B" />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
             </View>
-            <View style={styles.docRuleStepsCol}>
-              <View style={styles.docRuleStepRow}>
-                <View style={styles.docRuleStepBadge}>
-                  <Text style={styles.docRuleStepBadgeText}>1</Text>
-                </View>
-                <Text style={styles.docRuleStepText}>
-                  Istalgan ariza yoki talabnomani kamida 2 nusxada chop eting.
-                </Text>
-              </View>
-              <View style={styles.docRuleStepRow}>
-                <View style={styles.docRuleStepBadge}>
-                  <Text style={styles.docRuleStepBadgeText}>2</Text>
-                </View>
-                <Text style={styles.docRuleStepText}>
-                  1-nusxani devonxonaga topshiring, 2-nusxaga sana va kiruvçi № qöydirib özizda saqlang.
-                </Text>
-              </View>
-              <View style={styles.docRuleStepRow}>
-                <View style={styles.docRuleStepBadge}>
-                  <Text style={styles.docRuleStepBadgeText}>3</Text>
-                </View>
-                <Text style={styles.docRuleStepText}>
-                  3 iş kuni içida rasmiy buyruq yoki qonuniy javob xatini kuting.
-                </Text>
-              </View>
-              <View style={styles.docRuleStepRow}>
-                <View style={styles.docRuleStepBadge}>
-                  <Text style={styles.docRuleStepBadgeText}>4</Text>
-                </View>
-                <Text style={styles.docRuleStepText}>
-                  Asossiz rad etilsa — Davlat mehnat inspeksiyasi (1176) ga murojaat qiling.
-                </Text>
-              </View>
-            </View>
+          )}
 
-            {/* Direct Call 1176 Button */}
+          {/* Minimalist Hint & Hotline Pill */}
+          <View style={styles.miniDocFooterRow}>
+            <Ionicons name="information-circle-outline" size={15} color="#94A3B8" />
+            <Text style={styles.miniDocFooterHint}>
+              Arizalarni 2 nusxada topshiring. Savollar böyiça:
+            </Text>
             <TouchableOpacity
-              style={styles.docHotlineBtn}
-              activeOpacity={0.8}
-              onPress={() => {
-                Linking.openURL('tel:1176').catch(() => {
-                  Alert.alert('1176 Ishonç telefoni', 'Qöng‘iroq qiliş: 1176 (Davlat mehnat inspeksiyasi)');
-                });
-              }}
+              onPress={() => Linking.openURL('tel:1176')}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
-              <Ionicons name="call" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.docHotlineBtnText}>1176 Ishonç telefoniga qöng‘iroq qiliş</Text>
+              <Text style={styles.miniDocFooterHotline}>1176</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -5721,6 +5612,266 @@ const styles = StyleSheet.create({
   },
   aiSendBtnActive: {
     backgroundColor: '#0F2644',
+  },
+  // ==================== MINIMALIST HUJJATLAR TAB STYLES ====================
+  miniDocHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  miniDocTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.4,
+  },
+  miniDocSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  miniDocCreateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0F2644',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  miniDocCreateBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  miniDocSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginBottom: 10,
+  },
+  miniDocSearchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0F172A',
+    paddingVertical: 0,
+  },
+  miniAiBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  miniAiIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miniAiTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  miniAiDesc: {
+    fontSize: 11,
+    color: '#B45309',
+    marginTop: 1,
+  },
+  miniAiArrow: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miniDocSegmentRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: 12,
+  },
+  miniDocSegmentBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  miniDocSegmentBtnActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  miniDocSegmentText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  miniDocSegmentTextActive: {
+    color: '#0F172A',
+    fontWeight: '700',
+  },
+  miniDocFilterScroll: {
+    paddingBottom: 10,
+    gap: 8,
+  },
+  miniFilterPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  miniFilterPillActive: {
+    backgroundColor: '#0F2644',
+  },
+  miniFilterPillInactive: {
+    backgroundColor: '#F1F5F9',
+  },
+  miniFilterPillText: {
+    fontSize: 12,
+  },
+  miniFilterPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  miniFilterPillTextInactive: {
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  miniDocList: {
+    gap: 8,
+  },
+  miniDocCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  miniDocBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  miniDocBadgeLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    marginTop: 1,
+  },
+  miniDocInfo: {
+    flex: 1,
+    marginRight: 8,
+  },
+  miniDocItemTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0F172A',
+    lineHeight: 18,
+  },
+  miniDocItemMeta: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 3,
+  },
+  miniDocActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  miniDocIconAction: {
+    padding: 4,
+  },
+  miniDocStatusPill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  miniDocStatusText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#16A34A',
+  },
+  miniEmptyBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 36,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  miniEmptyTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#334155',
+    marginTop: 10,
+  },
+  miniEmptyDesc: {
+    fontSize: 12,
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  miniEmptyActionBtn: {
+    marginTop: 14,
+    backgroundColor: '#0F2644',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 18,
+  },
+  miniEmptyActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  miniDocFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingHorizontal: 16,
+    gap: 4,
+  },
+  miniDocFooterHint: {
+    fontSize: 11,
+    color: '#94A3B8',
+  },
+  miniDocFooterHotline: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0284C7',
+    textDecorationLine: 'underline',
   },
   // ==================== HUJJATLAR MARKAZI TAB STYLES ====================
   docHeaderBlock: {

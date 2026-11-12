@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewProps, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ChevronRight, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
+import { ChevronRight, Scale, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
 
 import { colors, fonts, radius, spacing } from '@/constants/tokens'
 
@@ -11,15 +11,25 @@ export function Page({ children, scroll = true, contentStyle, ...props }: { chil
   return <View style={styles.page} {...props}>{body}</View>
 }
 
-export function Header({ onBack }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
+export function Header({ onBack, showBrand = false }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
   const insets = useSafeAreaInsets()
-  if (!onBack) {
+  if (!onBack && !showBrand) {
     return <View style={{ paddingTop: Math.max(insets.top, 8) + 4, backgroundColor: colors.canvas }} />
   }
   return <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
-    <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
-      <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
-    </Pressable>
+    {onBack ? (
+      <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
+        <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
+      </Pressable>
+    ) : (
+      <View style={styles.headerLeft}>
+        <View style={styles.brandIcon}><Scale size={18} color="#fff" /></View>
+        <View style={styles.headerText}>
+          <Text style={styles.headerTitle}>YURIST ONLINE</Text>
+          <Text style={styles.headerSubtitle}>Huquqiy yordam — yaqinroq</Text>
+        </View>
+      </View>
+    )}
   </View>
 }
 
@@ -69,8 +79,13 @@ const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.canvas },
   scrollContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.md },
   fixedContent: { flex: 1, paddingHorizontal: spacing.lg },
-  header: { minHeight: 46, paddingHorizontal: spacing.lg, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  header: { minHeight: 54, paddingHorizontal: spacing.lg, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
+  brandIcon: { width: 36, height: 36, borderRadius: 11, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   backButton: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  headerText: { flex: 1, minWidth: 0 },
+  headerTitle: { color: colors.primary, fontFamily: fonts.heading, fontSize: 16, letterSpacing: 0.1 },
+  headerSubtitle: { color: colors.muted, fontFamily: fonts.body, fontSize: 12, marginTop: 1 },
   text: { color: colors.text, fontFamily: fonts.body, fontSize: 14 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 },
   sectionTitle: { color: colors.neutral, fontFamily: fonts.heading, fontSize: 17, letterSpacing: -0.2 },

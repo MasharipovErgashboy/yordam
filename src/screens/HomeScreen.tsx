@@ -33,6 +33,7 @@ export default function HomeScreen() {
   return <View style={[styles.screen, { backgroundColor: palette.canvas }]}>
     <Header showBrand showActions={false} />
     <Page>
+      <View style={styles.welcome}><View style={{ flex: 1 }}><Text style={styles.kicker}>HUQUQIY YORDAM — YAQINROQ</Text><Text style={[styles.greeting, { color: palette.text }]}>Assalomu alaykum,</Text><Text style={styles.greetingName}>Alisher aka!</Text><Text style={[styles.welcomeText, { color: palette.muted }]}>Huquqiy masalangizga mos mutaxassisni toping.</Text></View><View style={[styles.welcomeIcon, { backgroundColor: palette.surface, borderColor: palette.line }]}><ShieldCheck size={19} color={colors.primary} /></View></View>
       <SearchField value={query} onChangeText={setQuery} placeholder="Qanday yurist kerak? (oila, soliq...)" onSubmitEditing={() => router.push({ pathname: '/(tabs)/lawyers', params: { q: query } })} />
 
       <Pressable onPress={() => openLawyer(lawyers[4])} style={({ pressed }) => [styles.hero, { backgroundColor: palette.hero }, pressed && styles.pressed]}>
@@ -63,6 +64,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
+  welcome: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 5, gap: 10 },
+  kicker: { color: '#8797A8', fontFamily: fonts.semibold, fontSize: 11, letterSpacing: 0.7 },
+  greeting: { marginTop: 6, color: colors.neutral, fontFamily: fonts.heading, fontSize: 22, lineHeight: 28 },
+  greetingName: { color: colors.primary, fontFamily: fonts.headingExtra, fontSize: 24, lineHeight: 30 },
+  welcomeText: { marginTop: 5, maxWidth: 270, color: colors.muted, fontFamily: fonts.body, fontSize: 13, lineHeight: 19 },
+  welcomeIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
   hero: { position: 'relative', overflow: 'hidden', padding: 16, paddingBottom: 0, borderRadius: radius.xl, backgroundColor: colors.primary, gap: 8 },
   heroOrb: { position: 'absolute', top: -50, right: -25, width: 170, height: 170, borderRadius: 90, borderWidth: 1, borderColor: '#FFFFFF20' },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },

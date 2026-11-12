@@ -7,29 +7,23 @@ import { Avatar, Card, Header, Page, Pill, SearchField, SectionTitle, ActionButt
 import { useAppStore } from '@/hooks/use-app-store'
 import { colors, fonts } from '@/constants/tokens'
 import { formatMoney } from '@/constants/demo-data'
-import type { LegalRequest, RequestStatus } from '@/types/models'
+import type { LegalRequest } from '@/types/models'
 
-const statuses: (RequestStatus | 'Barchasi')[] = ['Barchasi', 'Kutilayotgan', 'Ko‘rib chiqilmoqda', 'Yakunlangan']
 const kinds = ['Barchasi', 'Video konsultatsiya', 'Hujjat ekspertizasi', 'Matnli chat']
 
 export default function RequestsScreen() {
-  const [status, setStatus] = useState<RequestStatus | 'Barchasi'>('Barchasi')
   const [kind, setKind] = useState('Barchasi')
   const [query, setQuery] = useState('')
   const { requests } = useAppStore()
-  const pendingCount = requests.filter((request) => request.status === 'Kutilayotgan').length
-  const reviewCount = requests.filter((request) => request.status === 'Ko‘rib chiqilmoqda').length
-  const completedCount = requests.filter((request) => request.status === 'Yakunlangan').length
 
   const filtered = useMemo(
     () => requests.filter((request) => {
       const searchTerm = query.trim().toLocaleLowerCase('uz')
-      const matchesStatus = status === 'Barchasi' || request.status === status
       const matchesKind = kind === 'Barchasi' || request.kind === kind
       const searchable = `${request.lawyerName} ${request.subject} ${request.kind}`.toLocaleLowerCase('uz')
-      return matchesStatus && matchesKind && (!searchTerm || searchable.includes(searchTerm))
+      return matchesKind && (!searchTerm || searchable.includes(searchTerm))
     }),
-    [kind, query, requests, status],
+    [kind, query, requests],
   )
 
   function openRoom(request: LegalRequest) {
@@ -37,13 +31,11 @@ export default function RequestsScreen() {
   }
 
   return <View style={styles.screen}><Header title="Mening murojaatlarim" subtitle="Konsultatsiya va hujjatlaringiz" onProfile={() => router.push('/(tabs)/profile')} /><Page>
-    <View style={styles.stats}>{[[`${pendingCount} ta`, 'Faol navbat', 'Kutilayotgan'], [`${reviewCount} ta`, 'Jarayonda', 'Ko‘rib chiqilmoqda'], [`${completedCount} ta`, 'Yakunlangan', 'Yakunlangan']].map(([value, label, filter]) => <Pressable key={label} onPress={() => setStatus(status === filter ? 'Barchasi' : filter as RequestStatus)} style={[styles.statCard, status === filter && styles.statSelected]}><Text style={styles.statValue}>{value}</Text><Text style={styles.statLabel}>{label}</Text></Pressable>)}</View>
-    <View style={styles.statusChips}>{statuses.map((item) => <Pill key={item} label={item} selected={status === item} onPress={() => setStatus(item)} />)}</View>
     <SearchField value={query} onChangeText={setQuery} placeholder="Murojaat yoki yuristni qidiring..." />
     <View style={styles.typeChips}>{kinds.map((item) => <Pill key={item} label={item} selected={kind === item} onPress={() => setKind(item)} />)}</View>
     <SectionTitle title="Murojaatlar" subtitle={`${filtered.length} ta natija`} />
     <View style={styles.list}>{filtered.map((request) => <RequestCard key={request.id} request={request} onRoom={() => openRoom(request)} onReview={() => router.push({ pathname: '/review', params: { lawyerId: request.lawyerId } })} />)}</View>
-    {!filtered.length ? <Card style={styles.empty}><Search size={22} color={colors.muted} /><Text style={styles.emptyTitle}>Murojaat topilmadi</Text><Text style={styles.emptyText}>Boshqa qidiruv so‘zini yoki filtrni tanlang.</Text><ActionButton title="Filtrlarni tozalash" variant="outline" onPress={() => { setQuery(''); setStatus('Barchasi'); setKind('Barchasi') }} /></Card> : null}
+    {!filtered.length ? <Card style={styles.empty}><Search size={22} color={colors.muted} /><Text style={styles.emptyTitle}>Murojaat topilmadi</Text><Text style={styles.emptyText}>Boshqa qidiruv so‘zini yoki filtrni tanlang.</Text><ActionButton title="Filtrlarni tozalash" variant="outline" onPress={() => { setQuery(''); setKind('Barchasi') }} /></Card> : null}
     <Card style={styles.support}><View style={styles.supportIcon}><Headphones size={17} color="#fff" /></View><View style={{ flex: 1 }}><Text style={styles.supportTitle}>Savollaringiz bormi?</Text><Text style={styles.supportText}>Qo‘llab-quvvatlash xizmati bilan bog‘laning.</Text></View><Pressable onPress={() => router.push('/(tabs)/messages')}><Text style={styles.supportAction}>Yordam</Text></Pressable></Card>
   </Page></View>
 }
@@ -63,12 +55,6 @@ function RequestCard({ request, onRoom, onReview }: { request: LegalRequest; onR
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  stats: { flexDirection: 'row', gap: 8 },
-  statCard: { flex: 1, minHeight: 62, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center', gap: 3, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff' },
-  statSelected: { borderColor: '#A8C9E2', backgroundColor: '#F1F8FD' },
-  statValue: { color: colors.primary, fontFamily: fonts.heading, fontSize: 15 },
-  statLabel: { color: colors.muted, fontFamily: fonts.body, fontSize: 11, textAlign: 'center' },
-  statusChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   typeChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   list: { gap: 10 },
   requestCard: { gap: 10, padding: 12 },

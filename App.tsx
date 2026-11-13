@@ -44,7 +44,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+      <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
         {currentScreen === 'splash' && (
           <SplashScreen
             onFinish={() => setCurrentScreen('onboarding')}

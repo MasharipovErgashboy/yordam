@@ -95,11 +95,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const handleLoginSubmit = async () => {
     const cleanEmail = loginEmail.trim();
     if (!cleanEmail) {
-      Alert.alert('Xatolik', 'Iltimos, email manzilingizni kiriting.');
+      Alert.alert('Xatolik', 'Email manzilingizni kiriting.');
       return;
     }
     if (!loginPassword) {
-      Alert.alert('Xatolik', 'Iltimos, parolingizni kiriting.');
+      Alert.alert('Xatolik', 'Parolingizni kiriting.');
       return;
     }
 
@@ -124,18 +124,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     const cleanPhone = phone.trim();
 
     if (!cleanFirst || !cleanLast) {
-      Alert.alert('Xatolik', 'Iltimos, ism va familiyangizni to‘liq kiriting.');
+      Alert.alert('Xatolik', 'Ism va familiyangizni to‘liq kiriting.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
-      Alert.alert('Xatolik', 'Iltimos, to‘g‘ri email manzilini kiriting.');
+      Alert.alert('Xatolik', 'To‘g‘ri email manzilini kiriting.');
       return;
     }
 
     if (cleanPhone.replace(/\D/g, '').length < 9) {
-      Alert.alert('Xatolik', 'Iltimos, to‘g‘ri telefon raqamingizni kiriting.');
+      Alert.alert('Xatolik', 'To‘g‘ri telefon raqamingizni kiriting.');
       return;
     }
 
@@ -145,7 +145,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     }
 
     if (registerPassword !== confirmPassword) {
-      Alert.alert('Xatolik', 'Parollar bir-biriga mos kelmadi. Tekshirib qaytadan kiriting.');
+      Alert.alert('Xatolik', 'Parollar bir-biriga mos kelmadi.');
       return;
     }
 
@@ -166,7 +166,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       setCanResend(false);
       setIsOtpModalVisible(true);
     } catch (err: any) {
-      Alert.alert('Ro‘yxatdan o‘tishda xatolik', err.message || 'Server bilan bog‘lanishda xatolik.');
+      Alert.alert('Xatolik', err.message || 'Server bilan bog‘lanishda xatolik.');
     } finally {
       setIsRegisterLoading(false);
     }
@@ -176,7 +176,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const handleVerifyOtp = async () => {
     const cleanOtp = otpCode.trim();
     if (cleanOtp.length !== 6) {
-      setOtpError('Iltimos, 6 xonali tasdiqlash kodini to‘liq kiriting.');
+      setOtpError('6 xonali tasdiqlash kodini to‘liq kiriting.');
       return;
     }
 
@@ -218,14 +218,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
-
-      {/* Ambient background decoration */}
-      <LinearGradient
-        colors={['#0F1E36', '#060E1A', '#060E1A']}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={styles.ambientGlowTop} />
+      <StatusBar style="dark" />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -234,12 +227,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 },
+            { paddingTop: insets.top + 10, paddingBottom: insets.bottom + 24 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Top navigation bar */}
+          {/* Top bar with back button */}
           <View style={styles.headerBar}>
             {onCancel ? (
               <TouchableOpacity
@@ -247,19 +240,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 onPress={onCancel}
                 activeOpacity={0.7}
               >
-                <Ionicons name="chevron-back" size={22} color="#00E5FF" />
+                <Ionicons name="arrow-back" size={20} color="#0F172A" />
                 <Text style={styles.backButtonText}>Bosh sahifa</Text>
               </TouchableOpacity>
             ) : (
               <View style={{ width: 40 }} />
             )}
-            <View style={styles.secureBadge}>
-              <Ionicons name="shield-checkmark" size={14} color="#10B981" />
-              <Text style={styles.secureBadgeText}>Xavfsiz portal</Text>
-            </View>
+            <View style={{ width: 40 }} />
           </View>
 
-          {/* Logo & Platform Name */}
+          {/* Logo & Platform Title */}
           <View style={styles.brandContainer}>
             <View style={styles.logoWrapper}>
               <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
@@ -269,9 +259,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <Text style={styles.brandOrange}>o</Text>
               <Text style={styles.brandBlue}>rdam</Text>
             </View>
-            <Text style={styles.brandSubtitle}>
-              Fuqarolar uchun yagona interaktiv huquqiy boshqaruv tizimi
-            </Text>
           </View>
 
           {/* Auth Tab Switcher */}
@@ -283,8 +270,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             >
               <Ionicons
                 name="log-in-outline"
-                size={17}
-                color={activeTab === 'login' ? '#00E5FF' : '#94A3B8'}
+                size={18}
+                color={activeTab === 'login' ? '#0284C7' : '#64748B'}
                 style={{ marginRight: 6 }}
               />
               <Text
@@ -304,8 +291,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             >
               <Ionicons
                 name="person-add-outline"
-                size={16}
-                color={activeTab === 'register' ? '#00E5FF' : '#94A3B8'}
+                size={17}
+                color={activeTab === 'register' ? '#0284C7' : '#64748B'}
                 style={{ marginRight: 6 }}
               />
               <Text
@@ -325,19 +312,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {activeTab === 'login' && (
             <View style={styles.formCard}>
               <Text style={styles.cardHeaderTitle}>Tizimga kirish</Text>
-              <Text style={styles.cardHeaderSubtitle}>
-                Yordam xizmatlaridan foydalanish uchun emailingiz va parolingizni kiriting
-              </Text>
 
               {/* Email Input */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Email manzil</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="mail-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="namuna@gmail.com"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={loginEmail}
                     onChangeText={setLoginEmail}
                     keyboardType="email-address"
@@ -351,11 +335,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Parol</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="lock-closed-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="Parolingizni kiriting"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={loginPassword}
                     onChangeText={setLoginPassword}
                     secureTextEntry={!showLoginPassword}
@@ -368,7 +352,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     <Ionicons
                       name={showLoginPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={20}
-                      color="#94A3B8"
+                      color="#64748B"
                     />
                   </TouchableOpacity>
                 </View>
@@ -414,19 +398,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {activeTab === 'register' && (
             <View style={styles.formCard}>
               <Text style={styles.cardHeaderTitle}>Ro‘yxatdan o‘tish</Text>
-              <Text style={styles.cardHeaderSubtitle}>
-                Barcha huquqiy xizmatlardan to‘liq foydalanish uchun ma’lumotlaringizni kiriting
-              </Text>
 
               {/* Ism Field */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Ism</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="person-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="Ismingizni kiriting"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={firstName}
                     onChangeText={setFirstName}
                     autoCapitalize="words"
@@ -438,11 +419,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Familiya</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="person-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="Familiyangizni kiriting"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={lastName}
                     onChangeText={setLastName}
                     autoCapitalize="words"
@@ -452,13 +433,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
               {/* Email Address Field */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email manzil (kod yuboriladi)</Text>
+                <Text style={styles.inputLabel}>Email manzil</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="mail-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="namuna@gmail.com"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={registerEmail}
                     onChangeText={setRegisterEmail}
                     keyboardType="email-address"
@@ -472,11 +453,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Telefon raqam</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="call-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="call-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="+998 90 123 45 67"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={phone}
                     onChangeText={handlePhoneChange}
                     keyboardType="phone-pad"
@@ -486,13 +467,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
               {/* Password Field */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Parol yaratish (kamida 6 ta belgi)</Text>
+                <Text style={styles.inputLabel}>Parol</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="lock-closed-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
-                    placeholder="Kuchli parol o‘ylab toping"
-                    placeholderTextColor="#64748B"
+                    placeholder="Kamida 6 ta belgi"
+                    placeholderTextColor="#94A3B8"
                     value={registerPassword}
                     onChangeText={setRegisterPassword}
                     secureTextEntry={!showRegisterPassword}
@@ -505,7 +486,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     <Ionicons
                       name={showRegisterPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={20}
-                      color="#94A3B8"
+                      color="#64748B"
                     />
                   </TouchableOpacity>
                 </View>
@@ -515,11 +496,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Parolni tasdiqlash</Text>
                 <View style={styles.inputWrapper}>
-                  <Ionicons name="shield-checkmark-outline" size={19} color="#00A3FF" style={styles.inputIcon} />
+                  <Ionicons name="shield-checkmark-outline" size={19} color="#0284C7" style={styles.inputIcon} />
                   <TextInput
                     style={styles.inputField}
                     placeholder="Parolni qayta kiriting"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor="#94A3B8"
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     secureTextEntry={!showConfirmPassword}
@@ -532,7 +513,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     <Ionicons
                       name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={20}
-                      color="#94A3B8"
+                      color="#64748B"
                     />
                   </TouchableOpacity>
                 </View>
@@ -571,16 +552,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </View>
             </View>
           )}
-
-          {/* Privacy Note */}
-          <Text style={styles.privacyNote}>
-            Ro‘yxatdan o‘tish orqali siz Yordam tizimining xavfsizlik qoidalari va shaxsiy ma’lumotlarni qayta ishlash siyosatiga rozilik bildirasiz.
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
 
       {/* ===================================================================== */}
-      {/* 6-DIGIT OTP VERIFICATION MODAL / ALERT */}
+      {/* 6-DIGIT OTP VERIFICATION MODAL / ALERT (LIGHT THEME) */}
       {/* ===================================================================== */}
       <Modal
         visible={isOtpModalVisible}
@@ -593,17 +569,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.otpModalCard}>
-            {/* Glow header icon */}
+            {/* Header icon */}
             <View style={styles.otpIconCircle}>
-              <Ionicons name="mail-unread" size={32} color="#00E5FF" />
+              <Ionicons name="mail-unread" size={30} color="#0284C7" />
             </View>
 
             <Text style={styles.otpModalTitle}>Emailni tasdiqlang</Text>
             <Text style={styles.otpModalSubtitle}>
-              <Text style={{ color: '#00E5FF', fontWeight: '700' }}>{registerEmail}</Text> manziliga 6 xonali tasdiqlash kodi yuborildi.
+              <Text style={{ color: '#0284C7', fontWeight: '700' }}>{registerEmail}</Text> manziliga 6 xonali tasdiqlash kodi yuborildi.
             </Text>
 
-            {/* OTP Input Boxes representation */}
+            {/* OTP Input Boxes */}
             <View style={styles.otpBoxesRow}>
               {[0, 1, 2, 3, 4, 5].map((index) => {
                 const char = otpCode[index] || '';
@@ -617,7 +593,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       char ? styles.otpDigitBoxFilled : null,
                     ]}
                   >
-                    <Text style={styles.otpDigitText}>{char}</Text>
+                    <Text style={[styles.otpDigitText, char ? styles.otpDigitTextFilled : null]}>
+                      {char}
+                    </Text>
                   </View>
                 );
               })}
@@ -641,7 +619,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             {/* Error Message */}
             {otpError ? (
               <View style={styles.otpErrorBox}>
-                <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
+                <Ionicons name="alert-circle" size={16} color="#DC2626" style={{ marginRight: 6 }} />
                 <Text style={styles.otpErrorText}>{otpError}</Text>
               </View>
             ) : null}
@@ -654,14 +632,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   disabled={isResending}
                   style={styles.resendButton}
                 >
-                  <Ionicons name="refresh" size={15} color="#00E5FF" style={{ marginRight: 5 }} />
+                  <Ionicons name="refresh" size={15} color="#0284C7" style={{ marginRight: 5 }} />
                   <Text style={styles.resendText}>
                     {isResending ? 'Yuborilmoqda...' : 'Kodni qayta yuborish'}
                   </Text>
                 </TouchableOpacity>
               ) : (
                 <Text style={styles.resendCountdownText}>
-                  Qayta kod so‘rash: <Text style={{ color: '#00E5FF', fontWeight: '700' }}>{resendCountdown}s</Text>
+                  Qayta kod so‘rash: <Text style={{ color: '#0284C7', fontWeight: '700' }}>{resendCountdown}s</Text>
                 </Text>
               )}
             </View>
@@ -674,7 +652,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               activeOpacity={0.85}
             >
               <LinearGradient
-                colors={otpCode.length === 6 ? ['#0284C7', '#00A3FF'] : ['#334155', '#1E293B']}
+                colors={otpCode.length === 6 ? ['#0284C7', '#00A3FF'] : ['#CBD5E1', '#94A3B8']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.otpConfirmGradient}
@@ -683,7 +661,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <>
-                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                    <Ionicons name="checkmark-circle" size={19} color="#FFFFFF" style={{ marginRight: 8 }} />
                     <Text style={styles.otpConfirmText}>Tasdiqlash va kirish</Text>
                   </>
                 )}
@@ -707,16 +685,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#060E1A',
-  },
-  ambientGlowTop: {
-    position: 'absolute',
-    top: -120,
-    alignSelf: 'center',
-    width: 340,
-    height: 340,
-    borderRadius: 170,
-    backgroundColor: 'rgba(0, 163, 255, 0.12)',
+    backgroundColor: '#F8FAFC',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -725,93 +694,79 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   backButtonText: {
     fontSize: 13,
-    color: '#00E5FF',
+    color: '#0F172A',
     fontWeight: '600',
-    marginLeft: 4,
-  },
-  secureBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
-  },
-  secureBadgeText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#10B981',
-    marginLeft: 5,
+    marginLeft: 6,
   },
   brandContainer: {
     alignItems: 'center',
-    marginVertical: 12,
+    marginVertical: 10,
   },
   logoWrapper: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    width: 68,
+    height: 68,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(0, 163, 255, 0.25)',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
     overflow: 'hidden',
   },
   logoImage: {
-    width: 58,
-    height: 58,
+    width: 60,
+    height: 60,
   },
   brandTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   brandBlue: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
-    color: '#2563EB',
+    color: '#0284C7',
     letterSpacing: -0.5,
   },
   brandOrange: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
     color: '#FF7A00',
     letterSpacing: -0.5,
   },
-  brandSubtitle: {
-    fontSize: 12.5,
-    color: '#94A3B8',
-    textAlign: 'center',
-    marginTop: 6,
-    paddingHorizontal: 20,
-    lineHeight: 18,
-  },
   tabSwitcher: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#EEF2F6',
     borderRadius: 14,
     padding: 4,
-    marginTop: 18,
-    marginBottom: 20,
+    marginTop: 14,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
   },
   tabButton: {
     flex: 1,
@@ -819,59 +774,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 11,
-    borderRadius: 10,
+    borderRadius: 11,
   },
   tabButtonActive: {
-    backgroundColor: 'rgba(0, 163, 255, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 163, 255, 0.4)',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   tabButtonText: {
     fontSize: 13.5,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#64748B',
   },
   tabButtonTextActive: {
-    color: '#00E5FF',
+    color: '#0284C7',
     fontWeight: '700',
   },
   formCard: {
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    backgroundColor: '#FFFFFF',
     borderRadius: 22,
     padding: 22,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.09)',
+    borderColor: '#E2E8F0',
     marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   cardHeaderTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  cardHeaderSubtitle: {
-    fontSize: 12.5,
-    color: '#94A3B8',
-    lineHeight: 18,
+    color: '#0F172A',
     marginBottom: 18,
   },
   inputGroup: {
-    marginBottom: 15,
+    marginBottom: 14,
   },
   inputLabel: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#CBD5E1',
-    marginBottom: 7,
+    color: '#334155',
+    marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 13,
-    paddingHorizontal: 12,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    paddingHorizontal: 13,
     height: 48,
   },
   inputIcon: {
@@ -879,8 +836,8 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: 14.5,
+    color: '#0F172A',
     height: '100%',
   },
   eyeButton: {
@@ -889,14 +846,19 @@ const styles = StyleSheet.create({
   primaryButton: {
     borderRadius: 13,
     overflow: 'hidden',
-    marginTop: 10,
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 14,
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 3,
   },
   buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 49,
+    height: 48,
     paddingHorizontal: 18,
   },
   primaryButtonText: {
@@ -912,25 +874,18 @@ const styles = StyleSheet.create({
   },
   switchAuthText: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: '#64748B',
   },
   switchAuthLink: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#00E5FF',
-  },
-  privacyNote: {
-    fontSize: 11.5,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 17,
-    paddingHorizontal: 12,
+    color: '#0284C7',
   },
 
-  // Modal styles
+  // Modal styles (Light theme)
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.82)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -938,21 +893,25 @@ const styles = StyleSheet.create({
   otpModalCard: {
     width: '100%',
     maxWidth: 390,
-    backgroundColor: '#0E172A',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(0, 163, 255, 0.3)',
+    borderColor: '#E2E8F0',
     padding: 24,
     alignItems: 'center',
-    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 6,
   },
   otpIconCircle: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    backgroundColor: 'rgba(0, 163, 255, 0.12)',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#F0F9FF',
     borderWidth: 1,
-    borderColor: 'rgba(0, 163, 255, 0.25)',
+    borderColor: '#BAE6FD',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 14,
@@ -960,12 +919,12 @@ const styles = StyleSheet.create({
   otpModalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 6,
   },
   otpModalSubtitle: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 19,
     marginBottom: 20,
@@ -975,30 +934,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   otpDigitBox: {
     width: 44,
     height: 52,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   otpDigitBoxFocused: {
-    borderColor: '#00E5FF',
-    backgroundColor: 'rgba(0, 229, 255, 0.08)',
+    borderColor: '#0284C7',
+    backgroundColor: '#F0F9FF',
   },
   otpDigitBoxFilled: {
     borderColor: '#0284C7',
-    backgroundColor: 'rgba(2, 132, 199, 0.12)',
+    backgroundColor: '#F0F9FF',
   },
   otpDigitText: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#00E5FF',
+    color: '#0F172A',
+  },
+  otpDigitTextFilled: {
+    color: '#0284C7',
   },
   hiddenOtpInput: {
     position: 'absolute',
@@ -1009,9 +971,9 @@ const styles = StyleSheet.create({
   otpErrorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.25)',
+    borderColor: '#FCA5A5',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 10,
@@ -1020,7 +982,7 @@ const styles = StyleSheet.create({
   },
   otpErrorText: {
     fontSize: 12,
-    color: '#F87171',
+    color: '#DC2626',
     fontWeight: '600',
   },
   resendRow: {
@@ -1035,11 +997,11 @@ const styles = StyleSheet.create({
   resendText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#00E5FF',
+    color: '#0284C7',
   },
   resendCountdownText: {
     fontSize: 12.5,
-    color: '#94A3B8',
+    color: '#64748B',
   },
   otpConfirmButton: {
     width: '100%',
@@ -1061,7 +1023,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   cancelModalButton: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 12,
   },
   cancelModalText: {

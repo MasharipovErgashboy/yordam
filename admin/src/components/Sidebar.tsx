@@ -15,7 +15,7 @@ import logoImg from '../assets/logo.png';
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  user: UserSession;
+  user?: UserSession;
   onLogout: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
@@ -24,7 +24,6 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onTabChange,
-  user,
   onLogout,
   isCollapsed,
   onToggleCollapse,
@@ -292,103 +291,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* User Profile Card at Bottom */}
+      {/* Bottom Logout Button */}
       <div style={{
         marginTop: 'auto',
         paddingTop: '16px',
         borderTop: '1px solid rgba(255, 255, 255, 0.06)',
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: isCollapsed ? '6px 0' : '8px 10px',
-          background: isCollapsed ? 'transparent' : 'rgba(255, 255, 255, 0.03)',
-          border: isCollapsed ? 'none' : '1px solid rgba(255, 255, 255, 0.06)',
-          borderRadius: '14px',
-          justifyContent: isCollapsed ? 'center' : 'flex-start',
-        }}>
-          {/* Avatar with active green dot */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#FFFFFF',
-              fontSize: '13px',
-              fontWeight: 800,
-              border: '1.5px solid rgba(255, 255, 255, 0.2)',
-            }}>
-              {user.avatar || 'RC'}
-            </div>
-            <div style={{
-              position: 'absolute',
-              bottom: '0px',
-              right: '0px',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              background: '#10B981',
-              border: '2px solid #070B14',
-            }} />
-          </div>
-
-          {!isCollapsed && (
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{
-                fontSize: '13px',
-                fontWeight: 700,
-                color: '#FFFFFF',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>
-                {user.name}
-              </div>
-              <div style={{
-                fontSize: '11px',
-                color: '#94A3B8',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>
-                Bosh Administrator
-              </div>
-            </div>
-          )}
-
-          {!isCollapsed && (
-            <button
-              onClick={onLogout}
-              title="Tizimdan chiqish"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#64748B',
-                cursor: 'pointer',
-                padding: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#EF4444';
-                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#64748B';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <LogOut size={16} />
-            </button>
-          )}
-        </div>
+        <button
+          onClick={onLogout}
+          title="Chiqish"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            gap: '12px',
+            width: '100%',
+            height: '44px',
+            padding: isCollapsed ? '0 12px' : '0 14px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: '#94A3B8',
+            fontSize: '13.5px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+            e.currentTarget.style.color = '#EF4444';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+            e.currentTarget.style.color = '#94A3B8';
+          }}
+        >
+          <LogOut size={18} style={{ flexShrink: 0 }} />
+          {!isCollapsed && <span>Chiqish</span>}
+        </button>
       </div>
     </aside>
   );

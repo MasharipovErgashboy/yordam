@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, Alert,
+  StatusBar, Alert, Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from '../components/ScreenContainer';
@@ -68,8 +68,34 @@ const addDays = (days: number) => {
   return d;
 };
 
+export type ReminderAction = {
+  label: string;
+  primary: boolean;
+  icon: string;
+};
+
+export type ReminderItem = {
+  id: string;
+  dateObj: Date;
+  urgency: string;
+  urgencyColor: string;
+  urgencyBg: string;
+  icon: string;
+  title: string;
+  amount?: string;
+  date: string;
+  dateColor: string;
+  meta?: string;
+  metaLabel?: string;
+  holat?: string;
+  holatColor?: string;
+  actions: ReminderAction[];
+  expired: boolean;
+  daysLeft: number;
+};
+
 // ─── REMINDERS ───────────────────────────────────────────────
-const REMINDERS = [
+const REMINDERS: ReminderItem[] = [
   {
     id: '1',
     dateObj: addDays(0),
@@ -199,13 +225,67 @@ const REMINDERS = [
 // ─── COMPONENT ───────────────────────────────────────────────
 export default function RemindersScreen() {
   const navigation = useNavigation<any>();
+  const [reminders, setReminders] = useState<ReminderItem[]>(REMINDERS);
   const [activeTab, setActiveTab] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState(currentDay);
   const [selectedFilter, setSelectedFilter] = useState('all');
 
-  const soonCount = REMINDERS.filter(r => !r.expired).length;
-  const expiredCount = REMINDERS.filter(r => r.expired).length;
-  const allCount = REMINDERS.length;
+  // New reminder modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newCategory, setNewCategory] = useState<'pay' | 'warranty' | 'insurance' | 'contract'>('pay');
+  const [newDays, setNewDays] = useState(3);
+
+  const handleAddReminder = () => {
+    if (!newTitle.trim()) {
+      Alert.alert('Xatolik', 'Iltimos, eslatma nomini kiriting.');
+      return;
+    }
+
+    const d = addDays(newDays);
+    const catMap = {
+      pay: { icon: 'flash-outline', meta: "To'lov eslatmasi", urgencyBg: newDays <= 1 ? C.redLight : C.blueLight, urgencyColor: newDays <= 1 ? C.red : C.primary },
+      warranty: { icon: 'phone-portrait-outline', meta: 'Kafolat taloni monitoringi', urgencyBg: C.blueLight, urgencyColor: C.primary },
+      insurance: { icon: 'car-outline', meta: "Sug'urta polisi", urgencyBg: C.orangeLight, urgencyColor: C.orange },
+      contract: { icon: 'document-text-outline', meta: 'Rasmiy shartnoma muddati', urgencyBg: C.blueLight, urgencyColor: C.primary },
+    }[newCategory];
+
+    const urgencyText = newDays === 0
+      ? "Bugun! To'lov kuni"
+      : newDays === 1
+      ? 'Ertaga! 1 kun qoldi'
+      : `${newDays} kun qoldi`;
+
+    const newRem = {
+      id: Date.now().toString(),
+      dateObj: d,
+      urgency: urgencyText,
+      urgencyColor: catMap.urgencyColor,
+      urgencyBg: catMap.urgencyBg,
+      icon: catMap.icon,
+      title: newTitle.trim(),
+      amount: newAmount.trim() ? newAmount.trim() : undefined,
+      date: formatDateStr(d),
+      dateColor: newDays <= 1 ? C.red : C.textDark,
+      meta: catMap.meta,
+      actions: [
+        { label: "Bajarildi", primary: true, icon: 'checkmark-circle-outline' },
+      ],
+      expired: false,
+      daysLeft: newDays,
+    };
+
+    setReminders(prev => [newRem, ...prev]);
+    setNewTitle('');
+    setNewAmount('');
+    setModalVisible(false);
+    Alert.alert('Muvaffaqiyatli', "Yangi eslatma ro'yxatga qo'shildi!");
+  };
+
+  const soonCount = reminders.filter(r => !r.expired).length;
+  const expiredCount = reminders.filter(r => r.expired).length;
+  const allCount = reminders.length;
 
   const filters = [
     { id: 'all', label: 'Barchasi', count: allCount },
@@ -215,12 +295,12 @@ export default function RemindersScreen() {
 
   const filtered = (() => {
     if (selectedFilter === 'expired') {
-      return REMINDERS.filter(r => r.expired).sort((a, b) => b.daysLeft - a.daysLeft);
+      return reminders.filter(r => r.expired).sort((a, b) => b.daysLeft - a.daysLeft);
     }
     if (selectedFilter === 'soon') {
-      return REMINDERS.filter(r => !r.expired).sort((a, b) => a.daysLeft - b.daysLeft);
+      return reminders.filter(r => !r.expired).sort((a, b) => a.daysLeft - b.daysLeft);
     }
-    return [...REMINDERS].sort((a, b) => {
+    return [...reminders].sort((a, b) => {
       if (!a.expired && b.expired) return -1;
       if (a.expired && !b.expired) return 1;
       if (!a.expired && !b.expired) return a.daysLeft - b.daysLeft;
@@ -303,46 +383,48 @@ export default function RemindersScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── TITLE ── */}
-      <View style={styles.titleRow}>
-        <Text style={styles.pageTitle}>Eslatmalar va Muddatlar</Text>
-        <TouchableOpacity style={styles.newBtn} onPress={() => Alert.alert('Yangi eslatma', "Yangi eslatma qo'shish oynasi")}>
-          <Ionicons name="add" size={16} color={C.white} style={{ marginRight: 4 }} />
-          <Text style={styles.newBtnText}>Yangi eslatma</Text>
-        </TouchableOpacity>
-      </View>
+      {/* ── TOP CONTROLS (TABS + QUICK ADD) ── */}
+      <View style={styles.topControlRow}>
+        <View style={styles.tabRow}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'list' && styles.tabActive]}
+            onPress={() => setActiveTab('list')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons
+                name="list"
+                size={15}
+                color={activeTab === 'list' ? C.white : C.textGrey}
+              />
+              <Text style={[styles.tabText, activeTab === 'list' && styles.tabTextActive]}>
+                Ro'yxat
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'calendar' && styles.tabActive]}
+            onPress={() => setActiveTab('calendar')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons
+                name="calendar-outline"
+                size={15}
+                color={activeTab === 'calendar' ? C.white : C.textGrey}
+              />
+              <Text style={[styles.tabText, activeTab === 'calendar' && styles.tabTextActive]}>
+                Taqvim ({todayStr})
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-      {/* ── TABS ── */}
-      <View style={styles.tabRow}>
+        {/* Sleek top-right add button */}
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'list' && styles.tabActive]}
-          onPress={() => setActiveTab('list')}
+          style={styles.topAddBtn}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.8}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Ionicons
-              name="list"
-              size={15}
-              color={activeTab === 'list' ? C.white : C.textGrey}
-            />
-            <Text style={[styles.tabText, activeTab === 'list' && styles.tabTextActive]}>
-              Ro'yxat
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'calendar' && styles.tabActive]}
-          onPress={() => setActiveTab('calendar')}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Ionicons
-              name="calendar-outline"
-              size={15}
-              color={activeTab === 'calendar' ? C.white : C.textGrey}
-            />
-            <Text style={[styles.tabText, activeTab === 'calendar' && styles.tabTextActive]}>
-              Taqvim ({todayStr})
-            </Text>
-          </View>
+          <Ionicons name="add" size={20} color={C.white} />
         </TouchableOpacity>
       </View>
 
@@ -362,7 +444,7 @@ export default function RemindersScreen() {
                 {WEEK_DAYS.map((day, i) => {
                   const dateNum = WEEK_DATES[i];
                   const isSelected = selectedDate === dateNum;
-                  const hasEvent = REMINDERS.some(r => r.dateObj.getDate() === dateNum);
+                  const hasEvent = reminders.some(r => r.dateObj.getDate() === dateNum);
                   return (
                     <TouchableOpacity
                       key={i}
@@ -384,7 +466,7 @@ export default function RemindersScreen() {
 
             {/* Selected day header */}
             {(() => {
-              const dayEvents = REMINDERS.filter(r => r.dateObj.getDate() === selectedDate);
+              const dayEvents = reminders.filter(r => r.dateObj.getDate() === selectedDate);
               return (
                 <View>
                   <View style={styles.calSelectedHeader}>
@@ -404,7 +486,7 @@ export default function RemindersScreen() {
                       <Ionicons name="calendar-outline" size={36} color={C.textGrey} style={{ marginBottom: 8 }} />
                       <Text style={styles.emptyTitle}>Ushbu kunga eslatma yo'q</Text>
                       <Text style={styles.emptySub}>
-                        Yangi eslatma qo'shish uchun yuqoridagi «Yangi eslatma» tugmasini bosing
+                        Yangi eslatma qo'shish uchun «+» tugmasini bosing
                       </Text>
                     </View>
                   )}
@@ -435,8 +517,132 @@ export default function RemindersScreen() {
           </View>
         )}
 
-        <View style={{ height: 20 }} />
+        <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* ── FLOATING ACTION BUTTON (FAB) ── */}
+      <TouchableOpacity
+        style={styles.fabBtn}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="add" size={20} color={C.white} />
+        <Text style={styles.fabText}>Yangi eslatma</Text>
+      </TouchableOpacity>
+
+      {/* ── ADD REMINDER MODAL ── */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity
+            style={styles.modalDismiss}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={styles.modalIconBox}>
+                  <Ionicons name="notifications-outline" size={20} color={C.primary} />
+                </View>
+                <Text style={styles.modalTitle}>Yangi eslatma yaratish</Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseBtn}>
+                <Ionicons name="close" size={20} color={C.textGrey} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Input title */}
+            <Text style={styles.inputLabel}>Eslatma nomi</Text>
+            <View style={styles.inputBox}>
+              <Ionicons name="create-outline" size={18} color={C.textGrey} style={{ marginRight: 8 }} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Masalan: Gaz to'lovi, Sug'urta..."
+                placeholderTextColor={C.textGrey}
+                value={newTitle}
+                onChangeText={setNewTitle}
+              />
+            </View>
+
+            {/* Input amount (optional) */}
+            <Text style={styles.inputLabel}>To'lov summasi (ixtiyoriy)</Text>
+            <View style={styles.inputBox}>
+              <Ionicons name="card-outline" size={18} color={C.textGrey} style={{ marginRight: 8 }} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Masalan: 350,000 UZS"
+                placeholderTextColor={C.textGrey}
+                value={newAmount}
+                onChangeText={setNewAmount}
+              />
+            </View>
+
+            {/* Category selection */}
+            <Text style={styles.inputLabel}>Kategoriya turi</Text>
+            <View style={styles.categoryRow}>
+              {[
+                { id: 'pay', label: "To'lov", icon: 'flash-outline' },
+                { id: 'warranty', label: 'Kafolat', icon: 'phone-portrait-outline' },
+                { id: 'insurance', label: "Sug'urta", icon: 'car-outline' },
+                { id: 'contract', label: 'Shartnoma', icon: 'document-text-outline' },
+              ].map(cat => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[styles.categoryChip, newCategory === cat.id && styles.categoryChipActive]}
+                  onPress={() => setNewCategory(cat.id as any)}
+                >
+                  <Ionicons
+                    name={cat.icon as any}
+                    size={14}
+                    color={newCategory === cat.id ? C.white : C.primary}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={[styles.categoryChipText, newCategory === cat.id && styles.categoryChipTextActive]}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Muddat selection */}
+            <Text style={styles.inputLabel}>Muddat qachon?</Text>
+            <View style={styles.daysRow}>
+              {[
+                { days: 0, label: 'Bugun' },
+                { days: 1, label: 'Ertaga' },
+                { days: 3, label: '3 kun' },
+                { days: 7, label: '1 hafta' },
+                { days: 14, label: '2 hafta' },
+                { days: 30, label: '1 oy' },
+              ].map(d => (
+                <TouchableOpacity
+                  key={d.days}
+                  style={[styles.daysChip, newDays === d.days && styles.daysChipActive]}
+                  onPress={() => setNewDays(d.days)}
+                >
+                  <Text style={[styles.daysChipText, newDays === d.days && styles.daysChipTextActive]}>
+                    {d.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Action button */}
+            <TouchableOpacity style={styles.submitBtn} onPress={handleAddReminder}>
+              <Ionicons name="checkmark-circle" size={18} color={C.white} style={{ marginRight: 6 }} />
+              <Text style={styles.submitBtnText}>Eslatmani saqlash</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* ── BOTTOM NAV ── */}
       <BottomNav activeScreen="Reminders" />
@@ -447,32 +653,192 @@ export default function RemindersScreen() {
 // ─── STYLES ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: 14, paddingTop: 8 },
+  scroll: { paddingHorizontal: 14, paddingTop: 4 },
 
-  titleRow: {
+  // Top controls
+  topControlRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 14,
-    marginTop: 14,
-    marginBottom: 14,
+    marginTop: 12,
+    marginBottom: 10,
+    gap: 10,
   },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: C.textDark,
+  tabRow: {
     flex: 1,
-    marginRight: 8,
+    flexDirection: 'row',
+    backgroundColor: C.white,
+    borderRadius: 12,
+    padding: 4,
+    elevation: 1,
   },
-  newBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
-  newBtnText: { fontSize: 12, color: C.white, fontWeight: '700' },
-
-  // Tabs
-  tabRow: { flexDirection: 'row', marginHorizontal: 14, backgroundColor: C.white, borderRadius: 12, padding: 4, marginBottom: 14, elevation: 1 },
   tab: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
   tabActive: { backgroundColor: C.primary },
   tabText: { fontSize: 13, color: C.textGrey, fontWeight: '500' },
   tabTextActive: { color: C.white, fontWeight: '700' },
+
+  topAddBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: C.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: C.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  // FAB
+  fabBtn: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 28,
+    elevation: 6,
+    shadowColor: C.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    gap: 6,
+    zIndex: 10,
+  },
+  fabText: {
+    color: C.white,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalDismiss: {
+    flex: 1,
+  },
+  modalContent: {
+    backgroundColor: C.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: C.blueLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: C.textDark,
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: C.textDark,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  inputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 14,
+    color: C.textDark,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  categoryChipActive: {
+    backgroundColor: C.primary,
+  },
+  categoryChipText: {
+    fontSize: 12,
+    color: C.textDark,
+    fontWeight: '600',
+  },
+  categoryChipTextActive: {
+    color: C.white,
+  },
+  daysRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  daysChip: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  daysChipActive: {
+    backgroundColor: C.primary,
+  },
+  daysChipText: {
+    fontSize: 12,
+    color: C.textDark,
+    fontWeight: '600',
+  },
+  daysChipTextActive: {
+    color: C.white,
+  },
+  submitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 20,
+    elevation: 3,
+  },
+  submitBtnText: {
+    color: C.white,
+    fontSize: 15,
+    fontWeight: '700',
+  },
 
   // Calendar
   calendarCard: { backgroundColor: C.white, borderRadius: 16, padding: 14, marginBottom: 12, elevation: 1 },

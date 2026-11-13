@@ -148,6 +148,13 @@ export default function DocumentsScreen() {
 
       {/* ── TITLE ── */}
       <View style={styles.titleRow}>
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
+        </TouchableOpacity>
         <Text style={styles.pageTitle}>Hujjatlarim</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>24 ta</Text>
@@ -306,6 +313,7 @@ const styles = StyleSheet.create({
 
   // Title
   titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginTop: 14, marginBottom: 12, gap: 10 },
+  backBtn: { padding: 4, marginRight: 2 },
   pageTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
   countBadge: { backgroundColor: C.blueLight, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
   countText: { fontSize: 13, color: C.primary, fontWeight: '700' },

@@ -383,8 +383,16 @@ export default function RemindersScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── TOP CONTROLS (TABS + QUICK ADD) ── */}
+      {/* ── TOP CONTROLS (BACK + TABS + QUICK ADD) ── */}
       <View style={styles.topControlRow}>
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
+        </TouchableOpacity>
+
         <View style={styles.tabRow}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'list' && styles.tabActive]}
@@ -652,7 +660,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginTop: 12,
     marginBottom: 10,
-    gap: 10,
+    gap: 8,
+  },
+  backBtn: {
+    padding: 4,
+    marginRight: 2,
   },
   tabRow: {
     flex: 1,

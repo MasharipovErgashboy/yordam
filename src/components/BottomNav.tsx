@@ -99,3 +99,4 @@ const styles = StyleSheet.create({
   navLabel: { fontSize: 10, color: '#64748B', marginTop: 3, fontWeight: '500' },
   navLabelActive: { color: '#2563EB', fontWeight: '700' },
 });
+

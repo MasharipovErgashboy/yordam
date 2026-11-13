@@ -62,6 +62,18 @@ export default function ProfileScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
+      {/* ── TOP BAR WITH BACK BUTTON ── */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
+        </TouchableOpacity>
+        <Text style={styles.topBarTitle}>Profil</Text>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── USER CARD ── */}
@@ -213,7 +225,26 @@ export default function ProfileScreen() {
 // ─── STYLES ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: 16, paddingTop: 14 },
+
+  // Top bar
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 6,
+    gap: 8,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  topBarTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: C.textDark,
+  },
+
+  scroll: { paddingHorizontal: 16, paddingTop: 10 },
 
   // User card
   userCard: { backgroundColor: C.white, borderRadius: 18, padding: 14, marginBottom: 14, elevation: 1 },

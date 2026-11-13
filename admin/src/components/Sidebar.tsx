@@ -14,6 +14,7 @@ import {
   Command,
 } from 'lucide-react';
 import type { UserSession } from '../types';
+import logoImg from '../assets/logo.png';
 
 interface SidebarProps {
   activeTab: string;
@@ -98,32 +99,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
         marginBottom: '24px',
         paddingLeft: isCollapsed ? '4px' : '6px',
       }}>
-        {/* Glowing Geometric Logo */}
+        {/* Official Yordam Logo */}
         <div style={{
           width: '38px',
           height: '38px',
           borderRadius: '12px',
-          background: 'linear-gradient(135deg, #00E5FF 0%, #0066FF 100%)',
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 0 20px rgba(0, 163, 255, 0.5)',
+          boxShadow: '0 0 20px rgba(0, 163, 255, 0.35)',
           flexShrink: 0,
+          padding: '4px',
         }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 8C5 5.5 7 4 9.5 4C12 4 14 5.5 14 8C14 10.5 12 12 9.5 12C7 12 5 10.5 5 8Z"
-              stroke="#FFFFFF"
-              strokeWidth="2.2"
-              fill="rgba(255, 255, 255, 0.2)"
-            />
-            <path
-              d="M10 12C10 14.5 12 16 14.5 16C17 16 19 14.5 19 12C19 9.5 17 8 14.5 8"
-              stroke="#FFFFFF"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
+          <img
+            src={logoImg}
+            alt="Logo"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 8px rgba(0, 163, 255, 0.4))',
+            }}
+          />
         </div>
 
         {!isCollapsed && (

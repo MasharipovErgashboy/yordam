@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, User, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import type { UserSession } from '../types';
+import logoImg from '../assets/logo.png';
 
 interface LoginScreenProps {
   onLoginSuccess: (session: UserSession) => void;
@@ -38,7 +39,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         localStorage.setItem('yordam_admin_session', JSON.stringify(session));
         onLoginSuccess(session);
       } else {
-        triggerError('Foydalanuvchi nomi yoki parol noto‘g‘ri! (yordam / yordam123)');
+        triggerError('Foydalanuvchi nomi yoki parol noto‘g‘ri!');
         setIsLoading(false);
       }
     }, 450);
@@ -50,12 +51,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     setTimeout(() => setIsShaking(false), 500);
   };
 
-  const fillDemoCredentials = () => {
-    setUsername('yordam');
-    setPassword('yordam123');
-    setErrorMsg('');
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -64,70 +59,80 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       justifyContent: 'center',
       padding: '24px',
       position: 'relative',
-      zIndex: 2,
+      overflow: 'hidden',
     }}>
+      {/* Dynamic Cosmic Background */}
+      <div className="login-bg-container">
+        <div className="login-orb-1" />
+        <div className="login-orb-2" />
+        <div className="login-orb-3" />
+        <div className="login-orbit-ring" />
+        <div className="login-orbit-ring-outer" />
+        <div className="login-grid-plane" />
+        <div className="login-stars" />
+      </div>
+
       {/* Login Glass Card */}
       <div
         className={`glass-panel ${isShaking ? 'animate-shake' : 'animate-fade-in'}`}
         style={{
           width: '100%',
-          maxWidth: '460px',
-          padding: '40px 36px',
+          maxWidth: '430px',
+          padding: '42px 36px 36px 36px',
           borderRadius: '28px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(13, 20, 36, 0.40)',
-          backdropFilter: 'blur(36px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(36px) saturate(180%)',
-          boxShadow: '0 30px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.12)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'rgba(12, 19, 34, 0.38)',
+          backdropFilter: 'blur(36px) saturate(190%)',
+          WebkitBackdropFilter: 'blur(36px) saturate(190%)',
+          boxShadow: '0 30px 80px -15px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.15)',
+          position: 'relative',
+          zIndex: 5,
         }}
       >
-        {/* Brand Header */}
+        {/* Brand Header with New Official Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          {/* Logo */}
+          {/* Logo with matching ambient warm/cyan glow */}
           <div style={{
+            position: 'relative',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '64px',
-            height: '64px',
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, rgba(0, 163, 255, 0.25) 0%, rgba(0, 102, 255, 0.1) 100%)',
-            border: '1px solid rgba(0, 163, 255, 0.4)',
-            marginBottom: '16px',
-            boxShadow: '0 0 35px rgba(0, 163, 255, 0.35)',
+            marginBottom: '14px',
           }}>
-            <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="9" fill="url(#loginGlow)" />
-              <path d="M10 16.5 L14.5 21 L22 11" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-              <defs>
-                <linearGradient id="loginGlow" x1="0" y1="0" x2="32" y2="32">
-                  <stop stopColor="#00E5FF" />
-                  <stop offset="1" stopColor="#0066FF" />
-                </linearGradient>
-              </defs>
-            </svg>
+            <div style={{
+              position: 'absolute',
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(0, 163, 255, 0.35) 0%, rgba(245, 158, 11, 0.28) 45%, transparent 70%)',
+              filter: 'blur(18px)',
+              pointerEvents: 'none',
+            }} />
+            <img
+              src={logoImg}
+              alt="Yordam Logo"
+              style={{
+                width: '88px',
+                height: '88px',
+                objectFit: 'contain',
+                position: 'relative',
+                zIndex: 2,
+                filter: 'drop-shadow(0 10px 24px rgba(0, 163, 255, 0.35))',
+              }}
+            />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.5px', color: '#FFFFFF' }}>yordam</span>
+          <div>
             <span style={{
-              fontSize: '11px',
+              fontSize: '28px',
               fontWeight: 800,
-              padding: '2px 8px',
-              borderRadius: '6px',
-              background: 'rgba(0, 163, 255, 0.15)',
-              color: '#00E5FF',
-              border: '1px solid rgba(0, 163, 255, 0.3)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.8px',
+              letterSpacing: '-0.5px',
+              color: '#FFFFFF',
+              display: 'inline-block',
             }}>
-              ADMIN
+              yordam
             </span>
           </div>
-
-          <p style={{ fontSize: '13.5px', color: '#94A3B8', margin: 0 }}>
-            Huquqiy boshqaruv paneliga xavfsiz kirish
-          </p>
         </div>
 
         {/* Error Notification */}
@@ -138,8 +143,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             gap: '10px',
             padding: '12px 14px',
             borderRadius: '12px',
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            background: 'rgba(239, 68, 68, 0.14)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
             marginBottom: '20px',
             color: '#FCA5A5',
             fontSize: '13px',
@@ -156,20 +161,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           <div style={{ marginBottom: '18px' }}>
             <label style={{
               display: 'block',
-              fontSize: '12px',
+              fontSize: '11.5px',
               fontWeight: 700,
-              color: '#CBD5E1',
-              marginBottom: '7px',
+              color: '#94A3B8',
+              marginBottom: '8px',
               textTransform: 'uppercase',
-              letterSpacing: '0.5px',
+              letterSpacing: '0.6px',
             }}>
               Foydalanuvchi nomi
             </label>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              background: 'rgba(8, 14, 27, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.10)',
               borderRadius: '14px',
               padding: '0 14px',
               height: '48px',
@@ -180,7 +185,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="yordam"
+                placeholder="Foydalanuvchi nomini kiriting"
                 autoComplete="username"
                 style={{
                   flex: 1,
@@ -190,48 +195,30 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                   color: '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 500,
+                  fontFamily: 'inherit',
                 }}
               />
             </div>
           </div>
 
           {/* Password */}
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
-              <label style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                color: '#CBD5E1',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}>
-                Maxfiy parol
-              </label>
-              <button
-                type="button"
-                onClick={fillDemoCredentials}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#00A3FF',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: 0,
-                }}
-              >
-                <Sparkles size={12} />
-                Demo to‘ldirish
-              </button>
-            </div>
+          <div style={{ marginBottom: '26px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '11.5px',
+              fontWeight: 700,
+              color: '#94A3B8',
+              marginBottom: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.6px',
+            }}>
+              Maxfiy parol
+            </label>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              background: 'rgba(8, 14, 27, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.10)',
               borderRadius: '14px',
               padding: '0 14px',
               height: '48px',
@@ -242,7 +229,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="yordam123"
+                placeholder="Parolni kiriting"
                 autoComplete="current-password"
                 style={{
                   flex: 1,
@@ -252,6 +239,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                   color: '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 500,
+                  fontFamily: 'inherit',
                 }}
               />
               <button
@@ -305,37 +293,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             )}
           </button>
         </form>
-
-        {/* Demo Credentials Box */}
-        <div style={{
-          marginTop: '24px',
-          padding: '12px 14px',
-          borderRadius: '12px',
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.07)',
-          textAlign: 'center',
-        }}>
-          <p style={{ fontSize: '11.5px', color: '#94A3B8', margin: '0 0 4px 0' }}>
-            Standart ma’lumotlar:
-          </p>
-          <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', margin: 0 }}>
-            Login: <span style={{ color: '#00E5FF' }}>yordam</span> &bull; Parol: <span style={{ color: '#00E5FF' }}>yordam123</span>
-          </p>
-        </div>
-
-        {/* Security Badge Footnote */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          marginTop: '22px',
-          color: '#64748B',
-          fontSize: '11px',
-        }}>
-          <ShieldCheck size={14} color="#10B981" />
-          <span>256-bit SSL xavfsiz shifrlangan boshqaruv tizimi</span>
-        </div>
       </div>
     </div>
   );

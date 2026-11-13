@@ -24,6 +24,8 @@ import { ContractAiScreen } from './ContractAi/ContractAiScreen';
 import { LegalMapNavigator } from '../features/legal-map/LegalMapNavigator';
 import { FraudRadarNavigator } from '../features/fraud-radar/FraudRadarNavigator';
 import { YuristOnlineNavigator } from '../features/yurist-online/YuristOnlineNavigator';
+import { FoydaliMalumotlarScreen } from './FoydaliMalumotlarScreen';
+import { LEGAL_ARTICLES } from '../data/legalArticles';
 import type { UserProfile } from '../services/authService';
 
 const { width } = Dimensions.get('window');
@@ -404,6 +406,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   // Yurist Online Mini App State
   const [isYuristOnlineOpen, setIsYuristOnlineOpen] = useState(false);
 
+  // Foydali ma'lumotlar Screen State
+  const [isFoydaliMalumotlarOpen, setIsFoydaliMalumotlarOpen] = useState(false);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (!checkAuth()) return;
 
@@ -549,6 +555,18 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
 
   if (isYuristOnlineOpen) {
     return <YuristOnlineNavigator onBack={() => setIsYuristOnlineOpen(false)} />;
+  }
+
+  if (isFoydaliMalumotlarOpen) {
+    return (
+      <FoydaliMalumotlarScreen
+        initialArticleId={selectedArticleId}
+        onBack={() => {
+          setIsFoydaliMalumotlarOpen(false);
+          setSelectedArticleId(null);
+        }}
+      />
+    );
   }
 
   // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran
@@ -911,56 +929,66 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
                 <TouchableOpacity
                   onPress={() => {
                     if (!checkAuth()) return;
-                    Alert.alert('Maqolalar', 'Barça foydali huquqiy maqolalar sahifasi.');
+                    setSelectedArticleId(null);
+                    setIsFoydaliMalumotlarOpen(true);
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
+                  <Text style={styles.seeAllText}>Barchasini ko‘rish ›</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Article Card matching screenshot */}
-              <TouchableOpacity
-                style={styles.articleCard}
-                activeOpacity={0.85}
-                onPress={() => {
-                  if (!checkAuth()) return;
-                  Alert.alert(
-                    'Mehnat şartnomasi',
-                    'Mehnat şartnomasi tuzişda asosiy qoidalar: sinov muddati, ta’tillar, oylik maoh va bekor qiliş şartlariga e’tibor qaratiş lozim.'
-                  );
-                }}
-              >
-                {/* Article Thumbnail Image */}
-                <Image
-                  source={articleGavelImage}
-                  style={styles.articleImage}
-                  resizeMode="cover"
-                />
+              {/* 5 eng yangi chiqqan maqolalar */}
+              {LEGAL_ARTICLES.slice(0, 5).map((article) => (
+                <TouchableOpacity
+                  key={article.id}
+                  style={styles.articleCard}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    setSelectedArticleId(article.id);
+                    setIsFoydaliMalumotlarOpen(true);
+                  }}
+                >
+                  {/* Article Thumbnail Image */}
+                  <Image
+                    source={articleGavelImage}
+                    style={styles.articleImage}
+                    resizeMode="cover"
+                  />
 
-                {/* Article Details */}
-                <View style={styles.articleInfo}>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>Huquqiy maslahat</Text>
-                  </View>
-
-                  <Text style={styles.articleTitle} numberOfLines={2}>
-                    Mehnat şartnomasi tuzişda nimalarga e’tibor beriş kerak?
-                  </Text>
-
-                  {/* Date & Views Meta */}
-                  <View style={styles.articleMetaRow}>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
-                      <Text style={styles.metaText}>12-noy, 2026</Text>
+                  {/* Article Details */}
+                  <View style={styles.articleInfo}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <View style={[styles.categoryBadge, { backgroundColor: article.badgeBg }]}>
+                        <Text style={[styles.categoryBadgeText, { color: article.badgeColor }]}>
+                          {article.categoryLabel}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                        <Ionicons name="time-outline" size={10.5} color="#64748B" />
+                        <Text style={{ fontSize: 10, color: '#64748B', fontWeight: '500' }}>{article.readTime}</Text>
+                      </View>
                     </View>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="eye-outline" size={12} color="#9CA3AF" />
-                      <Text style={styles.metaText}>3 420</Text>
+
+                    <Text style={styles.articleTitle} numberOfLines={2}>
+                      {article.title}
+                    </Text>
+
+                    {/* Date & Views Meta */}
+                    <View style={styles.articleMetaRow}>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
+                        <Text style={styles.metaText}>{article.date}</Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="eye-outline" size={12} color="#9CA3AF" />
+                        <Text style={styles.metaText}>{article.views}</Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
             </>
           )}
 

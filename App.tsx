@@ -29,7 +29,14 @@ export default function App() {
   return (
     <PaperProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            animationDuration: 150,
+          }}
+        >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Documents" component={DocumentsScreen} />
           <Stack.Screen name="Upload" component={UploadScreen} />

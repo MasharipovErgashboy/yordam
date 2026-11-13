@@ -965,77 +965,253 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
           )}
 
 
-          {/* ===================== 4. PROFIL TAB ===================== */}
+          {/* ===================== 4. PROFIL TAB (PREMIUM REDESIGN) ===================== */}
           {activeTab === 'profile' && (
             <View style={styles.tabContentContainer}>
-              <View style={styles.profileCard}>
-                <View style={styles.profileAvatar}>
-                  {user?.avatar ? (
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: '#FFFFFF' }}>{user.avatar}</Text>
-                  ) : (
-                    <Ionicons name="person" size={26} color="#FFFFFF" />
-                  )}
+              {/* 1. User Hero Card */}
+              <View style={styles.profileHeroCard}>
+                <View style={styles.profileHeroTop}>
+                  <LinearGradient
+                    colors={['#0284C7', '#00A3FF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.profileAvatarLarge}
+                  >
+                    <Text style={styles.profileAvatarInitials}>
+                      {user?.avatar || (user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'YD')}
+                    </Text>
+                  </LinearGradient>
+
+                  <View style={{ flex: 1, marginLeft: 14 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.profileHeroName} numberOfLines={1}>
+                        {user?.name || (user ? `${user.firstName} ${user.lastName}` : 'O‘zbekiston Fuqarosi')}
+                      </Text>
+                      <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                    </View>
+
+                    <View style={styles.profileBadgesRow}>
+                      <View style={styles.roleBadge}>
+                        <Text style={styles.roleBadgeText}>{user?.role || 'Fuqaro'}</Text>
+                      </View>
+                      <View style={styles.verifiedBadge}>
+                        <Ionicons name="shield-checkmark" size={11} color="#10B981" />
+                        <Text style={styles.verifiedBadgeText}>OneID tasdiqlangan</Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.profileName}>
-                    {user?.name || (user ? `${user.firstName} ${user.lastName}` : 'Özbekiston Fuqarosi')}
-                  </Text>
-                  <Text style={styles.profileStatus}>
-                    {user?.email ? `${user.phone} • ${user.email}` : 'OneID orqali tasdiqlangan'}
-                  </Text>
+
+                {/* Contact info list inside card */}
+                <View style={styles.profileContactList}>
+                  {user?.phone ? (
+                    <View style={styles.profileContactRow}>
+                      <Ionicons name="call-outline" size={14} color="#0284C7" />
+                      <Text style={styles.profileContactText}>{user.phone}</Text>
+                    </View>
+                  ) : null}
+                  {user?.email ? (
+                    <View style={styles.profileContactRow}>
+                      <Ionicons name="mail-outline" size={14} color="#0284C7" />
+                      <Text style={styles.profileContactText}>{user.email}</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.profileContactRow}>
+                    <Ionicons name="calendar-outline" size={14} color="#64748B" />
+                    <Text style={[styles.profileContactText, { color: '#64748B' }]}>
+                      Ro‘yxatdan o‘tgan: {user?.registered || '13.11.2026'}
+                    </Text>
+                  </View>
                 </View>
-                <Ionicons name="checkmark-circle" size={22} color="#10B981" />
               </View>
 
+              {/* 2. Quick Activity KPI Strip */}
+              <View style={styles.profileStatsRow}>
+                <View style={styles.profileStatItem}>
+                  <Text style={styles.profileStatNumber}>{user?.appsCount || 0}</Text>
+                  <Text style={styles.profileStatLabel}>Arizalarim</Text>
+                </View>
+                <View style={styles.profileStatDivider} />
+                <View style={styles.profileStatItem}>
+                  <Text style={[styles.profileStatNumber, { color: '#0284C7' }]}>0</Text>
+                  <Text style={styles.profileStatLabel}>AI tahlillari</Text>
+                </View>
+                <View style={styles.profileStatDivider} />
+                <View style={styles.profileStatItem}>
+                  <Text style={[styles.profileStatNumber, { color: '#10B981' }]}>100%</Text>
+                  <Text style={styles.profileStatLabel}>Himoyalangan</Text>
+                </View>
+              </View>
+
+              {/* 3. Section: Yuridik xizmatlarim & Hujjatlar */}
+              <Text style={styles.profileSectionTitle}>YURIDIK XIZMATLAR VA ARXIV</Text>
               <View style={styles.profileMenuBox}>
-                <TouchableOpacity style={styles.profileMenuItem}>
-                  <Ionicons name="globe-outline" size={20} color="#0284C7" />
-                  <Text style={styles.profileMenuText}>Dastur tili</Text>
-                  <Text style={styles.profileMenuSub}>Özbekça</Text>
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setIsHujjatlarHamyoniOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#FFFBEB' }]}>
+                    <Ionicons name="folder" size={20} color="#F59E0B" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Hujjatlar hamyoni</Text>
+                    <Text style={styles.profileMenuSubText}>Pasport, shartnoma va rasmiy arxiv</Text>
+                  </View>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.profileMenuItem}>
-                  <Ionicons name="shield-checkmark-outline" size={20} color="#10B981" />
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setShowContractAi(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="document-text" size={20} color="#0284C7" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Shartnoma AI tahlili</Text>
+                    <Text style={styles.profileMenuSubText}>Yuridik xavflar va shartnomalar xulosasi</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setIsYuristOnlineOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="headset" size={20} color="#10B981" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Yurist Online</Text>
+                    <Text style={styles.profileMenuSubText}>Advokatlar bilan jonli maslahatlashuv</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                  activeOpacity={0.7}
+                  onPress={() => setIsLegalMapOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F5F3FF' }]}>
+                    <Ionicons name="map" size={20} color="#8B5CF6" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Huquqiy xarita</Text>
+                    <Text style={styles.profileMenuSubText}>Yaqin oradagi sud, notarius va FHDYo</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 4. Section: Sozlamalar va xavfsizlik */}
+              <Text style={styles.profileSectionTitle}>SOZLAMALAR VA XAVFSIZLIK</Text>
+              <View style={styles.profileMenuBox}>
+                <TouchableOpacity style={styles.profileMenuItem} activeOpacity={0.7}>
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="globe-outline" size={20} color="#0284C7" />
+                  </View>
+                  <Text style={styles.profileMenuText}>Dastur tili</Text>
+                  <Text style={styles.profileMenuSub}>O‘zbekcha (Lotin)</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.profileMenuItem} activeOpacity={0.7}>
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color="#10B981" />
+                  </View>
                   <Text style={styles.profileMenuText}>Xavfsizlik va biometriya</Text>
+                  <Text style={styles.profileMenuSub}>Faol</Text>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
                 {onBackToOnboarding && (
-                  <TouchableOpacity style={styles.profileMenuItem} onPress={onBackToOnboarding}>
-                    <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
-                    <Text style={styles.profileMenuText}>Kiriş taqdimotini köriş</Text>
+                  <TouchableOpacity
+                    style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                    activeOpacity={0.7}
+                    onPress={onBackToOnboarding}
+                  >
+                    <View style={[styles.profileMenuIconWrap, { backgroundColor: '#FFFBEB' }]}>
+                      <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
+                    </View>
+                    <Text style={styles.profileMenuText}>Kirish taqdimotini qayta ko‘rish</Text>
                     <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                   </TouchableOpacity>
                 )}
-
-                {onLogout && (
-                  <TouchableOpacity
-                    style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
-                    onPress={() => {
-                      Alert.alert(
-                        'Tizimdan chiqish',
-                        'Haqiqatan ham profilingizdan chiqmoqchimisiz?',
-                        [
-                          { text: 'Bekor qilish', style: 'cancel' },
-                          {
-                            text: 'Chiqish',
-                            style: 'destructive',
-                            onPress: () => {
-                              onLogout();
-                              setActiveTab('home');
-                            },
-                          },
-                        ]
-                      );
-                    }}
-                  >
-                    <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-                    <Text style={[styles.profileMenuText, { color: '#EF4444' }]}>Tizimdan chiqish</Text>
-                    <Ionicons name="chevron-forward" size={16} color="#EF4444" />
-                  </TouchableOpacity>
-                )}
               </View>
+
+              {/* 5. Section: Qo‘llab-quvvatlash */}
+              <Text style={styles.profileSectionTitle}>QO‘LLAB-QUVVATLASH</Text>
+              <View style={styles.profileMenuBox}>
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    Alert.alert(
+                      'Yordam markazi',
+                      'Yordam huquqiy portali yagona koll-markazi: 1159 yoki +998 (71) 200-00-00\n\nIsh vaqti: 24/7 uzluksiz'
+                    )
+                  }
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="call-outline" size={20} color="#0284C7" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Koll-markaz: 1159</Text>
+                    <Text style={styles.profileMenuSubText}>24/7 bepul huquqiy aloqa</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    Alert.alert(
+                      'Yordam ilovasi',
+                      'Yordam — O‘zbekiston fuqarolari uchun rasmiy huquqiy ko‘makchi dasturi.\n\nTalqin: v1.0.0 (Rasmiy nashr)\n© 2026 Barcha huquqlar himoyalangan.'
+                    )
+                  }
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F1F5F9' }]}>
+                    <Ionicons name="information-circle-outline" size={20} color="#64748B" />
+                  </View>
+                  <Text style={styles.profileMenuText}>Ilova haqida</Text>
+                  <Text style={styles.profileMenuSub}>v1.0.0</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 6. Logout Button */}
+              {onLogout && (
+                <TouchableOpacity
+                  style={styles.profileLogoutCard}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    Alert.alert(
+                      'Tizimdan chiqish',
+                      'Haqiqatan ham profilingizdan chiqmoqchimisiz?',
+                      [
+                        { text: 'Bekor qilish', style: 'cancel' },
+                        {
+                          text: 'Chiqish',
+                          style: 'destructive',
+                          onPress: () => {
+                            onLogout();
+                            setActiveTab('home');
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <Ionicons name="log-out-outline" size={20} color="#EF4444" style={{ marginRight: 8 }} />
+                  <Text style={styles.profileLogoutText}>Tizimdan chiqish</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </ScrollView>
@@ -1693,62 +1869,214 @@ const styles = StyleSheet.create({
   // Tab container styles
   tabContentContainer: {
     paddingTop: 8,
+    paddingBottom: 24,
   },
-  profileCard: {
+  profileHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  profileHeroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  profileAvatarLarge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  profileAvatarInitials: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  profileHeroName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  profileBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 5,
+  },
+  roleBadge: {
+    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.2)',
+  },
+  roleBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0284C7',
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  verifiedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  profileContactList: {
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 12,
+    gap: 7,
+  },
+  profileContactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileContactText: {
+    fontSize: 12.5,
+    color: '#334155',
+    fontWeight: '500',
+  },
+
+  // KPI Quick Stats
+  profileStatsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 14,
+    borderColor: '#E2E8F0',
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
-  profileAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#034687',
+  profileStatItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileName: {
-    fontSize: 15,
+  profileStatNumber: {
+    fontSize: 18,
     fontWeight: '800',
     color: '#0F172A',
+    marginBottom: 2,
   },
-  profileStatus: {
+  profileStatLabel: {
     fontSize: 11,
-    color: '#10B981',
+    color: '#64748B',
     fontWeight: '600',
-    marginTop: 2,
+  },
+  profileStatDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#E2E8F0',
+  },
+
+  // Profile Sections & Lists
+  profileSectionTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.8,
+    marginLeft: 4,
+    marginBottom: 8,
+    marginTop: 6,
   },
   profileMenuBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
     overflow: 'hidden',
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   profileMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F1F5F9',
     gap: 12,
+  },
+  profileMenuIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profileMenuText: {
     flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
     color: '#0F172A',
+  },
+  profileMenuSubText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 1,
   },
   profileMenuSub: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     marginRight: 4,
+    fontWeight: '500',
+  },
+
+  // Logout card
+  profileLogoutCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    borderRadius: 16,
+    paddingVertical: 14,
+    marginTop: 6,
+    marginBottom: 18,
+  },
+  profileLogoutText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#EF4444',
   },
 
   // Bottom Navbar

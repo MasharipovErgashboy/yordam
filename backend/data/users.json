@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "u_1794578344256_724",
+    "firstName": "Ergashboy",
+    "lastName": "Masharipov",
+    "name": "Ergashboy Masharipov",
+    "email": "ergashmasharipov88@gmail.com",
+    "phone": "+998 953768926",
+    "password": "$2a$10$2dRuA4yq8sA9AZ7oAoiu1uY8ixWQifeCA20SWfnby653wqo97V8MK",
+    "role": "Fuqaro",
+    "roleColor": "#00A3FF",
+    "status": "Faol",
+    "registered": "13.11.2026",
+    "registeredAt": "2026-11-13T13:59:04.256Z",
+    "appsCount": 0,
+    "avatar": "EM"
+  }
+]

@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, TextInput, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from '../components/ScreenContainer';
+import BottomNav from '../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -30,7 +32,7 @@ const EVIDENCE_DOCS = [
     size: '1.2 MB',
     meta: 'MediaPark, 15-may, 2024 • Fiskal chek #48201',
     badge: 'Soliq QR tasdiqlangan',
-    badgeIcon: '✓',
+    badgeIcon: 'checkmark-circle-outline',
     pages: '2 sahifa',
   },
   {
@@ -39,7 +41,7 @@ const EVIDENCE_DOCS = [
     size: '2.4 MB',
     meta: 'Seriya raqami: SM-S928B • Muhrlangan talon',
     badge: 'Muhr va imzo mavjud',
-    badgeIcon: '✓',
+    badgeIcon: 'checkmark-circle-outline',
     pages: '3 sahifa',
   },
   {
@@ -48,7 +50,7 @@ const EVIDENCE_DOCS = [
     size: '0.8 MB',
     meta: 'PDF akt • Texnik ekspertiza xulosasi',
     badge: 'Rasmiy xulosa',
-    badgeIcon: '🏛️',
+    badgeIcon: 'business-outline',
     pages: '1 sahifa',
   },
 ];
@@ -76,15 +78,19 @@ export default function LegalScreen() {
       {/* ── HEADER ── */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerLeftBtn}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={22} color={C.textDark} />
         </TouchableOpacity>
-        <View style={styles.logoBox}><Text style={{ fontSize: 16 }}>💼</Text></View>
+        <View style={styles.logoBox}>
+          <Ionicons name="briefcase-outline" size={16} color={C.primary} />
+        </View>
         <View>
           <Text style={styles.appName}>Huquqiy dalillar</Text>
           <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
         </View>
         <View style={{ flex: 1 }} />
-        <View style={styles.avatar}><Text style={{ fontSize: 16 }}>👤</Text></View>
+        <View style={styles.avatar}>
+          <Ionicons name="person" size={16} color={C.primary} />
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -92,10 +98,16 @@ export default function LegalScreen() {
         {/* ── TOP BADGES ── */}
         <View style={styles.topBadgeRow}>
           <View style={styles.dossierBadge}>
-            <Text style={styles.dossierText}>🛡️ RASMIY YURIDIK DOSYE</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+              <Ionicons name="shield-checkmark" size={12} color={C.primary} />
+              <Text style={styles.dossierText}>RASMIY YURIDIK DOSYE</Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.exportPdfBtn} onPress={handleGeneratePDF}>
-            <Text style={styles.exportPdfText}>📄 Eksport (PDF)</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Ionicons name="document-text-outline" size={12} color={C.badgeText} />
+              <Text style={styles.exportPdfText}>Eksport (PDF)</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -148,7 +160,10 @@ export default function LegalScreen() {
               <Text style={styles.evidenceMeta}>{doc.meta}</Text>
               <View style={styles.evidenceFooter}>
                 <View style={styles.tagBadge}>
-                  <Text style={styles.tagBadgeText}>{doc.badgeIcon} {doc.badge}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Ionicons name={doc.badgeIcon as any} size={12} color={C.green} />
+                    <Text style={styles.tagBadgeText}>{doc.badge}</Text>
+                  </View>
                 </View>
                 <Text style={styles.pageCountText}>{doc.pages}</Text>
               </View>
@@ -161,7 +176,10 @@ export default function LegalScreen() {
           style={styles.addDocBtn}
           onPress={() => navigation.navigate('Documents')}
         >
-          <Text style={styles.addDocBtnText}>⊕ + Yana hujjat qo'shish</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Ionicons name="add-circle-outline" size={18} color={C.primary} />
+            <Text style={styles.addDocBtnText}>Yana hujjat qo'shish</Text>
+          </View>
         </TouchableOpacity>
 
         {/* ── COLLECTION NAME ── */}
@@ -197,8 +215,11 @@ export default function LegalScreen() {
 
         {/* ── MAIN CTA BUTTON ── */}
         <TouchableOpacity style={styles.mainActionBtn} onPress={handleGeneratePDF}>
-          <Text style={styles.mainActionIcon}>📄</Text>
-          <Text style={styles.mainActionText}>Yagona PDF paket yaratish va yuklab olish →</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Ionicons name="document-text-outline" size={18} color={C.white} />
+            <Text style={styles.mainActionText}>Yagona PDF paket yaratish va yuklab olish</Text>
+            <Ionicons name="arrow-forward" size={16} color={C.white} />
+          </View>
         </TouchableOpacity>
 
         {/* ── AI JURIDICAL AUDIT BOX ── */}
@@ -206,9 +227,9 @@ export default function LegalScreen() {
           <View style={styles.aiAuditHeader}>
             <View style={styles.aiAuditLeft}>
               <View style={styles.sparkleCircle}>
-                <Text style={styles.sparkleIcon}>✦</Text>
+                <Ionicons name="sparkles" size={14} color={C.primary} />
               </View>
-              <Text style={styles.aiAuditTitle}>Al Yuridik tekshiruv{'\n'}xulosasi</Text>
+              <Text style={styles.aiAuditTitle}>AI Yuridik tekshiruv{'\n'}xulosasi</Text>
             </View>
             <View style={styles.aiTrustPill}>
               <Text style={styles.aiTrustText}>99.8% ishonch</Text>
@@ -222,7 +243,10 @@ export default function LegalScreen() {
         {/* ── SECURITY SEAL & METRICS ── */}
         <View style={styles.metricsBox}>
           <View style={styles.sealRow}>
-            <Text style={styles.sealTitle}>🛡️ QR-kodli xavfsizlik muhri</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="shield-checkmark-outline" size={15} color={C.primary} />
+              <Text style={styles.sealTitle}>QR-kodli xavfsizlik muhri</Text>
+            </View>
             <Text style={styles.sealStatus}>Kiritilgan</Text>
           </View>
           <View style={styles.metricsLine} />
@@ -244,36 +268,11 @@ export default function LegalScreen() {
           Hujjatlar to'plami O'zbekiston Respublikasi "Elektron hujjat aylanishi to'g'risida"gi qonuniga muvofiq rasmiylashtiriladi.
         </Text>
 
-        <View style={{ height: 110 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map(item => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={styles.navLabel}>{item.label}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
+      <BottomNav activeScreen="" />
     </ScreenContainer>
   );
 }
@@ -375,12 +374,4 @@ const styles = StyleSheet.create({
 
   // Statutory notice
   statutoryNotice: { fontSize: 10, color: C.textGrey, textAlign: 'center', lineHeight: 15, marginTop: 12 },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
 });

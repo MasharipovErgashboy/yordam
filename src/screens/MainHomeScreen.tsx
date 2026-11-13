@@ -24,6 +24,7 @@ import { ContractAiScreen } from './ContractAi/ContractAiScreen';
 import { LegalMapNavigator } from '../features/legal-map/LegalMapNavigator';
 import { FraudRadarNavigator } from '../features/fraud-radar/FraudRadarNavigator';
 import { YuristOnlineNavigator } from '../features/yurist-online/YuristOnlineNavigator';
+import type { UserProfile } from '../services/authService';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +33,10 @@ type ServiceCategory = 'all' | 'ai' | 'documents' | 'protection';
 
 interface MainHomeScreenProps {
   onBackToOnboarding?: () => void;
+  isAuthenticated?: boolean;
+  user?: UserProfile | null;
+  onRequireAuth?: () => void;
+  onLogout?: () => void;
 }
 
 const logoImage = require('../../assets/images/logo.jpg');
@@ -352,12 +357,27 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   },
 ];
 
-export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboarding }) => {
+export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
+  onBackToOnboarding,
+  isAuthenticated = false,
+  user = null,
+  onRequireAuth,
+  onLogout,
+}) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [serviceCategory, setServiceCategory] = useState<ServiceCategory>('all');
   const [serviceSearch, setServiceSearch] = useState('');
+
+  // Authentication check helper
+  const checkAuth = () => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return false;
+    }
+    return true;
+  };
 
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
@@ -385,6 +405,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   const [isYuristOnlineOpen, setIsYuristOnlineOpen] = useState(false);
 
   const handleQuickGridClick = (item: ServiceGridItem) => {
+    if (!checkAuth()) return;
+
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
       return;
@@ -419,10 +441,12 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   };
 
   const handleDetailedServiceClick = (item: DetailedServiceItem) => {
+    if (!checkAuth()) return;
     setSelectedService(item);
   };
 
   const handleUseService = () => {
+    if (!checkAuth()) return;
     if (!selectedService) return;
     const sName = selectedService.name;
     const sId = selectedService.id;
@@ -772,6 +796,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   onChangeText={setSearchQuery}
                   returnKeyType="search"
                   onSubmitEditing={() => {
+                    if (!checkAuth()) return;
                     if (searchQuery.trim().length > 0) {
                       setServiceSearch(searchQuery.trim());
                       setActiveTab('services');
@@ -790,6 +815,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   style={styles.homeSearchQuickJump}
                   activeOpacity={0.8}
                   onPress={() => {
+                    if (!checkAuth()) return;
                     setServiceSearch(searchQuery.trim());
                     setActiveTab('services');
                   }}
@@ -805,7 +831,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <TouchableOpacity
                 style={styles.heroBannerWrap}
                 activeOpacity={0.92}
-                onPress={() => setActiveTab('ai_assistant')}
+                onPress={() => {
+                  if (!checkAuth()) return;
+                  setActiveTab('ai_assistant');
+                }}
               >
                 <LinearGradient
                   colors={['#003A70', '#074886', '#0B599E']}
@@ -847,7 +876,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <View style={styles.sectionHeaderRow}>
                 <Text style={styles.sectionTitle}>Asosiy xizmatlar</Text>
                 <TouchableOpacity
-                  onPress={() => setActiveTab('services')}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    setActiveTab('services');
+                  }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
@@ -877,7 +909,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
                 <Text style={styles.sectionTitle}>Foydali ma’lumotlar</Text>
                 <TouchableOpacity
-                  onPress={() => Alert.alert('Maqolalar', 'Barça foydali huquqiy maqolalar sahifasi.')}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    Alert.alert('Maqolalar', 'Barça foydali huquqiy maqolalar sahifasi.');
+                  }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
@@ -888,12 +923,13 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <TouchableOpacity
                 style={styles.articleCard}
                 activeOpacity={0.85}
-                onPress={() =>
+                onPress={() => {
+                  if (!checkAuth()) return;
                   Alert.alert(
                     'Mehnat şartnomasi',
                     'Mehnat şartnomasi tuzişda asosiy qoidalar: sinov muddati, ta’tillar, oylik maoh va bekor qiliş şartlariga e’tibor qaratiş lozim.'
-                  )
-                }
+                  );
+                }}
               >
                 {/* Article Thumbnail Image */}
                 <Image
@@ -934,11 +970,19 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
             <View style={styles.tabContentContainer}>
               <View style={styles.profileCard}>
                 <View style={styles.profileAvatar}>
-                  <Ionicons name="person" size={28} color="#FFFFFF" />
+                  {user?.avatar ? (
+                    <Text style={{ fontSize: 16, fontWeight: '800', color: '#FFFFFF' }}>{user.avatar}</Text>
+                  ) : (
+                    <Ionicons name="person" size={26} color="#FFFFFF" />
+                  )}
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.profileName}>Özbekiston Fuqarosi</Text>
-                  <Text style={styles.profileStatus}>OneID orqali tasdiqlangan</Text>
+                  <Text style={styles.profileName}>
+                    {user?.name || (user ? `${user.firstName} ${user.lastName}` : 'Özbekiston Fuqarosi')}
+                  </Text>
+                  <Text style={styles.profileStatus}>
+                    {user?.email ? `${user.phone} • ${user.email}` : 'OneID orqali tasdiqlangan'}
+                  </Text>
                 </View>
                 <Ionicons name="checkmark-circle" size={22} color="#10B981" />
               </View>
@@ -962,6 +1006,33 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                     <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
                     <Text style={styles.profileMenuText}>Kiriş taqdimotini köriş</Text>
                     <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                  </TouchableOpacity>
+                )}
+
+                {onLogout && (
+                  <TouchableOpacity
+                    style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                    onPress={() => {
+                      Alert.alert(
+                        'Tizimdan chiqish',
+                        'Haqiqatan ham profilingizdan chiqmoqchimisiz?',
+                        [
+                          { text: 'Bekor qilish', style: 'cancel' },
+                          {
+                            text: 'Chiqish',
+                            style: 'destructive',
+                            onPress: () => {
+                              onLogout();
+                              setActiveTab('home');
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                  >
+                    <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                    <Text style={[styles.profileMenuText, { color: '#EF4444' }]}>Tizimdan chiqish</Text>
+                    <Ionicons name="chevron-forward" size={16} color="#EF4444" />
                   </TouchableOpacity>
                 )}
               </View>
@@ -998,7 +1069,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         {/* 2. Xizmatlar */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('services')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('services');
+          }}
           activeOpacity={0.7}
         >
           {activeTab === 'services' ? (
@@ -1021,7 +1095,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         {/* 3. AI yordamchi */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('ai_assistant')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('ai_assistant');
+          }}
           activeOpacity={0.7}
         >
           {/* AI tab to‘liq ekran (AiChatScreen) ochadi, shuning uchun bu yerda faol holat bo‘lmaydi */}
@@ -1034,7 +1111,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         {/* 4. Profil */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('profile')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('profile');
+          }}
           activeOpacity={0.7}
         >
           {activeTab === 'profile' ? (

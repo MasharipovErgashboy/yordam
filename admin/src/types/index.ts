@@ -37,3 +37,20 @@ export interface ApplicationItem {
   statusLabel: string;
 }
 
+export interface RegisteredUser {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  phone: string;
+  role: string;
+  roleColor?: string;
+  status: string;
+  registered: string;
+  registeredAt?: string;
+  appsCount: number;
+  avatar: string;
+}
+
+

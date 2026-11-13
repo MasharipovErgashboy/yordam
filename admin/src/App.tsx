@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { UserSession, ApplicationItem } from './types';
+import { useState, useEffect, useCallback } from 'react';
+import type { UserSession, ApplicationItem, RegisteredUser } from './types';
 import { LoginScreen } from './components/LoginScreen';
 import { Sidebar } from './components/Sidebar';
 import { DashboardHeader } from './components/DashboardHeader';
@@ -12,6 +12,11 @@ import {
   Search,
   CheckCircle2,
   Plus,
+  RotateCw,
+  Users,
+  Trash2,
+  Mail,
+  Phone,
 } from 'lucide-react';
 
 export default function App() {
@@ -187,64 +192,77 @@ export default function App() {
     },
   ]);
 
-  // User list
-  const usersList = [
-    {
-      id: 'u_1',
-      name: 'Ergashboy Masharipov',
-      phone: '+998 90 123 45 67',
-      role: 'Fuqaro',
-      roleColor: '#00A3FF',
-      status: 'Faol',
-      registered: '13.11.2026',
-      appsCount: 12,
-      avatar: 'EM',
-    },
-    {
-      id: 'u_2',
-      name: 'Bobur Mirzayev',
-      phone: '+998 93 456 78 90',
-      role: 'Fuqaro',
-      roleColor: '#00A3FF',
-      status: 'Faol',
-      registered: '12.11.2026',
-      appsCount: 4,
-      avatar: 'BM',
-    },
-    {
-      id: 'u_3',
-      name: 'Zuhra Karimova',
-      phone: '+998 97 789 01 23',
-      role: 'Yurist',
-      roleColor: '#10B981',
-      status: 'Faol',
-      registered: '10.11.2026',
-      appsCount: 48,
-      avatar: 'ZK',
-    },
-    {
-      id: 'u_4',
-      name: 'Sanjarbek Qodirov',
-      phone: '+998 99 321 65 43',
-      role: 'Fuqaro',
-      roleColor: '#00A3FF',
-      status: 'Kutilmoqda',
-      registered: '08.11.2026',
-      appsCount: 1,
-      avatar: 'SQ',
-    },
-    {
-      id: 'u_5',
-      name: 'Dilnoza Rahimova',
-      phone: '+998 91 654 98 70',
-      role: 'Moderator',
-      roleColor: '#A855F7',
-      status: 'Faol',
-      registered: '01.11.2026',
-      appsCount: 128,
-      avatar: 'DR',
-    },
-  ];
+  // Dynamic Registered Users from Backend API
+  const [usersList, setUsersList] = useState<RegisteredUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [usersMetrics, setUsersMetrics] = useState({
+    totalUsers: 0,
+    todayCount: 0,
+    lawyersCount: 0,
+  });
+
+  const fetchUsers = useCallback(async () => {
+    setIsLoadingUsers(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/users');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.users)) {
+          setUsersList(data.users);
+          if (data.metrics) {
+            setUsersMetrics(data.metrics);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Backend serverga ulanib bo‘lmadi:', err);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/admin/users');
+        if (res.ok) {
+          const data = await res.json();
+          if (!ignore && data.success && Array.isArray(data.users)) {
+            setUsersList(data.users);
+            if (data.metrics) {
+              setUsersMetrics(data.metrics);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Backend serverga ulanib bo‘lmadi:', err);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleDeleteUser = async (id: string, name: string) => {
+    if (!window.confirm(`Haqiqatan ham ${name} foydalanuvchisini o‘chirmoqchimisiz?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setUsersList((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        alert('Foydalanuvchini o‘chirishda xatolik yuz berdi');
+      }
+    } catch (err) {
+      console.error('Delete user error:', err);
+      alert('Server bilan bog‘lanishda xatolik yuz berdi');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('yordam_admin_session');
@@ -337,10 +355,12 @@ export default function App() {
     const matchesRole =
       selectedUserRole === 'all' ||
       u.role.toLowerCase() === selectedUserRole.toLowerCase();
+    const q = effectiveUserQuery.toLowerCase().trim();
     const matchesQuery =
-      effectiveUserQuery === '' ||
-      u.name.toLowerCase().includes(effectiveUserQuery.toLowerCase()) ||
-      u.phone.includes(effectiveUserQuery);
+      q === '' ||
+      u.name.toLowerCase().includes(q) ||
+      (u.email && u.email.toLowerCase().includes(q)) ||
+      u.phone.includes(q);
     return matchesRole && matchesQuery;
   });
 
@@ -409,9 +429,24 @@ export default function App() {
             {/* Quick Metrics */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
               {[
-                { title: 'Jami foydalanuvchilar', value: '14,820', change: '+18.4%', color: '#00A3FF' },
-                { title: 'Faol yuristlar', value: '142 nafar', change: '98.5% reyting', color: '#10B981' },
-                { title: 'Bugungi yangi a’zolar', value: '+64 ta', change: 'O‘sish sur’ati', color: '#F59E0B' },
+                {
+                  title: 'Jami foydalanuvchilar',
+                  value: `${usersList.length} nafar`,
+                  change: usersList.length > 0 ? `${usersList.length} ta faol profil` : 'Hozircha bo‘sh',
+                  color: '#00A3FF',
+                },
+                {
+                  title: 'Faol a’zolar / Fuqarolar',
+                  value: `${usersList.filter((u) => u.status === 'Faol').length} nafar`,
+                  change: 'Tasdiqlangan',
+                  color: '#10B981',
+                },
+                {
+                  title: 'Bugungi yangi a’zolar',
+                  value: `+${usersMetrics.todayCount} ta`,
+                  change: 'O‘sish sur’ati',
+                  color: '#F59E0B',
+                },
               ].map((m, idx) => (
                 <div
                   key={idx}
@@ -442,32 +477,57 @@ export default function App() {
             <div className="glass-panel" style={{ padding: '24px', borderRadius: '22px' }}>
               {/* Filter and Search Bar */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '12px',
-                  padding: '0 14px',
-                  height: '42px',
-                  width: '320px',
-                }}>
-                  <Search size={16} color="#64748B" style={{ marginRight: '8px' }} />
-                  <input
-                    type="text"
-                    placeholder="Ism yoki telefon raqam..."
-                    value={userSearchQuery}
-                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '12px',
+                    padding: '0 14px',
+                    height: '42px',
+                    width: '320px',
+                  }}>
+                    <Search size={16} color="#64748B" style={{ marginRight: '8px' }} />
+                    <input
+                      type="text"
+                      placeholder="Ism, email yoki telefon..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      style={{
+                        flex: 1,
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        color: '#FFFFFF',
+                        fontSize: '13px',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    onClick={fetchUsers}
+                    title="Ma’lumotlarni yangilash"
                     style={{
-                      flex: 1,
-                      background: 'transparent',
-                      border: 'none',
-                      outline: 'none',
-                      color: '#FFFFFF',
-                      fontSize: '13px',
-                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      height: '42px',
+                      padding: '0 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#00E5FF',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
                     }}
-                  />
+                  >
+                    <RotateCw size={14} className={isLoadingUsers ? 'animate-spin' : ''} />
+                    <span>Yangilash</span>
+                  </button>
                 </div>
 
                 {/* Role Tabs */}
@@ -515,86 +575,135 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map((u) => (
-                      <tr
-                        key={u.id}
-                        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)', transition: 'background 0.2s ease' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                      >
-                        <td style={{ padding: '14px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{
-                              width: '36px',
-                              height: '36px',
-                              borderRadius: '50%',
-                              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: '#FFFFFF',
-                              fontWeight: 800,
-                              fontSize: '12px',
-                            }}>
-                              {u.avatar}
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FFFFFF' }}>{u.name}</div>
-                              <div style={{ fontSize: '11.5px', color: '#64748B' }}>{u.phone}</div>
-                            </div>
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ padding: '56px 20px', textAlign: 'center', color: '#94A3B8' }}>
+                          <Users size={38} color="#64748B" style={{ margin: '0 auto 12px auto', opacity: 0.6 }} />
+                          <div style={{ fontSize: '15px', fontWeight: 600, color: '#E2E8F0', marginBottom: '6px' }}>
+                            {usersList.length === 0
+                              ? 'Hozircha ro‘yxatdan o‘tgan foydalanuvchilar mavjud emas'
+                              : 'Qidiruv bo‘yicha mos foydalanuvchi topilmadi'}
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#64748B' }}>
+                            {usersList.length === 0
+                              ? 'Mobil ilovada fuqarolar ro‘yxatdan o‘tgach, ularning ma’lumotlari bu yerda real vaqtda aks etadi.'
+                              : 'Boshqa so‘z, email yoki telefon raqami orqali qidirib ko‘ring.'}
                           </div>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: `${u.roleColor}18`,
-                            color: u.roleColor,
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            border: `1px solid ${u.roleColor}30`,
-                          }}>
-                            {u.role}
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px', fontSize: '13px', color: '#E2E8F0', fontWeight: 600 }}>
-                          {u.appsCount} ta
-                        </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            color: u.status === 'Faol' ? '#10B981' : '#F59E0B',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                          }}>
-                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: u.status === 'Faol' ? '#10B981' : '#F59E0B' }} />
-                            {u.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px', fontSize: '12.5px', color: '#94A3B8' }}>
-                          {u.registered}
-                        </td>
-                        <td style={{ padding: '14px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => alert(`${u.name} profili ochildi.`)}
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: '8px',
-                              background: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              color: '#00E5FF',
+                      </tr>
+                    ) : (
+                      filteredUsers.map((u) => (
+                        <tr
+                          key={u.id}
+                          style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)', transition: 'background 0.2s ease' }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          <td style={{ padding: '14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#FFFFFF',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                flexShrink: 0,
+                              }}>
+                                {u.avatar || 'YD'}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FFFFFF' }}>{u.name}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
+                                  {u.email && (
+                                    <div style={{ fontSize: '11.5px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      <Mail size={11} color="#64748B" />
+                                      {u.email}
+                                    </div>
+                                  )}
+                                  <div style={{ fontSize: '11.5px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Phone size={11} color="#64748B" />
+                                    {u.phone}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '14px' }}>
+                            <span style={{
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                              background: `${u.roleColor || '#00A3FF'}18`,
+                              color: u.roleColor || '#00A3FF',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              border: `1px solid ${u.roleColor || '#00A3FF'}30`,
+                            }}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px', fontSize: '13px', color: '#E2E8F0', fontWeight: 600 }}>
+                            {u.appsCount || 0} ta
+                          </td>
+                          <td style={{ padding: '14px' }}>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              color: u.status === 'Faol' ? '#10B981' : '#F59E0B',
                               fontSize: '12px',
                               fontWeight: 600,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Ko‘rish
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                            }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: u.status === 'Faol' ? '#10B981' : '#F59E0B' }} />
+                              {u.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px', fontSize: '12.5px', color: '#94A3B8' }}>
+                            {u.registered}
+                          </td>
+                          <td style={{ padding: '14px', textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                onClick={() => alert(`${u.name}\nEmail: ${u.email}\nTelefon: ${u.phone}\nRo‘yxatdan o‘tgan: ${u.registered}`)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '8px',
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  color: '#00E5FF',
+                                  fontSize: '12px',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Ko‘rish
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(u.id, u.name)}
+                                title="O‘chirish"
+                                style={{
+                                  padding: '6px 8px',
+                                  borderRadius: '8px',
+                                  background: 'rgba(239, 68, 68, 0.1)',
+                                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                                  color: '#EF4444',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

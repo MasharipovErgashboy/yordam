@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
   Modal,
+  Keyboard,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -358,6 +359,22 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   // Shartnoma AI to‘liq ekrani (bosh sahifa yoki xizmatlar katalogidan ochiladi)
   const [showContractAi, setShowContractAi] = useState(false);
 
+  // Pastki panel balandligi — AI suhbat yozish paneli uning ustida turishi uchun o‘lchanadi
+  const [navbarHeight, setNavbarHeight] = useState(64);
+  // AI suhbatda klaviatura ochilganda pastki panel yashiriladi (yozish paneli klaviatura ustiga chiqadi)
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  const hideNavbar = activeTab === 'ai_assistant' && keyboardVisible;
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (item.id === 'shartnoma_ai') {
       setShowContractAi(true);
@@ -438,11 +455,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     );
   }
 
-  // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran
-  if (activeTab === 'ai_assistant') {
-    return <AiChatScreen onBack={() => setActiveTab('home')} />;
-  }
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
@@ -484,8 +496,16 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         </View>
       </View>
 
-      {/* ===================== TAB 2: XIZMATLAR (STICKY HEADER + INDEPENDENT SCROLL) ===================== */}
-      {activeTab === 'services' ? (
+      {/* ===================== TAB 3: AI YORDAMCHI (header va pastki panel orasida) ===================== */}
+      {activeTab === 'ai_assistant' ? (
+        <View style={styles.aiTabWrapper}>
+          <AiChatScreen
+            embedded
+            bottomOffset={hideNavbar ? 0 : navbarHeight}
+            onBack={() => setActiveTab('home')}
+          />
+        </View>
+      ) : activeTab === 'services' ? (
         <View style={styles.servicesTabWrapper}>
           {/* Fixed Sticky Header for Services */}
           <View style={styles.stickyFilterHeader}>
@@ -881,7 +901,17 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       )}
 
       {/* ===================== BOTTOM NAVBAR (MATCHING SCREENSHOT) ===================== */}
-      <View style={[styles.bottomNavbar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View
+        style={[
+          styles.bottomNavbar,
+          { paddingBottom: Math.max(insets.bottom, 8) },
+          hideNavbar && styles.bottomNavbarHidden,
+        ]}
+        onLayout={(e) => {
+          const h = Math.round(e.nativeEvent.layout.height);
+          if (h > 0 && h !== navbarHeight) setNavbarHeight(h);
+        }}
+      >
         {/* 1. Asosiy sahifa (Active) */}
         <TouchableOpacity
           style={styles.navItem}
@@ -934,9 +964,19 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
           onPress={() => setActiveTab('ai_assistant')}
           activeOpacity={0.7}
         >
-          {/* AI tab to‘liq ekran (AiChatScreen) ochadi, shuning uchun bu yerda faol holat bo‘lmaydi */}
-          <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
-          <Text style={[styles.navLabel, styles.navLabelInactive]}>
+          {activeTab === 'ai_assistant' ? (
+            <View style={styles.activePillContainer}>
+              <Ionicons name="sparkles" size={20} color="#D97706" />
+            </View>
+          ) : (
+            <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
+          )}
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'ai_assistant' ? styles.navLabelActive : styles.navLabelInactive,
+            ]}
+          >
             AI yordamchi
           </Text>
         </TouchableOpacity>
@@ -1598,6 +1638,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 8,
+  },
+  bottomNavbarHidden: {
+    display: 'none',
+  },
+  aiTabWrapper: {
+    flex: 1,
   },
   navItem: {
     alignItems: 'center',

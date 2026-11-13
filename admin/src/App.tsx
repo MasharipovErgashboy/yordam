@@ -34,6 +34,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
 
   // Users tab state
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -271,7 +272,7 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        const searchInput = document.getElementById('sidebar-search-input') as HTMLInputElement | null;
+        const searchInput = document.getElementById('header-search-input') as HTMLInputElement | null;
         if (searchInput) {
           searchInput.focus();
         }
@@ -320,14 +321,26 @@ export default function App() {
 
   const { title, subtitle } = getTabHeader();
 
+  const displayedApplications = applications.filter((app) => {
+    if (!globalSearchQuery.trim()) return true;
+    const q = globalSearchQuery.toLowerCase();
+    return (
+      app.number.toLowerCase().includes(q) ||
+      app.client.toLowerCase().includes(q) ||
+      app.title.toLowerCase().includes(q) ||
+      app.categoryLabel.toLowerCase().includes(q)
+    );
+  });
+
+  const effectiveUserQuery = globalSearchQuery || userSearchQuery;
   const filteredUsers = usersList.filter((u) => {
     const matchesRole =
       selectedUserRole === 'all' ||
       u.role.toLowerCase() === selectedUserRole.toLowerCase();
     const matchesQuery =
-      userSearchQuery === '' ||
-      u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-      u.phone.includes(userSearchQuery);
+      effectiveUserQuery === '' ||
+      u.name.toLowerCase().includes(effectiveUserQuery.toLowerCase()) ||
+      u.phone.includes(effectiveUserQuery);
     return matchesRole && matchesQuery;
   });
 
@@ -368,7 +381,8 @@ export default function App() {
         <DashboardHeader
           title={title}
           subtitle={subtitle}
-          onOpenNewModal={() => setIsNewModalOpen(true)}
+          searchQuery={globalSearchQuery}
+          onSearchChange={setGlobalSearchQuery}
         />
 
         {/* =========================================================================
@@ -383,7 +397,7 @@ export default function App() {
             <ChartsSection />
 
             {/* Applications Table */}
-            <ApplicationsTable applications={applications} />
+            <ApplicationsTable applications={displayedApplications} />
           </div>
         )}
 

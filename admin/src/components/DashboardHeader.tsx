@@ -1,30 +1,47 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, ChevronDown, Filter } from 'lucide-react';
+import { Search, Command, X } from 'lucide-react';
 
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
-  onOpenNewModal: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title,
   subtitle,
-  onOpenNewModal,
+  searchQuery: externalQuery,
+  onSearchChange: externalOnChange,
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState('Oxirgi 7 kun');
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [internalQuery, setInternalQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
-  const filters = ['Oxirgi 7 kun', 'Bugun', 'Oxirgi 30 kun', 'Shu oy', 'Barcha davr'];
+  const query = externalQuery !== undefined ? externalQuery : internalQuery;
+
+  const handleChange = (val: string) => {
+    if (externalOnChange) {
+      externalOnChange(val);
+    } else {
+      setInternalQuery(val);
+    }
+  };
+
+  const handleClear = () => {
+    handleChange('');
+    const input = document.getElementById('header-search-input') as HTMLInputElement | null;
+    if (input) input.focus();
+  };
 
   return (
     <header style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: '24px',
+      marginBottom: '26px',
       position: 'relative',
       zIndex: 5,
+      gap: '20px',
     }}>
       {/* Left Title and Subtitle */}
       <div>
@@ -47,126 +64,93 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </p>
       </div>
 
-      {/* Right Action Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* Date Filter Pill */}
-        <div style={{ position: 'relative' }}>
+      {/* Right Search Bar (Placed in place of previous Date Filter and + button) */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: isFocused ? 'rgba(16, 26, 48, 0.65)' : 'rgba(255, 255, 255, 0.04)',
+        border: isFocused ? '1px solid rgba(0, 163, 255, 0.45)' : '1px solid rgba(255, 255, 255, 0.09)',
+        borderRadius: '14px',
+        padding: '0 14px',
+        height: '44px',
+        width: '340px',
+        maxWidth: '100%',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: isFocused
+          ? '0 0 24px rgba(0, 163, 255, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.12)'
+          : '0 8px 20px -8px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.06)',
+        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+        position: 'relative',
+      }}>
+        {/* Search Icon */}
+        <Search
+          size={16}
+          color={isFocused ? '#00E5FF' : '#64748B'}
+          style={{ marginRight: '10px', flexShrink: 0, transition: 'color 0.2s ease' }}
+        />
+
+        {/* Input */}
+        <input
+          id="header-search-input"
+          type="text"
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder="Qidiruv (arizalar, mijozlar, bo‘limlar)..."
+          style={{
+            flex: 1,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: '#FFFFFF',
+            fontSize: '13px',
+            fontWeight: 500,
+            fontFamily: 'inherit',
+          }}
+        />
+
+        {/* Clear Button or Cmd+K Badge */}
+        {query ? (
           <button
-            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+            onClick={handleClear}
+            title="Tozalash"
             style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#64748B',
+              cursor: 'pointer',
+              padding: '4px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
-              borderRadius: '12px',
-              background: 'rgba(14, 22, 38, 0.40)',
-              backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              color: '#E2E8F0',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              justifyContent: 'center',
+              borderRadius: '6px',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(22, 34, 60, 0.55)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(14, 22, 38, 0.40)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#64748B')}
           >
-            <Calendar size={15} color="#94A3B8" />
-            <span>{selectedFilter}</span>
-            <ChevronDown size={14} color="#94A3B8" />
+            <X size={14} />
           </button>
-
-          {/* Filter Dropdown Menu */}
-          {showFilterDropdown && (
-            <div
-              className="glass-panel"
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 6px)',
-                right: 0,
-                width: '180px',
-                padding: '6px',
-                borderRadius: '14px',
-                zIndex: 30,
-                background: '#0B1323',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
-              }}
-            >
-              {filters.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => {
-                    setSelectedFilter(f);
-                    setShowFilterDropdown(false);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: selectedFilter === f ? 'rgba(0, 163, 255, 0.15)' : 'transparent',
-                    color: selectedFilter === f ? '#00E5FF' : '#CBD5E1',
-                    fontSize: '12.5px',
-                    fontWeight: selectedFilter === f ? 700 : 500,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedFilter !== f) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedFilter !== f) e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <Filter size={12} color={selectedFilter === f ? '#00E5FF' : '#64748B'} />
-                  <span>{f}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Plus Action CTA Button */}
-        <button
-          onClick={onOpenNewModal}
-          title="Yangi ariza yoki shartnoma qo‘shish"
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
-            border: 'none',
-            background: 'linear-gradient(135deg, #00B2FF 0%, #0077FF 100%)',
-            color: '#FFFFFF',
+        ) : (
+          <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 0 20px rgba(0, 163, 255, 0.5)',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 0 28px rgba(0, 163, 255, 0.7)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 163, 255, 0.5)';
-          }}
-        >
-          <Plus size={20} strokeWidth={2.6} />
-        </button>
+            gap: '2px',
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '2px 6px',
+            borderRadius: '6px',
+            color: '#64748B',
+            fontSize: '10.5px',
+            fontWeight: 700,
+            userSelect: 'none',
+          }}>
+            <Command size={10} />
+            <span>K</span>
+          </div>
+        )}
       </div>
     </header>
   );
 };
-

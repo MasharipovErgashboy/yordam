@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   LayoutDashboard,
   Users,
   Briefcase,
   Crown,
   Megaphone,
-  Search,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
-  Command,
 } from 'lucide-react';
 import type { UserSession } from '../types';
 import logoImg from '../assets/logo.png';
@@ -31,8 +29,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggleCollapse,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-
   // 5 main navigation sections specified by user
   const navItems = [
     {
@@ -67,10 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Megaphone,
     },
   ];
-
-  const filteredNavItems = navItems.filter((item) =>
-    item.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <aside
@@ -213,62 +205,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       )}
 
-      {/* Search Input (Only when expanded) */}
-      {!isCollapsed ? (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          background: 'rgba(255, 255, 255, 0.035)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
-          padding: '0 12px',
-          height: '40px',
-          marginBottom: '22px',
-        }}>
-          <Search size={15} color="#64748B" style={{ marginRight: '8px', flexShrink: 0 }} />
-          <input
-            id="sidebar-search-input"
-            type="text"
-            placeholder="Qidiruv..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: '#FFFFFF',
-              fontSize: '13px',
-              fontFamily: 'inherit',
-            }}
-          />
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2px',
-            background: 'rgba(255, 255, 255, 0.06)',
-            padding: '2px 5px',
-            borderRadius: '5px',
-            color: '#64748B',
-            fontSize: '10px',
-            fontWeight: 700,
-          }}>
-            <Command size={10} />
-            <span>K</span>
-          </div>
-        </div>
-      ) : (
-        <div style={{ height: '8px' }} />
-      )}
-
       {/* Navigation Items List */}
       <nav style={{
         display: 'flex',
         flexDirection: 'column',
         gap: '6px',
         flex: 1,
+        marginTop: isCollapsed ? '0px' : '4px',
       }}>
-        {filteredNavItems.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
 

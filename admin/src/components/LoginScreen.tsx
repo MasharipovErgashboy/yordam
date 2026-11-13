@@ -124,13 +124,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
           <div>
             <span style={{
-              fontSize: '28px',
+              fontSize: '30px',
               fontWeight: 800,
               letterSpacing: '-0.5px',
-              color: '#FFFFFF',
               display: 'inline-block',
+              lineHeight: 1,
             }}>
-              yordam
+              <span style={{ color: '#2563EB' }}>Y</span>
+              <span style={{ color: '#FF7A00' }}>o</span>
+              <span style={{ color: '#2563EB' }}>rdam</span>
             </span>
           </div>
         </div>

@@ -137,7 +137,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // Image Upload handler (Base64 data or standard URL)
+  // Image Upload handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -162,7 +162,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
 
     try {
       setIsUploading(true);
-      const res = await fetch('/api/huquq-maktabi/banners', {
+      const res = await fetch('http://localhost:5000/api/huquq-maktabi/banners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -197,7 +197,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
   const handleDeleteBanner = async (id: string, target: 'main' | 'store') => {
     if (!confirm('Haqiqatan ham ushbu reklamani o‘chirmoqchimisiz?')) return;
     try {
-      const res = await fetch(`/api/huquq-maktabi/banners/${id}?target=${target}`, {
+      const res = await fetch(`http://localhost:5000/api/huquq-maktabi/banners/${id}?target=${target}`, {
         method: 'DELETE',
       });
       const result = await res.json();
@@ -225,7 +225,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
   const handleSaveTopic = async () => {
     if (!selectedTopic) return;
     try {
-      const res = await fetch(`/api/huquq-maktabi/topics/${selectedTopic.id}`, {
+      const res = await fetch(`http://localhost:5000/api/huquq-maktabi/topics/${selectedTopic.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -262,7 +262,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
   const handleSaveStoreItem = async () => {
     if (!selectedStoreItem) return;
     try {
-      const res = await fetch(`/api/huquq-maktabi/store/items/${selectedStoreItem.id}`, {
+      const res = await fetch(`http://localhost:5000/api/huquq-maktabi/store/items/${selectedStoreItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -284,144 +284,320 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
     }
   };
 
-  // Format remaining time
-  const getRemainingTimeBadge = (expiresAt: number | null) => {
+  // Format remaining time badge
+  const renderRemainingBadge = (expiresAt: number | null) => {
     if (!expiresAt) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <Sparkles className="w-3 h-3" /> Bir umr (Muddatsiz)
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          padding: '4px 10px',
+          borderRadius: '20px',
+          fontSize: '11px',
+          fontWeight: 700,
+          background: 'rgba(16, 185, 129, 0.2)',
+          color: '#10B981',
+          border: '1px solid rgba(16, 185, 129, 0.35)',
+        }}>
+          <Sparkles size={12} /> Bir umr (Muddatsiz)
         </span>
       );
     }
     const diffMs = expiresAt - Date.now();
     if (diffMs <= 0) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          <Clock className="w-3 h-3" /> Muddati tugagan
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          padding: '4px 10px',
+          borderRadius: '20px',
+          fontSize: '11px',
+          fontWeight: 700,
+          background: 'rgba(239, 68, 68, 0.2)',
+          color: '#EF4444',
+          border: '1px solid rgba(239, 68, 68, 0.35)',
+        }}>
+          <Clock size={12} /> Muddati tugagan
         </span>
       );
     }
 
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-        <Clock className="w-3 h-3" /> {days} kun qoldi
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '4px 10px',
+        borderRadius: '20px',
+        fontSize: '11px',
+        fontWeight: 700,
+        background: 'rgba(245, 158, 11, 0.2)',
+        color: '#F59E0B',
+        border: '1px solid rgba(245, 158, 11, 0.35)',
+      }}>
+        <Clock size={12} /> {days} kun qoldi
       </span>
     );
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '40px' }}>
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/90 text-white shadow-xl backdrop-blur-md border border-emerald-400/40 text-sm font-medium animate-slideIn">
-          <CheckCircle2 className="w-4 h-4" />
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '24px',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '12px 18px',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%)',
+          color: '#FFFFFF',
+          fontSize: '13px',
+          fontWeight: 700,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}>
+          <CheckCircle2 size={16} />
           {notification}
         </div>
       )}
 
-      {/* Top Bar with Back Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      {/* Top Header Card with Back Button */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '20px 24px',
+          borderRadius: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button
             onClick={onBack}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all duration-200 border border-slate-700/60 shadow-sm group"
             title="Xizmatlar ro‘yxatiga qaytish"
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
           >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+            <ArrowLeft size={20} />
           </button>
+
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span style={{
+                padding: '3px 9px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: 700,
+                background: 'rgba(139, 92, 246, 0.2)',
+                color: '#C084FC',
+                border: '1px solid rgba(139, 92, 246, 0.35)',
+              }}>
                 Xizmat boshqaruvi
               </span>
-              <span className="text-xs text-slate-400">Real-time sinxronizatsiya</span>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>• Real-time jonli sinxronizatsiya</span>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight mt-1">Huquq Maktabi</h1>
+            <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: '-0.3px' }}>
+              Huquq Maktabi Boshqaruvi
+            </h1>
           </div>
         </div>
 
-        {/* Action Button */}
         {activeTab === 'banners' && (
           <button
             onClick={() => {
               setBannerTarget('main');
               setShowAddBannerModal(true);
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/20 transition-all active:scale-95"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '11px 20px',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)',
+              transition: 'all 0.2s ease',
+            }}
           >
-            <Plus className="w-4 h-4" />
+            <Plus size={16} />
             <span>Yangi reklama qo‘shish</span>
           </button>
         )}
       </div>
 
-      {/* Primary Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+      {/* Main Tabs Navigation */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '6px',
+        background: 'rgba(8, 14, 27, 0.6)',
+        borderRadius: '14px',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        width: 'fit-content',
+        flexWrap: 'wrap',
+      }}>
         <button
           onClick={() => setActiveTab('banners')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            activeTab === 'banners'
-              ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '9px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            background: activeTab === 'banners' ? 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' : 'transparent',
+            color: activeTab === 'banners' ? '#FFFFFF' : '#94A3B8',
+            fontSize: '13px',
+            fontWeight: activeTab === 'banners' ? 700 : 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'banners' ? '0 0 16px rgba(139, 92, 246, 0.35)' : 'none',
+          }}
         >
-          <ImageIcon className="w-4 h-4" />
+          <ImageIcon size={16} />
           <span>Reklama bo‘limi (Bosh sahifa swiper)</span>
-          <span className="ml-1 px-1.5 py-0.5 rounded-md text-[11px] bg-slate-800 text-slate-300">
+          <span style={{
+            padding: '2px 7px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 800,
+            background: 'rgba(0, 0, 0, 0.25)',
+            color: '#FFFFFF',
+          }}>
             {data.banners?.length || 0}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('topics')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            activeTab === 'topics'
-              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '9px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            background: activeTab === 'topics' ? 'linear-gradient(135deg, #00A3FF 0%, #0077FF 100%)' : 'transparent',
+            color: activeTab === 'topics' ? '#FFFFFF' : '#94A3B8',
+            fontSize: '13px',
+            fontWeight: activeTab === 'topics' ? 700 : 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'topics' ? '0 0 16px rgba(0, 163, 255, 0.35)' : 'none',
+          }}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen size={16} />
           <span>Mavzular bo‘limi (Katalog)</span>
-          <span className="ml-1 px-1.5 py-0.5 rounded-md text-[11px] bg-slate-800 text-slate-300">
+          <span style={{
+            padding: '2px 7px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 800,
+            background: 'rgba(0, 0, 0, 0.25)',
+            color: '#FFFFFF',
+          }}>
             {data.topics?.length || 0}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('store')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            activeTab === 'store'
-              ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '9px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            background: activeTab === 'store' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'transparent',
+            color: activeTab === 'store' ? '#FFFFFF' : '#94A3B8',
+            fontSize: '13px',
+            fontWeight: activeTab === 'store' ? 700 : 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === 'store' ? '0 0 16px rgba(16, 185, 129, 0.35)' : 'none',
+          }}
         >
-          <ShoppingBag className="w-4 h-4" />
+          <ShoppingBag size={16} />
           <span>Maktab do‘koni (Coin Shop)</span>
         </button>
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. REKLAMA BO‘LIMI (BOSH SAHIFA SWIPERI) */}
+      {/* 1. REKLAMA BO‘LIMI (BOSH SAHIFA SWIPER) */}
       {/* ========================================================================= */}
       {activeTab === 'banners' && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/20 text-sm text-purple-300 flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Notification Info Box */}
+          <div style={{
+            padding: '16px 20px',
+            borderRadius: '16px',
+            background: 'rgba(139, 92, 246, 0.1)',
+            border: '1px solid rgba(139, 92, 246, 0.25)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px',
+          }}>
+            <Sparkles size={20} color="#C084FC" style={{ marginTop: '2px', flexShrink: 0 }} />
             <div>
-              <p className="font-semibold text-purple-200">Avtomatik o‘chish mexanizmi faol</p>
-              <p className="text-xs text-purple-300/80 mt-0.5">
-                Qo‘shilgan swiper reklamalari belgilangan muddat (1 kun, 1 hafta, 1 oy va h.k.) o‘tishi bilan avtomatik tarzda mini ilovadan ham, admin paneldan ham o‘chib ketadi.
-              </p>
+              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#E9D5FF' }}>
+                Avtomatik o‘chish mexanizmi faol
+              </div>
+              <div style={{ fontSize: '12px', color: '#CBD5E1', marginTop: '3px', lineHeight: '18px' }}>
+                Qo‘shilgan swiper reklamalari belgilangan muddat (1 kun, 3 kun, 1 hafta, 2 hafta, 1 oy, 3 oy) o‘tgandan so‘ng mini ilovadan hamda admin paneldan avtomatik o‘chib ketadi.
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Banner Cards Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '20px',
+          }}>
             {(!data.banners || data.banners.length === 0) ? (
-              <div className="col-span-full py-16 text-center rounded-2xl bg-slate-900/30 border border-dashed border-slate-800">
-                <ImageIcon className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-slate-300 font-semibold text-base">Hozircha faol reklama yo‘q</h3>
-                <p className="text-slate-500 text-xs mt-1 max-w-sm mx-auto">
+              <div className="glass-panel" style={{
+                gridColumn: '1 / -1',
+                padding: '60px 20px',
+                textAlign: 'center',
+                borderRadius: '20px',
+                border: '1px dashed rgba(255, 255, 255, 0.15)',
+              }}>
+                <ImageIcon size={44} color="#64748B" style={{ margin: '0 auto 12px auto' }} />
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#CBD5E1', margin: '0 0 4px 0' }}>
+                  Hozircha faol reklama yo‘q
+                </h3>
+                <p style={{ fontSize: '12.5px', color: '#64748B', maxWidth: '380px', margin: '0 auto' }}>
                   «Yangi reklama qo‘shish» tugmasi orqali Huquq maktabi bosh sahifasi uchun swiper rasmini joylashtiring.
                 </p>
               </div>
@@ -429,49 +605,110 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
               data.banners.map((banner) => (
                 <div
                   key={banner.id}
-                  className="group relative rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-purple-500/40 overflow-hidden shadow-lg transition-all duration-300 flex flex-col"
+                  className="glass-panel"
+                  style={{
+                    borderRadius: '20px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    background: 'rgba(14, 22, 38, 0.6)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.4)',
+                  }}
                 >
-                  <div className="relative h-44 w-full overflow-hidden bg-slate-950">
+                  {/* Banner Image Preview Container */}
+                  <div style={{
+                    position: 'relative',
+                    height: '180px',
+                    width: '100%',
+                    background: '#070B14',
+                    overflow: 'hidden',
+                  }}>
                     <img
                       src={banner.imageUrl}
                       alt={banner.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-                    
-                    <div className="absolute top-3 left-3">
-                      {getRemainingTimeBadge(banner.expiresAt)}
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, rgba(7, 11, 20, 0.95) 0%, rgba(7, 11, 20, 0.2) 60%, transparent 100%)',
+                    }} />
+
+                    {/* Remaining Days Badge */}
+                    <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
+                      {renderRemainingBadge(banner.expiresAt)}
                     </div>
 
+                    {/* Delete button on image */}
                     <button
                       onClick={() => handleDeleteBanner(banner.id, 'main')}
-                      className="absolute top-3 right-3 p-2 rounded-xl bg-rose-500/80 hover:bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-all shadow-md active:scale-95"
                       title="Reklamani o‘chirish"
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '9px',
+                        border: 'none',
+                        background: 'rgba(239, 68, 68, 0.85)',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                      }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 size={15} />
                     </button>
                   </div>
 
-                  <div className="p-4 flex-1 flex flex-col justify-between">
+                  {/* Banner Info */}
+                  <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
                     <div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400">
+                      <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#C084FC', letterSpacing: '0.4px', marginBottom: '4px' }}>
                         {banner.durationLabel}
-                      </span>
-                      <h3 className="text-base font-bold text-white mt-1 group-hover:text-purple-300 transition-colors">
+                      </div>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px 0', lineHeight: '20px' }}>
                         {banner.title}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                      <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '17px' }}>
                         {banner.subtitle}
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: '16px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                      fontSize: '11.5px',
+                      color: '#64748B',
+                    }}>
                       <span>Qo‘shilgan: {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}</span>
                       <button
                         onClick={() => handleDeleteBanner(banner.id, 'main')}
-                        className="text-rose-400 hover:text-rose-300 text-xs font-medium flex items-center gap-1"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#EF4444',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          cursor: 'pointer',
+                        }}
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> O‘chirish
+                        <Trash2 size={13} /> O‘chirish
                       </button>
                     </div>
                   </div>
@@ -483,111 +720,210 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       )}
 
       {/* ========================================================================= */}
-      {/* 2. MAVZULAR BO‘LIMI (KATALOG) */}
+      {/* 2. MAVZULAR BO‘LIMI (KATALOG JADVALI) */}
       {/* ========================================================================= */}
       {activeTab === 'topics' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-blue-950/20 border border-blue-500/20 text-sm text-blue-300">
-            <div className="flex items-center gap-3">
-              <Layers className="w-5 h-5 text-blue-400 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-blue-200">Mini ilovadagi huquqiy mavzular ro‘yxati</p>
-                <p className="text-xs text-blue-300/80 mt-0.5">
-                  Har bir mavzuning tartib raqami (navbati), iconi, nomi va darslar sonini real vaqt rejimida tahrirlashingiz mumkin.
-                </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Header Info */}
+          <div style={{
+            padding: '16px 20px',
+            borderRadius: '16px',
+            background: 'rgba(0, 163, 255, 0.1)',
+            border: '1px solid rgba(0, 163, 255, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+          }}>
+            <Layers size={20} color="#00E5FF" />
+            <div>
+              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#E0F2FE' }}>
+                Mini ilovadagi huquqiy mavzular katalogi (10 ta yo‘nalish)
+              </div>
+              <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+                Har bir mavzuning tartib raqami (navbati), iconi, nomi, qisqacha tavsifi va darslar sonini o‘zgartirishingiz mumkin.
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-900/40 border border-slate-800/80 overflow-hidden backdrop-blur-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-900/60">
-                    <th className="py-4 px-4 text-center w-16">Navbati</th>
-                    <th className="py-4 px-4">Mavzu nomi va tavsifi</th>
-                    <th className="py-4 px-4">Icon kodi</th>
-                    <th className="py-4 px-4 text-center">Darslar soni</th>
-                    <th className="py-4 px-4 text-center">Daraja</th>
-                    <th className="py-4 px-4 text-right">Amallar</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 text-sm">
-                  {data.topics?.map((topic) => (
-                    <tr
-                      key={topic.id}
-                      className="hover:bg-slate-800/30 transition-colors group"
-                    >
-                      {/* Navbati */}
-                      <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 font-black text-sm">
-                          {topic.order}
-                        </span>
-                      </td>
+          {/* Table Card */}
+          <div
+            className="glass-panel"
+            style={{
+              padding: '20px',
+              borderRadius: '20px',
+              overflowX: 'auto',
+            }}
+          >
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '70px' }}>
+                    Navbati
+                  </th>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Mavzu nomi va tavsifi
+                  </th>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Icon kodi
+                  </th>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
+                    Modullar soni
+                  </th>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
+                    Daraja
+                  </th>
+                  <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>
+                    Amallar
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.topics?.map((topic) => (
+                  <tr
+                    key={topic.id}
+                    className="table-row-hover"
+                    style={{
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {/* Order / Navbati */}
+                    <td style={{ padding: '16px 14px', textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '9px',
+                        background: 'rgba(0, 163, 255, 0.15)',
+                        border: '1px solid rgba(0, 163, 255, 0.3)',
+                        color: '#00E5FF',
+                        fontWeight: 800,
+                        fontSize: '13px',
+                      }}>
+                        #{topic.order}
+                      </span>
+                    </td>
 
-                      {/* Title & Subtitle */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0 border border-slate-700/60 text-blue-400">
-                            <BookOpen className="w-5 h-5" />
+                    {/* Topic Title & Subtitle */}
+                    <td style={{ padding: '16px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '12px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#00A3FF',
+                          flexShrink: 0,
+                        }}>
+                          <BookOpen size={18} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#FFFFFF', marginBottom: '3px' }}>
+                            {topic.title}
                           </div>
-                          <div>
-                            <div className="font-bold text-white group-hover:text-blue-300 transition-colors">
-                              {topic.title}
-                            </div>
-                            <div className="text-xs text-slate-400 mt-0.5 max-w-md line-clamp-1">
-                              {topic.subtitle}
-                            </div>
+                          <div style={{ fontSize: '12px', color: '#94A3B8', maxWidth: '420px', lineHeight: '16px' }}>
+                            {topic.subtitle}
                           </div>
                         </div>
-                      </td>
+                      </div>
+                    </td>
 
-                      {/* Icon name */}
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800/80 text-slate-300 border border-slate-700/50">
-                          <Tag className="w-3 h-3 text-slate-400" /> {topic.iconName}
-                        </span>
-                      </td>
+                    {/* Icon Name Tag */}
+                    <td style={{ padding: '16px 14px' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#CBD5E1',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}>
+                        <Tag size={12} color="#94A3B8" /> {topic.iconName}
+                      </span>
+                    </td>
 
-                      {/* Lessons Count */}
-                      <td className="py-4 px-4 text-center font-bold text-slate-200">
+                    {/* Lessons Count */}
+                    <td style={{ padding: '16px 14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#FFFFFF' }}>
                         {topic.lessonsCount} ta modul
-                      </td>
+                      </span>
+                    </td>
 
-                      {/* Level */}
-                      <td className="py-4 px-4 text-center">
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700/60">
-                          {topic.level}
-                        </span>
-                      </td>
+                    {/* Level Badge */}
+                    <td style={{ padding: '16px 14px', textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#94A3B8',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                      }}>
+                        {topic.level}
+                      </span>
+                    </td>
 
-                      {/* Actions */}
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedTopic(topic);
-                              setIsViewingTopic(true);
-                            }}
-                            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all shadow-sm"
-                            title="Batafsil ko‘rish"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => openEditTopic(topic)}
-                            className="p-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 hover:text-blue-300 border border-blue-500/30 transition-all shadow-sm"
-                            title="Tahrirlash"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    {/* Actions: Eye & Edit */}
+                    <td style={{ padding: '16px 14px', textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          onClick={() => {
+                            setSelectedTopic(topic);
+                            setIsViewingTopic(true);
+                          }}
+                          title="Batafsil ko‘rish"
+                          style={{
+                            width: '34px',
+                            height: '34px',
+                            borderRadius: '9px',
+                            border: '1px solid rgba(0, 163, 255, 0.35)',
+                            background: 'rgba(0, 163, 255, 0.12)',
+                            color: '#00A3FF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Eye size={15} />
+                        </button>
+
+                        <button
+                          onClick={() => openEditTopic(topic)}
+                          title="Tahrirlash"
+                          style={{
+                            width: '34px',
+                            height: '34px',
+                            borderRadius: '9px',
+                            border: '1px solid rgba(245, 158, 11, 0.35)',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            color: '#F59E0B',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -596,55 +932,98 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       {/* 3. MAKTAB DO‘KONI (COIN SHOP) */}
       {/* ========================================================================= */}
       {activeTab === 'store' && (
-        <div className="space-y-6">
-          {/* Subtabs within Store */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl">
-            <div className="flex items-center gap-1 sm:gap-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Subtabs Bar */}
+          <div
+            className="glass-panel"
+            style={{
+              padding: '12px 16px',
+              borderRadius: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setStoreSubTab('banners')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  storeSubTab === 'banners'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: storeSubTab === 'banners' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'transparent',
+                  color: storeSubTab === 'banners' ? '#FFFFFF' : '#94A3B8',
+                  fontSize: '12.5px',
+                  fontWeight: storeSubTab === 'banners' ? 700 : 500,
+                  cursor: 'pointer',
+                }}
               >
-                <ImageIcon className="w-4 h-4" />
+                <ImageIcon size={15} />
                 <span>1. Reklama bo‘limi</span>
               </button>
 
               <button
                 onClick={() => setStoreSubTab('talim')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  storeSubTab === 'talim'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: storeSubTab === 'talim' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'transparent',
+                  color: storeSubTab === 'talim' ? '#FFFFFF' : '#94A3B8',
+                  fontSize: '12.5px',
+                  fontWeight: storeSubTab === 'talim' ? 700 : 500,
+                  cursor: 'pointer',
+                }}
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen size={15} />
                 <span>2. Ta’lim imtiyozlari</span>
               </button>
 
               <button
                 onClick={() => setStoreSubTab('maxsus')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  storeSubTab === 'maxsus'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: storeSubTab === 'maxsus' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'transparent',
+                  color: storeSubTab === 'maxsus' ? '#FFFFFF' : '#94A3B8',
+                  fontSize: '12.5px',
+                  fontWeight: storeSubTab === 'maxsus' ? 700 : 500,
+                  cursor: 'pointer',
+                }}
               >
-                <Gift className="w-4 h-4" />
+                <Gift size={15} />
                 <span>3. Maxsus sovg‘alar</span>
               </button>
 
               <button
                 onClick={() => setStoreSubTab('hamkorlar')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  storeSubTab === 'hamkorlar'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: storeSubTab === 'hamkorlar' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'transparent',
+                  color: storeSubTab === 'hamkorlar' ? '#FFFFFF' : '#94A3B8',
+                  fontSize: '12.5px',
+                  fontWeight: storeSubTab === 'hamkorlar' ? 700 : 500,
+                  cursor: 'pointer',
+                }}
               >
-                <Award className="w-4 h-4" />
+                <Award size={15} />
                 <span>4. Hamkorlar takliflari</span>
               </button>
             </div>
@@ -655,9 +1034,21 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                   setBannerTarget('store');
                   setShowAddBannerModal(true);
                 }}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-semibold transition-all"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: '#10B981',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
               >
-                <Plus className="w-4 h-4" />
+                <Plus size={14} />
                 <span>Do‘konga reklama qo‘shish</span>
               </button>
             )}
@@ -665,110 +1056,214 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
 
           {/* 3.1 Store Banners */}
           {storeSubTab === 'banners' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {(!data.store?.banners || data.store.banners.length === 0) ? (
-                  <div className="col-span-full py-16 text-center rounded-2xl bg-slate-900/30 border border-dashed border-slate-800">
-                    <ImageIcon className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <h3 className="text-slate-300 font-semibold text-base">Do‘kon uchun reklama mavjud emas</h3>
-                    <p className="text-slate-500 text-xs mt-1 max-w-sm mx-auto">
-                      Coin Shop tepadagi swiper qismi uchun yangi rasm va muddat belgilab e’lon joylashtiring.
-                    </p>
-                  </div>
-                ) : (
-                  data.store.banners.map((banner) => (
-                    <div
-                      key={banner.id}
-                      className="group relative rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/40 overflow-hidden shadow-lg transition-all duration-300 flex flex-col"
-                    >
-                      <div className="relative h-44 w-full overflow-hidden bg-slate-950">
-                        <img
-                          src={banner.imageUrl}
-                          alt={banner.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-                        
-                        <div className="absolute top-3 left-3">
-                          {getRemainingTimeBadge(banner.expiresAt)}
-                        </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '20px',
+            }}>
+              {(!data.store?.banners || data.store.banners.length === 0) ? (
+                <div className="glass-panel" style={{
+                  gridColumn: '1 / -1',
+                  padding: '60px 20px',
+                  textAlign: 'center',
+                  borderRadius: '20px',
+                  border: '1px dashed rgba(255, 255, 255, 0.15)',
+                }}>
+                  <ImageIcon size={44} color="#64748B" style={{ margin: '0 auto 12px auto' }} />
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#CBD5E1', margin: '0 0 4px 0' }}>
+                    Do‘kon uchun reklama mavjud emas
+                  </h3>
+                  <p style={{ fontSize: '12.5px', color: '#64748B', maxWidth: '380px', margin: '0 auto' }}>
+                    Coin Shop yuqori qismidagi swiper uchun rasm yuklab, amal qilish muddatini tanlang.
+                  </p>
+                </div>
+              ) : (
+                data.store.banners.map((banner) => (
+                  <div
+                    key={banner.id}
+                    className="glass-panel"
+                    style={{
+                      borderRadius: '20px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      background: 'rgba(14, 22, 38, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                    }}
+                  >
+                    <div style={{
+                      position: 'relative',
+                      height: '180px',
+                      width: '100%',
+                      background: '#070B14',
+                    }}>
+                      <img
+                        src={banner.imageUrl}
+                        alt={banner.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(to top, rgba(7, 11, 20, 0.95) 0%, transparent 60%)',
+                      }} />
+                      <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
+                        {renderRemainingBadge(banner.expiresAt)}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteBanner(banner.id, 'store')}
+                        title="O‘chirish"
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '9px',
+                          border: 'none',
+                          background: 'rgba(239, 68, 68, 0.85)',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
 
+                    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10B981', marginBottom: '4px' }}>
+                          {banner.durationLabel}
+                        </div>
+                        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px 0' }}>
+                          {banner.title}
+                        </h3>
+                        <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '17px' }}>
+                          {banner.subtitle}
+                        </p>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: '16px',
+                        paddingTop: '12px',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                        fontSize: '11.5px',
+                        color: '#64748B',
+                      }}>
+                        <span>Qo‘shilgan: {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}</span>
                         <button
                           onClick={() => handleDeleteBanner(banner.id, 'store')}
-                          className="absolute top-3 right-3 p-2 rounded-xl bg-rose-500/80 hover:bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-all shadow-md active:scale-95"
-                          title="Reklamani o‘chirish"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#EF4444',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer',
+                          }}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 size={13} /> O‘chirish
                         </button>
                       </div>
-
-                      <div className="p-4 flex-1 flex flex-col justify-between">
-                        <div>
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-                            {banner.durationLabel}
-                          </span>
-                          <h3 className="text-base font-bold text-white mt-1 group-hover:text-emerald-300 transition-colors">
-                            {banner.title}
-                          </h3>
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                            {banner.subtitle}
-                          </p>
-                        </div>
-
-                        <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
-                          <span>Qo‘shilgan: {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}</span>
-                          <button
-                            onClick={() => handleDeleteBanner(banner.id, 'store')}
-                            className="text-rose-400 hover:text-rose-300 text-xs font-medium flex items-center gap-1"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" /> O‘chirish
-                          </button>
-                        </div>
-                      </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
           {/* 3.2 Ta'lim imtiyozlari */}
           {storeSubTab === 'talim' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '20px',
+            }}>
               {data.store?.talimItems?.map((item) => (
                 <div
                   key={item.id}
-                  className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between"
+                  className="glass-panel"
+                  style={{
+                    padding: '20px',
+                    borderRadius: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        background: 'rgba(0, 163, 255, 0.15)',
+                        color: '#00E5FF',
+                        border: '1px solid rgba(0, 163, 255, 0.3)',
+                      }}>
                         {item.subcategory}
                       </span>
-                      <div className="flex items-center gap-1 text-amber-400 font-black text-sm">
-                        <Coins className="w-4 h-4" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#F59E0B', fontWeight: 800, fontSize: '14px' }}>
+                        <Coins size={16} />
                         <span>{item.priceCoins} coin</span>
                       </div>
                     </div>
-                    <h3 className="text-base font-bold text-white">{item.title}</h3>
-                    <p className="text-xs text-slate-400 mt-2 line-clamp-3">{item.desc}</p>
+
+                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 8px 0' }}>
+                      {item.title}
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '18px' }}>
+                      {item.desc}
+                    </p>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '8px',
+                    marginTop: '20px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                  }}>
                     <button
                       onClick={() => {
                         setSelectedStoreItem(item);
                         setIsViewingStoreItem(true);
                       }}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#CBD5E1',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye size={15} />
                     </button>
                     <button
                       onClick={() => openEditStoreItem(item, 'talim')}
-                      className="p-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10B981',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil size={15} />
                     </button>
                   </div>
                 </div>
@@ -778,41 +1273,87 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
 
           {/* 3.3 Maxsus sovg'alar */}
           {storeSubTab === 'maxsus' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '20px',
+            }}>
               {data.store?.maxsusItems?.map((item) => (
                 <div
                   key={item.id}
-                  className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between"
+                  className="glass-panel"
+                  style={{
+                    padding: '20px',
+                    borderRadius: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        background: 'rgba(139, 92, 246, 0.15)',
+                        color: '#C084FC',
+                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                      }}>
                         {item.subcategory}
                       </span>
-                      <div className="flex items-center gap-1 text-amber-400 font-black text-sm">
-                        <Coins className="w-4 h-4" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#F59E0B', fontWeight: 800, fontSize: '14px' }}>
+                        <Coins size={16} />
                         <span>{item.priceCoins} coin</span>
                       </div>
                     </div>
-                    <h3 className="text-base font-bold text-white">{item.title}</h3>
-                    <p className="text-xs text-slate-400 mt-2 line-clamp-3">{item.desc}</p>
+
+                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 8px 0' }}>
+                      {item.title}
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '18px' }}>
+                      {item.desc}
+                    </p>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '8px',
+                    marginTop: '20px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                  }}>
                     <button
                       onClick={() => {
                         setSelectedStoreItem(item);
                         setIsViewingStoreItem(true);
                       }}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#CBD5E1',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye size={15} />
                     </button>
                     <button
                       onClick={() => openEditStoreItem(item, 'maxsus')}
-                      className="p-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10B981',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil size={15} />
                     </button>
                   </div>
                 </div>
@@ -822,41 +1363,87 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
 
           {/* 3.4 Hamkorlar takliflari */}
           {storeSubTab === 'hamkorlar' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '20px',
+            }}>
               {data.store?.hamkorlarItems?.map((item) => (
                 <div
                   key={item.id}
-                  className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between"
+                  className="glass-panel"
+                  style={{
+                    padding: '20px',
+                    borderRadius: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        background: 'rgba(245, 158, 11, 0.15)',
+                        color: '#F59E0B',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                      }}>
                         {item.subcategory}
                       </span>
-                      <div className="flex items-center gap-1 text-amber-400 font-black text-sm">
-                        <Coins className="w-4 h-4" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#F59E0B', fontWeight: 800, fontSize: '14px' }}>
+                        <Coins size={16} />
                         <span>{item.priceCoins} coin</span>
                       </div>
                     </div>
-                    <h3 className="text-base font-bold text-white">{item.title}</h3>
-                    <p className="text-xs text-slate-400 mt-2 line-clamp-3">{item.desc}</p>
+
+                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 8px 0' }}>
+                      {item.title}
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '18px' }}>
+                      {item.desc}
+                    </p>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '8px',
+                    marginTop: '20px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                  }}>
                     <button
                       onClick={() => {
                         setSelectedStoreItem(item);
                         setIsViewingStoreItem(true);
                       }}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#CBD5E1',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye size={15} />
                     </button>
                     <button
                       onClick={() => openEditStoreItem(item, 'hamkorlar')}
-                      className="p-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30"
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '9px',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10B981',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil size={15} />
                     </button>
                   </div>
                 </div>
@@ -870,132 +1457,261 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       {/* MODAL: ADD ADVERTISING SWIPER BANNER */}
       {/* ========================================================================= */}
       {showAddBannerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-5 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                  <ImageIcon className="w-5 h-5" />
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => setShowAddBannerModal(false)}
+        >
+          <div
+            className="glass-panel animate-scale-up"
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              borderRadius: '24px',
+              padding: '28px',
+              background: 'rgba(11, 18, 33, 0.96)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: 'rgba(139, 92, 246, 0.18)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#C084FC',
+                }}>
+                  <ImageIcon size={22} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 2px 0' }}>
                     {bannerTarget === 'store' ? 'Do‘kon uchun reklama qo‘shish' : 'Huquq maktabi uchun reklama'}
                   </h3>
-                  <p className="text-xs text-slate-400">Swiper rasmi va faollik muddatini tanlang</p>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>Swiper rasmi va muddatini belgilash</span>
                 </div>
               </div>
               <button
                 onClick={() => setShowAddBannerModal(false)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#64748B',
+                  cursor: 'pointer',
+                  padding: '6px',
+                }}
               >
-                <X className="w-5 h-5" />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Form Fields */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Image Upload Area */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Swiper rasmi (Upload yoki URL)
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '8px' }}>
+                  Swiper rasmi (Kompyuterdan yuklash yoki URL)
                 </label>
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="hidden"
+                  style={{ display: 'none' }}
                 />
 
                 {bannerImage ? (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-700 h-36 bg-slate-950 group">
-                    <img src={bannerImage} alt="Preview" className="w-full h-full object-cover" />
+                  <div style={{
+                    position: 'relative',
+                    height: '140px',
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    background: '#070B14',
+                  }}>
+                    <img src={bannerImage} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       onClick={() => setBannerImage('')}
-                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-rose-600 text-white"
-                      title="Olib tashlash"
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: '#EF4444',
+                        color: '#FFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer border-2 border-dashed border-slate-700 hover:border-purple-500/60 rounded-xl p-5 text-center transition-all bg-slate-800/30 hover:bg-slate-800/60"
+                    style={{
+                      border: '2px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '14px',
+                      padding: '24px 16px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      transition: 'all 0.2s ease',
+                    }}
                   >
-                    <UploadCloud className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                    <p className="text-sm font-semibold text-slate-300">Kompyuterdan rasm yuklash</p>
-                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, WEBP (Maksimal 5MB)</p>
+                    <UploadCloud size={32} color="#C084FC" style={{ margin: '0 auto 8px auto' }} />
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FFFFFF' }}>
+                      Kompyuterdan rasm yuklash
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px' }}>
+                      PNG, JPG, WEBP (Maksimal 5MB)
+                    </div>
                   </div>
                 )}
 
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={bannerImage}
-                    onChange={(e) => setBannerImage(e.target.value)}
-                    placeholder="yoki rasm to‘g‘ridan-to‘g‘ri URL manzilini kiriting..."
-                    className="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:border-purple-500"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={bannerImage}
+                  onChange={(e) => setBannerImage(e.target.value)}
+                  placeholder="yoki rasm to‘g‘ridan-to‘g‘ri URL manzilini kiriting..."
+                  style={{
+                    width: '100%',
+                    marginTop: '8px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '10px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '12.5px',
+                    outline: 'none',
+                  }}
+                />
               </div>
 
               {/* Title & Subtitle */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Reklama sarlavhasi
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Reklama sarlavhasi:
                 </label>
                 <input
                   type="text"
                   value={bannerTitle}
                   onChange={(e) => setBannerTitle(e.target.value)}
-                  placeholder="Masalan: Yangi interaktiv testlar bazasi"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                  placeholder="Masalan: Huquqiy savodxonlik oyligi"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '11px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Qisqacha izoh
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Qisqacha izoh / tagso‘z:
                 </label>
                 <input
                   type="text"
                   value={bannerSubtitle}
                   onChange={(e) => setBannerSubtitle(e.target.value)}
-                  placeholder="Masalan: 50% ko‘proq ball va tangalar yutib oling"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                  placeholder="Masalan: 50% ko‘proq tangalar yutib oling"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '11px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                  }}
                 />
               </div>
 
               {/* Duration Selector */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Reklama muddati (Avtomatik o‘chish vaqti)
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Reklama muddati (Avtomatik o‘chish vaqti):
                 </label>
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                   <select
                     value={bannerDuration}
                     onChange={(e) => setBannerDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500 appearance-none"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: '#0F172A',
+                      padding: '0 36px 0 14px',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      outline: 'none',
+                      appearance: 'none',
+                      cursor: 'pointer',
+                    }}
                   >
                     {DURATION_OPTIONS.map((opt) => (
-                      <option key={opt.key} value={opt.key} className="bg-slate-900 text-white">
+                      <option key={opt.key} value={opt.key} style={{ background: '#0F172A', color: '#FFFFFF' }}>
                         {opt.label}
                       </option>
                     ))}
                   </select>
-                  <Calendar className="w-4 h-4 text-slate-400 absolute right-3.5 top-3 pointer-events-none" />
+                  <Calendar size={16} color="#64748B" style={{ position: 'absolute', right: '14px', top: '14px', pointerEvents: 'none' }} />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Ushbu muddat yakuniga yetgach swiper reklamasi tizimdan avtomatik olib tashlanadi.
-                </p>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '5px' }}>
+                  Ushbu muddat yakuniga yetgach reklama avtomatik ravishda olib tashlanadi.
+                </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+            {/* Actions */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            }}>
               <button
                 type="button"
                 onClick={() => setShowAddBannerModal(false)}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold"
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#CBD5E1',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Bekor qilish
               </button>
@@ -1003,7 +1719,17 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                 type="button"
                 onClick={handleCreateBanner}
                 disabled={isUploading}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-purple-600/30 disabled:opacity-50"
+                style={{
+                  padding: '10px 22px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: isUploading ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)',
+                }}
               >
                 {isUploading ? 'Yuklanmoqda...' : 'Saqlash va faollashtirish'}
               </button>
@@ -1016,32 +1742,76 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       {/* MODAL: TOPIC EDIT (NAVBI, TITLE, ICON, LEVEL, LESSONS) */}
       {/* ========================================================================= */}
       {isEditingTopic && selectedTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-5 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  <Pencil className="w-5 h-5" />
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => setIsEditingTopic(false)}
+        >
+          <div
+            className="glass-panel animate-scale-up"
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              borderRadius: '24px',
+              padding: '28px',
+              background: 'rgba(11, 18, 33, 0.96)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: 'rgba(0, 163, 255, 0.18)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#00E5FF',
+                }}>
+                  <Pencil size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Mavzuni tahrirlash</h3>
-                  <p className="text-xs text-slate-400">Tartib raqami, icon va matnlarni sozlash</p>
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 2px 0' }}>
+                    Mavzuni tahrirlash
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>Tartib raqami, icon va matnlarni sozlash</span>
                 </div>
               </div>
               <button
                 onClick={() => setIsEditingTopic(false)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#64748B',
+                  cursor: 'pointer',
+                  padding: '6px',
+                }}
               >
-                <X className="w-5 h-5" />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                {/* Navbati (Order) */}
-                <div className="col-span-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Navbati (#)
+            {/* Fields */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                {/* Navbati */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Navbati (#):
                   </label>
                   <input
                     type="number"
@@ -1049,33 +1819,68 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                     max="100"
                     value={topicOrder}
                     onChange={(e) => setTopicOrder(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-black text-center text-sm focus:outline-none focus:border-blue-500"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '0 12px',
+                      color: '#00E5FF',
+                      fontSize: '15px',
+                      fontWeight: 800,
+                      textAlign: 'center',
+                      outline: 'none',
+                    }}
                   />
                 </div>
 
-                {/* Darslar soni */}
-                <div className="col-span-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Modullar soni
+                {/* Modullar soni */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Modullar soni:
                   </label>
                   <input
                     type="number"
                     min="1"
                     value={topicLessons}
                     onChange={(e) => setTopicLessons(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-bold text-center text-sm focus:outline-none focus:border-blue-500"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '0 12px',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      outline: 'none',
+                    }}
                   />
                 </div>
 
                 {/* Darajasi */}
-                <div className="col-span-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Daraja
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Daraja:
                   </label>
                   <select
                     value={topicLevel}
                     onChange={(e) => setTopicLevel(e.target.value)}
-                    className="w-full px-2 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-blue-500"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: '#0F172A',
+                      padding: '0 10px',
+                      color: '#FFFFFF',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      outline: 'none',
+                    }}
                   >
                     <option value="Boshlang‘ich">Boshlang‘ich</option>
                     <option value="O‘rta">O‘rta</option>
@@ -1086,23 +1891,33 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
 
               {/* Title */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Mavzu nomi
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Mavzu nomi:
                 </label>
                 <input
                   type="text"
                   value={topicTitle}
                   onChange={(e) => setTopicTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-sm font-semibold focus:outline-none focus:border-blue-500"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '11px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    outline: 'none',
+                  }}
                 />
               </div>
 
-              {/* Icon Selector / Field */}
+              {/* Icon selector & custom input */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Mavzu iconi (Tanlang yoki Ionicons nomini yozing)
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Mavzu iconi (Tanlang yoki nomini yozing):
                 </label>
-                <div className="grid grid-cols-2 gap-2 mb-2">
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
                   <select
                     value={AVAILABLE_ICONS.some((ic) => ic.name === topicIcon) ? topicIcon : 'custom'}
                     onChange={(e) => {
@@ -1110,14 +1925,23 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                         setTopicIcon(e.target.value);
                       }
                     }}
-                    className="px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xs"
+                    style={{
+                      height: '42px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: '#0F172A',
+                      padding: '0 12px',
+                      color: '#FFFFFF',
+                      fontSize: '12.5px',
+                      outline: 'none',
+                    }}
                   >
                     {AVAILABLE_ICONS.map((ic) => (
                       <option key={ic.name} value={ic.name}>
                         {ic.label}
                       </option>
                     ))}
-                    <option value="custom">Boshqa icon...</option>
+                    <option value="custom">Boshqa icon nomi...</option>
                   </select>
 
                   <input
@@ -1125,37 +1949,86 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                     value={topicIcon}
                     onChange={(e) => setTopicIcon(e.target.value)}
                     placeholder="masalan: gavel, cart"
-                    className="px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xs font-mono"
+                    style={{
+                      height: '42px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '0 12px',
+                      color: '#C084FC',
+                      fontSize: '12.5px',
+                      fontFamily: 'monospace',
+                      outline: 'none',
+                    }}
                   />
                 </div>
               </div>
 
               {/* Subtitle */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Qisqacha tavsifi (Subtitle)
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Qisqacha tavsifi (Subtitle):
                 </label>
                 <textarea
                   rows={2}
                   value={topicSubtitle}
                   onChange={(e) => setTopicSubtitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xs leading-relaxed focus:outline-none focus:border-blue-500"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '10px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '12.5px',
+                    lineHeight: '18px',
+                    outline: 'none',
+                    resize: 'none',
+                    fontFamily: 'inherit',
+                  }}
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+            {/* Actions */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            }}>
               <button
                 type="button"
                 onClick={() => setIsEditingTopic(false)}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold"
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#CBD5E1',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Bekor qilish
               </button>
               <button
                 type="button"
                 onClick={handleSaveTopic}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-600/30"
+                style={{
+                  padding: '10px 22px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #00A3FF 0%, #0077FF 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 0 20px rgba(0, 163, 255, 0.4)',
+                }}
               >
                 O‘zgarishlarni saqlash
               </button>
@@ -1168,55 +2041,119 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       {/* MODAL: TOPIC VIEW DETAILS */}
       {/* ========================================================================= */}
       {isViewingTopic && selectedTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-500/20 text-blue-400">
-                  Navbat: #{selectedTopic.order}
-                </span>
-                <h3 className="text-base font-bold text-white">Mavzu kartasi</h3>
-              </div>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => setIsViewingTopic(false)}
+        >
+          <div
+            className="glass-panel animate-scale-up"
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              borderRadius: '24px',
+              padding: '26px',
+              background: 'rgba(11, 18, 33, 0.96)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <span style={{
+                padding: '4px 10px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 800,
+                background: 'rgba(0, 163, 255, 0.15)',
+                color: '#00E5FF',
+              }}>
+                Navbat: #{selectedTopic.order}
+              </span>
               <button
                 onClick={() => setIsViewingTopic(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer' }}
               >
-                <X className="w-5 h-5" />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-3 text-sm">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <span className="text-xs text-slate-400">Mavzu nomi:</span>
-                <p className="font-bold text-white text-base mt-0.5">{selectedTopic.title}</p>
+                <span style={{ fontSize: '11.5px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700 }}>
+                  Mavzu nomi:
+                </span>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', margin: '4px 0 0 0' }}>
+                  {selectedTopic.title}
+                </h3>
               </div>
 
               <div>
-                <span className="text-xs text-slate-400">Tavsifi:</span>
-                <p className="text-slate-300 text-xs mt-0.5 leading-relaxed">{selectedTopic.subtitle}</p>
+                <span style={{ fontSize: '11.5px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700 }}>
+                  Tavsifi:
+                </span>
+                <p style={{ fontSize: '13px', color: '#CBD5E1', margin: '4px 0 0 0', lineHeight: '19px' }}>
+                  {selectedTopic.subtitle}
+                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                  <span className="text-xs text-slate-400">Dars modullari</span>
-                  <p className="text-base font-black text-white mt-0.5">{selectedTopic.lessonsCount} ta</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
+                <div style={{
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Dars modullari</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF', marginTop: '2px' }}>
+                    {selectedTopic.lessonsCount} ta
+                  </div>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                  <span className="text-xs text-slate-400">Qiyinlik darajasi</span>
-                  <p className="text-base font-black text-blue-400 mt-0.5">{selectedTopic.level}</p>
+
+                <div style={{
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Qiyinlik darajasi</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#00A3FF', marginTop: '2px' }}>
+                    {selectedTopic.level}
+                  </div>
                 </div>
               </div>
 
               <div>
-                <span className="text-xs text-slate-400">Mini ilovadagi icon:</span>
-                <p className="font-mono text-xs text-purple-400 mt-0.5">{selectedTopic.iconName}</p>
+                <span style={{ fontSize: '11.5px', color: '#64748B' }}>Mini ilovadagi icon kodi: </span>
+                <span style={{ fontFamily: 'monospace', color: '#C084FC', fontWeight: 700, fontSize: '13px' }}>
+                  {selectedTopic.iconName}
+                </span>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex justify-end">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '22px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
               <button
                 onClick={() => setIsViewingTopic(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
               >
                 Yopish
               </button>
@@ -1229,71 +2166,170 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       {/* MODAL: STORE ITEM EDIT & VIEW */}
       {/* ========================================================================= */}
       {isEditingStoreItem && selectedStoreItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-4 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-lg font-bold text-white">Do‘kon elementini tahrirlash</h3>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => setIsEditingStoreItem(false)}
+        >
+          <div
+            className="glass-panel animate-scale-up"
+            style={{
+              width: '100%',
+              maxWidth: '500px',
+              borderRadius: '24px',
+              padding: '28px',
+              background: 'rgba(11, 18, 33, 0.96)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                Do‘kon mahsulotini tahrirlash
+              </h3>
               <button
                 onClick={() => setIsEditingStoreItem(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer' }}
               >
-                <X className="w-5 h-5" />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-4 text-sm">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Nomi</label>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Nomi:
+                </label>
                 <input
                   type="text"
                   value={storeItemTitle}
                   onChange={(e) => setStoreItemTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '10px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                  }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Subkategoriya</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Kichik toifa (subkategoriya):
+                  </label>
                   <input
                     type="text"
                     value={storeItemSubcategory}
                     onChange={(e) => setStoreItemSubcategory(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs"
+                    style={{
+                      width: '100%',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '10px 14px',
+                      color: '#FFFFFF',
+                      fontSize: '12.5px',
+                      outline: 'none',
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Narxi (Coin)</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Narxi (Coin):
+                  </label>
                   <input
                     type="number"
                     value={storeItemPrice}
                     onChange={(e) => setStoreItemPrice(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold"
+                    style={{
+                      width: '100%',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '10px 14px',
+                      color: '#F59E0B',
+                      fontSize: '13.5px',
+                      fontWeight: 800,
+                      outline: 'none',
+                    }}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Tavsifi</label>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Tavsifi:
+                </label>
                 <textarea
                   rows={3}
                   value={storeItemDesc}
                   onChange={(e) => setStoreItemDesc(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs"
+                  style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '10px 14px',
+                    color: '#FFFFFF',
+                    fontSize: '12.5px',
+                    lineHeight: '18px',
+                    outline: 'none',
+                    resize: 'none',
+                    fontFamily: 'inherit',
+                  }}
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex justify-end gap-3">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              marginTop: '22px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            }}>
               <button
                 onClick={() => setIsEditingStoreItem(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#CBD5E1',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Bekor qilish
               </button>
               <button
                 onClick={handleSaveStoreItem}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold"
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
               >
                 Saqlash
               </button>
@@ -1303,36 +2339,89 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
       )}
 
       {isViewingStoreItem && selectedStoreItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400">
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => setIsViewingStoreItem(false)}
+        >
+          <div
+            className="glass-panel animate-scale-up"
+            style={{
+              width: '100%',
+              maxWidth: '440px',
+              borderRadius: '24px',
+              padding: '26px',
+              background: 'rgba(11, 18, 33, 0.96)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <span style={{
+                padding: '4px 10px',
+                borderRadius: '8px',
+                fontSize: '11.5px',
+                fontWeight: 700,
+                background: 'rgba(16, 185, 129, 0.2)',
+                color: '#10B981',
+              }}>
                 {selectedStoreItem.subcategory}
               </span>
               <button
                 onClick={() => setIsViewingStoreItem(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer' }}
               >
-                <X className="w-5 h-5" />
+                <X size={18} />
               </button>
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-white">{selectedStoreItem.title}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">{selectedStoreItem.desc}</p>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 8px 0' }}>
+                {selectedStoreItem.title}
+              </h3>
+              <p style={{ fontSize: '12.5px', color: '#CBD5E1', lineHeight: '18px', margin: 0 }}>
+                {selectedStoreItem.desc}
+              </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700 flex items-center justify-between">
-              <span className="text-xs text-slate-400">Talab qilinadigan coin:</span>
-              <span className="text-sm font-black text-amber-400 flex items-center gap-1">
-                <Coins className="w-4 h-4" /> {selectedStoreItem.priceCoins} coin
+            <div style={{
+              marginTop: '18px',
+              padding: '12px 14px',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Talab qilinadigan ball:</span>
+              <span style={{ fontSize: '14.5px', fontWeight: 800, color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Coins size={16} /> {selectedStoreItem.priceCoins} coin
               </span>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex justify-end">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px', paddingTop: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
               <button
                 onClick={() => setIsViewingStoreItem(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold"
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
               >
                 Yopish
               </button>

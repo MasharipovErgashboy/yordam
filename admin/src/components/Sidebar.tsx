@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import {
   LayoutDashboard,
-  AlertTriangle,
-  FileText,
-  RefreshCw,
-  FolderLock,
-  Settings,
+  Users,
+  Briefcase,
+  Crown,
+  Megaphone,
   Search,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
   LogOut,
   Command,
 } from 'lucide-react';
@@ -35,127 +33,203 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const navPrincipal = [
-    { id: 'visao_geral', label: 'Visão geral', uzLabel: 'Umumiy ko‘rinish', icon: LayoutDashboard },
-    { id: 'sinistros', label: 'Sinistros', uzLabel: 'Nizolar va Da’volar', icon: AlertTriangle },
-    { id: 'apolices', label: 'Apólices', uzLabel: 'Arizalar va Shartnomalar', icon: FileText, hasDropdown: true },
-    { id: 'renovacoes', label: 'Renovações', uzLabel: 'Yangilanishlar', icon: RefreshCw, badge: '9', badgeColor: '#EF4444' },
+  // 5 main navigation sections specified by user
+  const navItems = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      id: 'foydalanuvchilar',
+      label: 'Foydalanuvchilar',
+      icon: Users,
+      badge: '1.2k',
+      badgeColor: 'rgba(0, 163, 255, 0.25)',
+      badgeTextColor: '#00E5FF',
+    },
+    {
+      id: 'xizmatlar',
+      label: 'Xizmatlar',
+      icon: Briefcase,
+    },
+    {
+      id: 'premium',
+      label: 'Premium obuna',
+      icon: Crown,
+      badge: 'PRO',
+      badgeColor: 'rgba(245, 158, 11, 0.25)',
+      badgeTextColor: '#F59E0B',
+    },
+    {
+      id: 'reklama',
+      label: 'Reklama',
+      icon: Megaphone,
+    },
   ];
 
-  const navCorretora = [
-    { id: 'documentos', label: 'Documentos', uzLabel: 'Hujjatlar bazasi', icon: FolderLock },
-    { id: 'configuracoes', label: 'Configurações', uzLabel: 'Sozlamalar', icon: Settings },
-  ];
+  const filteredNavItems = navItems.filter((item) =>
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <aside
       className="glass-panel"
       style={{
-        width: isCollapsed ? '84px' : '272px',
+        width: isCollapsed ? '80px' : '265px',
         minHeight: 'calc(100vh - 32px)',
         margin: '16px 0 16px 16px',
-        padding: isCollapsed ? '24px 12px' : '24px 18px',
+        padding: isCollapsed ? '20px 10px' : '20px 16px',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         zIndex: 10,
         transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        overflow: 'visible',
+        overflow: 'hidden',
       }}
     >
-      {/* Collapse Toggle Button (Circle on right border) */}
-      <button
-        onClick={onToggleCollapse}
-        title={isCollapsed ? 'Kengaytirish' : 'Yig‘ish'}
-        style={{
-          position: 'absolute',
-          right: '-14px',
-          top: '28px',
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          background: '#0E172B',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          color: '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-          zIndex: 20,
-          transition: 'transform 0.2s ease, background 0.2s ease',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = '#1E293B')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = '#0E172B')}
-      >
-        {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-      </button>
-
-      {/* Brand Logo Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '24px',
-        paddingLeft: isCollapsed ? '4px' : '6px',
-      }}>
-        {/* Official Yordam Logo */}
-        <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '12px',
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 20px rgba(0, 163, 255, 0.35)',
-          flexShrink: 0,
-          padding: '4px',
-        }}>
-          <img
-            src={logoImg}
-            alt="Logo"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 8px rgba(0, 163, 255, 0.4))',
-            }}
-          />
-        </div>
-
-        {!isCollapsed && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-            <span style={{
-              fontSize: '22px',
-              fontWeight: 800,
-              letterSpacing: '-0.5px',
-              color: '#FFFFFF',
-            }}>
-              nuvio
-            </span>
-            <span style={{ fontSize: '11px', color: '#00E5FF', fontWeight: 700 }}>• yordam</span>
-          </div>
-        )}
-      </div>
-
-      {/* Search Pill Input */}
+      {/* Brand Logo & Header */}
       {!isCollapsed ? (
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          background: 'rgba(8, 14, 27, 0.65)',
+          justifyContent: 'space-between',
+          marginBottom: '22px',
+          padding: '2px 4px',
+        }}>
+          {/* Logo without rectangle frame + Stylized Yordam Wordmark */}
+          <div
+            onClick={() => onTabChange('dashboard')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            <img
+              src={logoImg}
+              alt="Yordam Logo"
+              style={{
+                width: '46px',
+                height: '46px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 4px 12px rgba(0, 163, 255, 0.35))',
+                flexShrink: 0,
+              }}
+            />
+            {/* Word "Yordam": "o" is orange (#FF7A00), "Y" and "rdam" are deep blue (#2563EB) */}
+            <div style={{ marginLeft: '10px', display: 'flex', alignItems: 'baseline' }}>
+              <span style={{
+                fontSize: '24px',
+                fontWeight: 800,
+                letterSpacing: '-0.5px',
+                lineHeight: 1,
+              }}>
+                <span style={{ color: '#2563EB' }}>Y</span>
+                <span style={{ color: '#FF7A00' }}>o</span>
+                <span style={{ color: '#2563EB' }}>rdam</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Sleek Collapse Toggle Button */}
+          <button
+            onClick={onToggleCollapse}
+            title="Panelni yig‘ish"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: '#94A3B8',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.color = '#94A3B8';
+            }}
+          >
+            <PanelLeftClose size={17} />
+          </button>
+        </div>
+      ) : (
+        /* Collapsed Header */
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: '22px',
+          gap: '12px',
+        }}>
+          <img
+            src={logoImg}
+            alt="Yordam Logo"
+            onClick={() => onTabChange('dashboard')}
+            style={{
+              width: '42px',
+              height: '42px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 12px rgba(0, 163, 255, 0.35))',
+              cursor: 'pointer',
+            }}
+          />
+          <button
+            onClick={onToggleCollapse}
+            title="Panelni ochish"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: '#00E5FF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 163, 255, 0.15)';
+              e.currentTarget.style.borderColor = 'rgba(0, 163, 255, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+            }}
+          >
+            <PanelLeftOpen size={17} />
+          </button>
+        </div>
+      )}
+
+      {/* Search Input (Only when expanded) */}
+      {!isCollapsed ? (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.035)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '12px',
           padding: '0 12px',
           height: '40px',
-          marginBottom: '26px',
+          marginBottom: '22px',
         }}>
-          <Search size={15} color="#64748B" style={{ marginRight: '8px' }} />
+          <Search size={15} color="#64748B" style={{ marginRight: '8px', flexShrink: 0 }} />
           <input
+            id="sidebar-search-input"
             type="text"
-            placeholder="Buscar..."
+            placeholder="Qidiruv..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -184,240 +258,160 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       ) : (
-        <div style={{ height: '16px' }} />
+        <div style={{ height: '8px' }} />
       )}
 
-      {/* Nav List */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '22px' }}>
-        {/* Section 1: PRINCIPAL */}
-        <div>
-          {!isCollapsed && (
-            <div style={{
-              fontSize: '10px',
-              fontWeight: 800,
-              color: '#64748B',
-              letterSpacing: '1px',
-              marginBottom: '10px',
-              paddingLeft: '10px',
-            }}>
-              PRINCIPAL
-            </div>
-          )}
+      {/* Navigation Items List */}
+      <nav style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+        flex: 1,
+      }}>
+        {filteredNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {navPrincipal.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              title={isCollapsed ? item.label : undefined}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                width: '100%',
+                height: '46px',
+                padding: isCollapsed ? '0 16px' : '0 14px',
+                borderRadius: '14px',
+                border: 'none',
+                cursor: 'pointer',
+                background: isActive
+                  ? 'linear-gradient(135deg, #00B2FF 0%, #0077FF 100%)'
+                  : 'transparent',
+                color: isActive ? '#FFFFFF' : '#94A3B8',
+                fontWeight: isActive ? 700 : 500,
+                fontSize: '13.5px',
+                position: 'relative',
+                boxShadow: isActive ? '0 0 25px rgba(0, 163, 255, 0.45)' : 'none',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#94A3B8';
+                }
+              }}
+            >
+              <Icon
+                size={20}
+                color={isActive ? '#FFFFFF' : '#94A3B8'}
+                style={{ flexShrink: 0 }}
+              />
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onTabChange(item.id)}
-                  title={item.label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    width: '100%',
-                    height: '44px',
-                    padding: isCollapsed ? '0 16px' : '0 14px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: isActive
-                      ? 'linear-gradient(135deg, #00B2FF 0%, #0080FF 100%)'
-                      : 'transparent',
-                    color: isActive ? '#FFFFFF' : '#94A3B8',
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: '13px',
-                    position: 'relative',
-                    boxShadow: isActive ? '0 0 25px rgba(0, 163, 255, 0.45)' : 'none',
-                    transition: 'all 0.2s ease',
-                    justifyContent: isCollapsed ? 'center' : 'flex-start',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.color = '#FFFFFF';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#94A3B8';
-                    }
-                  }}
-                >
-                  <Icon size={18} color={isActive ? '#FFFFFF' : '#94A3B8'} style={{ flexShrink: 0 }} />
+              {!isCollapsed && (
+                <>
+                  <span style={{
+                    flex: 1,
+                    textAlign: 'left',
+                    letterSpacing: '-0.2px',
+                  }}>
+                    {item.label}
+                  </span>
 
-                  {!isCollapsed && (
-                    <>
-                      <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
-
-                      {item.hasDropdown && (
-                        <ChevronDown size={14} color={isActive ? '#FFFFFF' : '#94A3B8'} />
-                      )}
-
-                      {item.badge && (
-                        <span style={{
-                          background: item.badgeColor,
-                          color: '#FFFFFF',
-                          fontSize: '10.5px',
-                          fontWeight: 800,
-                          padding: '1px 7px',
-                          borderRadius: '10px',
-                          minWidth: '18px',
-                          textAlign: 'center',
-                        }}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </>
+                  {item.badge && (
+                    <span style={{
+                      background: item.badgeColor || 'rgba(255, 255, 255, 0.1)',
+                      color: item.badgeTextColor || '#FFFFFF',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '8px',
+                      letterSpacing: '0.3px',
+                    }}>
+                      {item.badge}
+                    </span>
                   )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                </>
+              )}
+            </button>
+          );
+        })}
+      </nav>
 
-        {/* Section 2: CORRETORA */}
-        <div>
-          {!isCollapsed && (
-            <div style={{
-              fontSize: '10px',
-              fontWeight: 800,
-              color: '#64748B',
-              letterSpacing: '1px',
-              marginBottom: '10px',
-              paddingLeft: '10px',
-            }}>
-              CORRETORA
-            </div>
-          )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {navCorretora.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onTabChange(item.id)}
-                  title={item.label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    width: '100%',
-                    height: '44px',
-                    padding: isCollapsed ? '0 16px' : '0 14px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: isActive
-                      ? 'linear-gradient(135deg, #00B2FF 0%, #0080FF 100%)'
-                      : 'transparent',
-                    color: isActive ? '#FFFFFF' : '#94A3B8',
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: '13px',
-                    boxShadow: isActive ? '0 0 25px rgba(0, 163, 255, 0.45)' : 'none',
-                    transition: 'all 0.2s ease',
-                    justifyContent: isCollapsed ? 'center' : 'flex-start',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.color = '#FFFFFF';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#94A3B8';
-                    }
-                  }}
-                >
-                  <Icon size={18} color={isActive ? '#FFFFFF' : '#94A3B8'} style={{ flexShrink: 0 }} />
-                  {!isCollapsed && <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Cards: Plan Usage & Profile Card */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto', paddingTop: '16px' }}>
-        {/* Plano Card */}
-        {!isCollapsed && (
-          <div style={{
-            background: 'rgba(8, 14, 27, 0.7)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '14px',
-            padding: '12px 14px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFFFFF' }}>Plano Corretora</span>
-              <span style={{ fontSize: '10px', color: '#00E5FF', fontWeight: 700 }}>Pro</span>
-            </div>
-            <div style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '8px' }}>
-              84% do arquivo usado
-            </div>
-            {/* Progress bar */}
-            <div style={{
-              width: '100%',
-              height: '4px',
-              borderRadius: '2px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                width: '84%',
-                height: '100%',
-                background: 'linear-gradient(90deg, #00B2FF, #00E5FF)',
-                borderRadius: '2px',
-              }} />
-            </div>
-          </div>
-        )}
-
-        {/* User Profile Card */}
+      {/* User Profile Card at Bottom */}
+      <div style={{
+        marginTop: 'auto',
+        paddingTop: '16px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+      }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          padding: isCollapsed ? '8px 0' : '8px 10px',
-          background: isCollapsed ? 'transparent' : 'rgba(8, 14, 27, 0.5)',
+          padding: isCollapsed ? '6px 0' : '8px 10px',
+          background: isCollapsed ? 'transparent' : 'rgba(255, 255, 255, 0.03)',
           border: isCollapsed ? 'none' : '1px solid rgba(255, 255, 255, 0.06)',
           borderRadius: '14px',
           justifyContent: isCollapsed ? 'center' : 'flex-start',
         }}>
-          {/* Avatar circle */}
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-            fontSize: '12px',
-            fontWeight: 800,
-            flexShrink: 0,
-            border: '1.5px solid rgba(255, 255, 255, 0.2)',
-          }}>
-            {user.avatar || 'RC'}
+          {/* Avatar with active green dot */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 800,
+              border: '1.5px solid rgba(255, 255, 255, 0.2)',
+            }}>
+              {user.avatar || 'RC'}
+            </div>
+            <div style={{
+              position: 'absolute',
+              bottom: '0px',
+              right: '0px',
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: '#10B981',
+              border: '2px solid #070B14',
+            }} />
           </div>
 
           {!isCollapsed && (
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#FFFFFF',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
                 {user.name}
               </div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Corretora de seguros
+              <div style={{
+                fontSize: '11px',
+                color: '#94A3B8',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                Bosh Administrator
               </div>
             </div>
           )}
@@ -435,10 +429,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 borderRadius: '8px',
-                transition: 'color 0.2s ease',
+                transition: 'all 0.2s ease',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#EF4444')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#64748B')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#EF4444';
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#64748B';
+                e.currentTarget.style.background = 'transparent';
+              }}
             >
               <LogOut size={16} />
             </button>

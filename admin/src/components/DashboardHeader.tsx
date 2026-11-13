@@ -12,10 +12,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   subtitle,
   onOpenNewModal,
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState('Próximos 7 dias');
+  const [selectedFilter, setSelectedFilter] = useState('Oxirgi 7 kun');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-  const filters = ['Próximos 7 dias', 'Bugun', 'Oxirgi 30 kun', 'Shu oy', 'Barcha davr'];
+  const filters = ['Oxirgi 7 kun', 'Bugun', 'Oxirgi 30 kun', 'Shu oy', 'Barcha davr'];
 
   return (
     <header style={{

@@ -1,4 +1,10 @@
 import React, { useState, useRef } from 'react';
+import { TopicDetailManagementView } from './TopicDetailManagementView';
+import type {
+  TopicCourse,
+  CourseLessonItem,
+  TopicCertificateItem,
+} from './TopicDetailManagementView';
 import {
   ArrowLeft,
   Plus,
@@ -58,6 +64,9 @@ export interface StoreItem {
 interface HuquqMaktabiData {
   banners: AdBanner[];
   topics: TopicItem[];
+  courses?: TopicCourse[];
+  lessons?: CourseLessonItem[];
+  certificates?: TopicCertificateItem[];
   store: {
     banners: AdBanner[];
     talimItems: StoreItem[];
@@ -127,6 +136,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
   const [storeItemPrice, setStoreItemPrice] = useState<number>(100);
   const [storeItemDesc, setStoreItemDesc] = useState('');
 
+  const [managingTopic, setManagingTopic] = useState<TopicItem | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -134,6 +144,20 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
     setNotification(msg);
     setTimeout(() => setNotification(null), 3500);
   };
+
+  if (managingTopic) {
+    return (
+      <TopicDetailManagementView
+        topic={managingTopic}
+        allTopics={data?.topics || []}
+        courses={data?.courses || []}
+        lessons={data?.lessons || []}
+        certificates={data?.certificates || []}
+        onBack={() => setManagingTopic(null)}
+        onRefresh={onRefresh}
+      />
+    );
+  }
 
   // Image Upload handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -873,10 +897,9 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                         <button
                           onClick={() => {
-                            setSelectedTopic(topic);
-                            setIsViewingTopic(true);
+                            setManagingTopic(topic);
                           }}
-                          title="Batafsil ko‘rish"
+                          title="Mavzu darslari, kurslari va sertifikatlarini boshqarish"
                           style={{
                             width: '34px',
                             height: '34px',

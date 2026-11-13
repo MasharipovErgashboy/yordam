@@ -11,6 +11,7 @@ import {
   Alert,
   TextInput,
   Animated,
+  Linking,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -998,18 +999,21 @@ const TEST_CATEGORIES: TestCategoryItem[] = [
 
 interface TopicCourseItem {
   id: string;
+  topicId?: string;
   title: string;
   lessons: string;
   duration: string;
   progress: number;
   progressColor: string;
   iconBg: string;
-  iconType: 'rings' | 'people' | 'coins' | 'home';
+  iconType?: string;
+  imageUrl?: string;
 }
 
 const FAMILY_LAW_COURSES: TopicCourseItem[] = [
   {
     id: 'marriage',
+    topicId: 'oila',
     title: 'Nikoh va oila munosabatlari',
     lessons: '4 dars',
     duration: '45 daqiqa',
@@ -1020,6 +1024,7 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
   },
   {
     id: 'parenting',
+    topicId: 'oila',
     title: 'Ota-onalik huquq va majburiyatlari',
     lessons: '3 dars',
     duration: '38 daqiqa',
@@ -1030,6 +1035,7 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
   },
   {
     id: 'alimony',
+    topicId: 'oila',
     title: 'Aliment va moddiy ta’minot',
     lessons: '4 dars',
     duration: '52 daqiqa',
@@ -1040,6 +1046,7 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
   },
   {
     id: 'property',
+    topicId: 'oila',
     title: 'Oilaviy mulk va meros',
     lessons: '3 dars',
     duration: '41 daqiqa',
@@ -1052,16 +1059,25 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
 
 interface CourseLesson {
   id: string;
+  courseId?: string;
+  topicId?: string;
   order: number;
   title: string;
   duration: string;
-  image: any;
+  image?: any;
+  imageUrl?: string;
+  youtubeUrl?: string;
+  description?: string;
+  plan?: Array<{ id: string; title: string; timeRange: string }>;
+  materials?: Array<{ id: string; name: string; size?: string; type?: string; fileUrl?: string }>;
   status: 'completed' | 'in_progress' | 'locked';
 }
 
 const COURSE_LESSONS: CourseLesson[] = [
   {
     id: 'l1',
+    courseId: 'marriage',
+    topicId: 'oila',
     order: 1,
     title: '1. Nikoh tuşunçasi va ahamiyati',
     duration: '10 daqiqa',
@@ -1070,6 +1086,8 @@ const COURSE_LESSONS: CourseLesson[] = [
   },
   {
     id: 'l2',
+    courseId: 'marriage',
+    topicId: 'oila',
     order: 2,
     title: '2. Nikoh tuziş tartibi',
     duration: '12 daqiqa',
@@ -1078,6 +1096,8 @@ const COURSE_LESSONS: CourseLesson[] = [
   },
   {
     id: 'l3',
+    courseId: 'marriage',
+    topicId: 'oila',
     order: 3,
     title: '3. Er-xotin huquq va majburiyatlari',
     duration: '11 daqiqa',
@@ -1086,6 +1106,8 @@ const COURSE_LESSONS: CourseLesson[] = [
   },
   {
     id: 'l4',
+    courseId: 'marriage',
+    topicId: 'oila',
     order: 4,
     title: '4. Oilaning moddiy ta’minoti',
     duration: '12 daqiqa',
@@ -1889,6 +1911,8 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   // Dynamic real-time legal topics and banners synchronized with Admin Panel & Backend
   const [legalCategories, setLegalCategories] = useState<LegalCategory[]>(LEGAL_CATEGORIES);
   const [homeBanners, setHomeBanners] = useState<any[]>([]);
+  const [dynamicCourses, setDynamicCourses] = useState<TopicCourseItem[]>(FAMILY_LAW_COURSES);
+  const [dynamicLessons, setDynamicLessons] = useState<CourseLesson[]>(COURSE_LESSONS);
 
   // Topics tab search & level filter state
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
@@ -1898,7 +1922,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   const [selectedTopicDetail, setSelectedTopicDetail] = useState<LegalCategory | null>(null);
   const [detailSubTab, setDetailSubTab] = useState<'courses' | 'lessons' | 'tests' | 'stats'>('courses');
 
-  // Real-time listener for Huquq Maktabi topics, banners and store
+  // Real-time listener for Huquq Maktabi topics, banners, courses, lessons and store
   useEffect(() => {
     const unsubscribe = legalServicesApi.subscribeToHuquqMaktabi((data) => {
       if (data) {
@@ -1915,6 +1939,22 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           const now = Date.now();
           const active = data.banners.filter((b: any) => !b.expiresAt || b.expiresAt > now);
           setHomeBanners(active);
+        }
+        if (Array.isArray(data.courses) && data.courses.length > 0) {
+          setDynamicCourses(data.courses);
+          setSelectedCourseDetail((prev) => {
+            if (!prev) return null;
+            const updated = data.courses.find((c: any) => c.id === prev.id);
+            return updated ? { ...prev, ...updated } : prev;
+          });
+        }
+        if (Array.isArray(data.lessons) && data.lessons.length > 0) {
+          setDynamicLessons(data.lessons);
+          setSelectedLessonVideo((prev) => {
+            if (!prev) return null;
+            const updated = data.lessons.find((l: any) => l.id === prev.id);
+            return updated ? { ...prev, ...updated } : prev;
+          });
         }
       }
     });
@@ -4753,16 +4793,56 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             {/* 1. Video Player Container with Video Frame Image & Overlays */}
             <View style={styles.videoPlayerContainer}>
               <Image
-                source={videoLessonInstructorImage}
+                source={
+                  selectedLessonVideo.imageUrl
+                    ? { uri: selectedLessonVideo.imageUrl }
+                    : selectedLessonVideo.image || videoLessonInstructorImage
+                }
                 style={styles.videoPlayerImage}
                 resizeMode="cover"
               />
+
+              {/* YouTube Video Direct Link Badge */}
+              {selectedLessonVideo.youtubeUrl ? (
+                <TouchableOpacity
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    backgroundColor: 'rgba(239, 68, 68, 0.95)',
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 5,
+                    zIndex: 10,
+                  }}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    Linking.openURL(selectedLessonVideo.youtubeUrl!).catch(() => {
+                      Alert.alert('Xatolik', 'YouTube havolasi ochilmadi.');
+                    });
+                  }}
+                >
+                  <Ionicons name="logo-youtube" size={14} color="#FFFFFF" />
+                  <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>YouTube</Text>
+                </TouchableOpacity>
+              ) : null}
 
               {/* Video Overlay Tap to Play/Pause */}
               <TouchableOpacity
                 style={styles.videoTouchOverlay}
                 activeOpacity={1}
-                onPress={() => setIsVideoPlaying(!isVideoPlaying)}
+                onPress={() => {
+                  if (selectedLessonVideo.youtubeUrl) {
+                    Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {
+                      setIsVideoPlaying(!isVideoPlaying);
+                    });
+                  } else {
+                    setIsVideoPlaying(!isVideoPlaying);
+                  }
+                }}
               >
                 {!isVideoPlaying && (
                   <View style={styles.videoBigPlayBtn}>
@@ -4774,7 +4854,15 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               {/* Bottom Video Controls Overlay */}
               <View style={styles.videoControlsOverlay}>
                 <TouchableOpacity
-                  onPress={() => setIsVideoPlaying(!isVideoPlaying)}
+                  onPress={() => {
+                    if (selectedLessonVideo.youtubeUrl) {
+                      Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {
+                        setIsVideoPlaying(!isVideoPlaying);
+                      });
+                    } else {
+                      setIsVideoPlaying(!isVideoPlaying);
+                    }
+                  }}
                   style={styles.videoControlPlayBtn}
                 >
                   <Ionicons
@@ -4834,7 +4922,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             <View style={styles.videoMetaHeaderRow}>
               <View style={styles.videoMetaLeftCol}>
                 <Text style={styles.videoLessonTitle}>
-                  {COURSE_LESSONS[currentLessonIndex]?.title || '1. Nikoh tushunchasi va ahamiyati'}
+                  {selectedLessonVideo?.title || COURSE_LESSONS[currentLessonIndex]?.title || '1. Nikoh tushunchasi va ahamiyati'}
                 </Text>
                 <View style={styles.videoLessonSubtitleRow}>
                   <Text style={styles.videoCourseNameText}>
@@ -4843,7 +4931,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   <Text style={styles.videoDotDivider}>·</Text>
                   <Ionicons name="time-outline" size={12} color="#64748B" style={{ marginRight: 3 }} />
                   <Text style={styles.videoDurationText}>
-                    {COURSE_LESSONS[currentLessonIndex]?.duration || '10 daqiqa'}
+                    {selectedLessonVideo?.duration || COURSE_LESSONS[currentLessonIndex]?.duration || '10 daqiqa'}
                   </Text>
                 </View>
               </View>
@@ -4901,7 +4989,8 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                     <Text style={styles.cardHeaderTitleText}>Dars haqida</Text>
                   </View>
                   <Text style={styles.lessonAboutBodyText}>
-                    Uşbu darsda nikoh tuşunçasi, uning yuridik mohiyati, nikohning jamiyat va oila hayotidagi örni, şuningdek, Özbekiston qonunçiligida nikoh bilan boğliq asosiy normalar körib çiqiladi.
+                    {selectedLessonVideo?.description ||
+                      'Ushbu darsda nikoh tushunchasi, uning yuridik mohiyati, nikohning jamiyat va oila hayotidagi o‘rni, shuningdek, O‘zbekiston qonunchiligida nikoh bilan bog‘liq asosiy normalar ko‘rib chiqiladi.'}
                   </Text>
                 </View>
 
@@ -4914,18 +5003,23 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                     </View>
                     <View style={styles.planHeaderRight}>
                       <Ionicons name="time-outline" size={13} color="#64748B" style={{ marginRight: 4 }} />
-                      <Text style={styles.planDurationText}>10 daqiqa</Text>
+                      <Text style={styles.planDurationText}>
+                        {selectedLessonVideo?.duration || '10 daqiqa'}
+                      </Text>
                     </View>
                   </View>
 
                   {/* Chapters List */}
                   <View style={styles.chaptersListWrap}>
-                    {LESSON_CHAPTERS.map((chap, idx) => {
+                    {(selectedLessonVideo?.plan && selectedLessonVideo.plan.length > 0
+                      ? selectedLessonVideo.plan
+                      : LESSON_CHAPTERS
+                    ).map((chap, idx) => {
                       const isActiveChap = activeChapterIndex === idx;
 
                       return (
                         <TouchableOpacity
-                          key={chap.id}
+                          key={chap.id || idx}
                           style={[
                             styles.chapterItemRow,
                             isActiveChap && styles.chapterItemRowActive,
@@ -5004,13 +5098,16 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   <Ionicons name="attach-outline" size={17} color="#0F172A" style={{ marginRight: 6 }} />
                   <Text style={styles.cardHeaderTitleText}>Qöşimça materiallar</Text>
                 </View>
-                {[
-                  { name: 'Oila kodeksi 13-18 moddalari (PDF)', size: '2.4 MB' },
-                  { name: 'Nikoh tushunchasi taqdimot slaydlari (PDF)', size: '5.1 MB' },
-                  { name: 'Amaliy keyslar va savol-javoblar (PDF)', size: '1.8 MB' },
-                ].map((mat, idx) => (
+                {(selectedLessonVideo?.materials && selectedLessonVideo.materials.length > 0
+                  ? selectedLessonVideo.materials
+                  : [
+                      { name: 'Oila kodeksi 13-18 moddalari (PDF)', size: '2.4 MB' },
+                      { name: 'Nikoh tushunchasi taqdimot slaydlari (PDF)', size: '5.1 MB' },
+                      { name: 'Amaliy keyslar va savol-javoblar (PDF)', size: '1.8 MB' },
+                    ]
+                ).map((mat: any, idx: number) => (
                   <TouchableOpacity
-                    key={idx}
+                    key={mat.id || idx}
                     style={styles.materialItemRow}
                     activeOpacity={0.75}
                     onPress={() => Alert.alert('Yuklab oliş', `${mat.name} qurilmangizga yuklanmoqda.`)}
@@ -5018,7 +5115,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                     <Ionicons name="document-attach-outline" size={20} color="#0284C7" />
                     <View style={{ flex: 1, marginLeft: 10 }}>
                       <Text style={styles.materialItemName}>{mat.name}</Text>
-                      <Text style={styles.materialItemSize}>{mat.size}</Text>
+                      <Text style={styles.materialItemSize}>{mat.size || '1.2 MB'}</Text>
                     </View>
                     <Ionicons name="download-outline" size={18} color="#0F172A" />
                   </TouchableOpacity>
@@ -5248,47 +5345,57 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 {/* Vertical Timeline connecting line */}
                 <View style={styles.timelineVerticalLine} />
 
-                {COURSE_LESSONS.map((lesson, index) => {
-                  const isCompleted = lesson.status === 'completed';
-                  const isInProgress = lesson.status === 'in_progress';
+                {(() => {
+                  const matchedLessons = dynamicLessons.filter(
+                    (l) => l.courseId === selectedCourseDetail?.id || (!l.courseId && selectedCourseDetail?.id === 'marriage')
+                  );
+                  const lessonsToRender = matchedLessons.length > 0 ? matchedLessons : COURSE_LESSONS;
 
-                  return (
-                    <View key={lesson.id} style={styles.lessonRowWrapper}>
-                      {/* Timeline Node Icon on the left */}
-                      <View style={styles.timelineNodeWrap}>
-                        {isCompleted ? (
-                          <View style={styles.completedCheckCircle}>
-                            <Ionicons name="checkmark" size={13} color="#FFFFFF" />
-                          </View>
-                        ) : isInProgress ? (
-                          <View style={styles.inProgressPlayCircle}>
-                            <Ionicons name="play" size={10} color="#FFFFFF" style={{ marginLeft: 2 }} />
-                          </View>
-                        ) : (
-                          <View style={styles.lockedNodeCircle}>
-                            <Ionicons name="lock-closed" size={10} color="#94A3B8" />
-                          </View>
-                        )}
-                      </View>
+                  return lessonsToRender.map((lesson, index) => {
+                    const isCompleted = lesson.status === 'completed';
+                    const isInProgress = lesson.status === 'in_progress';
 
-                      {/* Lesson Card */}
-                      <TouchableOpacity
-                        style={[
-                          styles.lessonCardItem,
-                          isInProgress && styles.lessonCardItemActive,
-                        ]}
-                        activeOpacity={0.8}
-                        onPress={() => {
-                          setSelectedLessonVideo(lesson);
-                          setCurrentLessonIndex(index);
-                        }}
-                      >
-                        {/* Thumbnail Image */}
-                        <Image
-                          source={lesson.image}
-                          style={styles.lessonThumbImage}
-                          resizeMode="cover"
-                        />
+                    return (
+                      <View key={lesson.id} style={styles.lessonRowWrapper}>
+                        {/* Timeline Node Icon on the left */}
+                        <View style={styles.timelineNodeWrap}>
+                          {isCompleted ? (
+                            <View style={styles.completedCheckCircle}>
+                              <Ionicons name="checkmark" size={13} color="#FFFFFF" />
+                            </View>
+                          ) : isInProgress ? (
+                            <View style={styles.inProgressPlayCircle}>
+                              <Ionicons name="play" size={10} color="#FFFFFF" style={{ marginLeft: 2 }} />
+                            </View>
+                          ) : (
+                            <View style={styles.lockedNodeCircle}>
+                              <Ionicons name="lock-closed" size={10} color="#94A3B8" />
+                            </View>
+                          )}
+                        </View>
+
+                        {/* Lesson Card */}
+                        <TouchableOpacity
+                          style={[
+                            styles.lessonCardItem,
+                            isInProgress && styles.lessonCardItemActive,
+                          ]}
+                          activeOpacity={0.8}
+                          onPress={() => {
+                            setSelectedLessonVideo(lesson);
+                            setCurrentLessonIndex(index);
+                          }}
+                        >
+                          {/* Thumbnail Image */}
+                          <Image
+                            source={
+                              lesson.imageUrl
+                                ? { uri: lesson.imageUrl }
+                                : lesson.image || lessonThumb1
+                            }
+                            style={styles.lessonThumbImage}
+                            resizeMode="cover"
+                          />
 
                         {/* Title & Duration */}
                         <View style={styles.lessonDetailsCol}>
@@ -5328,7 +5435,8 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                       </TouchableOpacity>
                     </View>
                   );
-                })}
+                });
+              })()}
               </View>
 
               {/* 7. Bottom Card: Yakuniy test */}
@@ -5543,75 +5651,105 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
 
                 {/* Course Cards List */}
                 <View style={styles.coursesList}>
-                  {FAMILY_LAW_COURSES.map((course) => (
-                    <TouchableOpacity
-                      key={course.id}
-                      style={styles.courseItemCard}
-                      activeOpacity={0.8}
-                      onPress={() => setSelectedCourseDetail(course)}
-                    >
-                      {/* Course Icon */}
-                      <View style={[styles.courseIconBox, { backgroundColor: course.iconBg }]}>
-                        {course.iconType === 'rings' && (
-                          <View style={styles.interlockingRings}>
-                            <View style={styles.ringLeft} />
-                            <View style={styles.ringRight} />
-                          </View>
-                        )}
-                        {course.iconType === 'people' && (
-                          <Ionicons name="people" size={20} color="#0284C7" />
-                        )}
-                        {course.iconType === 'coins' && (
-                          <FontAwesome5 name="coins" size={17} color="#64748B" />
-                        )}
-                        {course.iconType === 'home' && (
-                          <Ionicons name="home-outline" size={20} color="#64748B" />
-                        )}
-                      </View>
+                  {(() => {
+                    const matchedCourses = dynamicCourses.filter(
+                      (c) => c.topicId === selectedTopicDetail?.id || (!c.topicId && selectedTopicDetail?.id === 'oila')
+                    );
+                    const coursesToRender =
+                      matchedCourses.length > 0 ? matchedCourses : (selectedTopicDetail?.id === 'oila' ? FAMILY_LAW_COURSES : []);
 
-                      {/* Course Details */}
-                      <View style={styles.courseInfoCol}>
-                        <Text style={styles.courseTitleText} numberOfLines={1}>
-                          {course.title}
-                        </Text>
-                        <View style={styles.courseMetaRow}>
-                          <View style={styles.courseMetaItem}>
-                            <Ionicons name="book-outline" size={11} color="#64748B" style={{ marginRight: 3 }} />
-                            <Text style={styles.courseMetaText}>{course.lessons}</Text>
-                          </View>
-                          <View style={styles.courseMetaItem}>
-                            <Ionicons name="time-outline" size={11} color="#64748B" style={{ marginRight: 3 }} />
-                            <Text style={styles.courseMetaText}>{course.duration}</Text>
-                          </View>
+                    if (coursesToRender.length === 0) {
+                      return (
+                        <View style={{ paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
+                          <Ionicons name="book-outline" size={36} color="#94A3B8" />
+                          <Text style={{ marginTop: 8, fontSize: 13, color: '#64748B', fontWeight: '500' }}>
+                            Uşbu mavzuda hozirça kurslar mavjud emas
+                          </Text>
                         </View>
-                      </View>
+                      );
+                    }
 
-                      {/* Progress Bar & Percentage */}
-                      <View style={styles.courseProgressCol}>
-                        <Text
-                          style={[
-                            styles.courseProgressPercent,
-                            course.progress > 0 && { color: course.progressColor },
-                          ]}
-                        >
-                          {course.progress}%
-                        </Text>
-                        <View style={styles.courseProgressTrack}>
-                          <View
-                            style={[
-                              styles.courseProgressFill,
-                              {
-                                width: `${course.progress}%`,
-                                backgroundColor: course.progressColor,
-                              },
-                            ]}
+                    return coursesToRender.map((course) => (
+                      <TouchableOpacity
+                        key={course.id}
+                        style={styles.courseItemCard}
+                        activeOpacity={0.8}
+                        onPress={() => setSelectedCourseDetail(course)}
+                      >
+                        {/* Course Icon or Image */}
+                        {course.imageUrl ? (
+                          <Image
+                            source={{ uri: course.imageUrl }}
+                            style={{ width: 44, height: 44, borderRadius: 10, marginRight: 12 }}
+                            resizeMode="cover"
                           />
-                        </View>
-                      </View>
+                        ) : (
+                          <View style={[styles.courseIconBox, { backgroundColor: course.iconBg || '#EFF6FF' }]}>
+                            {course.iconType === 'rings' && (
+                              <View style={styles.interlockingRings}>
+                                <View style={styles.ringLeft} />
+                                <View style={styles.ringRight} />
+                              </View>
+                            )}
+                            {course.iconType === 'people' && (
+                              <Ionicons name="people" size={20} color="#0284C7" />
+                            )}
+                            {course.iconType === 'coins' && (
+                              <FontAwesome5 name="coins" size={17} color="#64748B" />
+                            )}
+                            {course.iconType === 'home' && (
+                              <Ionicons name="home-outline" size={20} color="#64748B" />
+                            )}
+                            {(!course.iconType || !['rings', 'people', 'coins', 'home'].includes(course.iconType)) && (
+                              <Ionicons name="school-outline" size={20} color="#0284C7" />
+                            )}
+                          </View>
+                        )}
 
-                      <Ionicons name="chevron-forward" size={15} color="#94A3B8" style={{ marginLeft: 6 }} />
-                    </TouchableOpacity>
-                  ))}
+                        {/* Course Details */}
+                        <View style={styles.courseInfoCol}>
+                          <Text style={styles.courseTitleText} numberOfLines={1}>
+                            {course.title}
+                          </Text>
+                          <View style={styles.courseMetaRow}>
+                            <View style={styles.courseMetaItem}>
+                              <Ionicons name="book-outline" size={11} color="#64748B" style={{ marginRight: 3 }} />
+                              <Text style={styles.courseMetaText}>{course.lessons}</Text>
+                            </View>
+                            <View style={styles.courseMetaItem}>
+                              <Ionicons name="time-outline" size={11} color="#64748B" style={{ marginRight: 3 }} />
+                              <Text style={styles.courseMetaText}>{course.duration}</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {/* Progress Bar & Percentage */}
+                        <View style={styles.courseProgressCol}>
+                          <Text
+                            style={[
+                              styles.courseProgressPercent,
+                              course.progress > 0 && { color: course.progressColor },
+                            ]}
+                          >
+                            {course.progress}%
+                          </Text>
+                          <View style={styles.courseProgressTrack}>
+                            <View
+                              style={[
+                                styles.courseProgressFill,
+                                {
+                                  width: `${course.progress}%`,
+                                  backgroundColor: course.progressColor,
+                                },
+                              ]}
+                            />
+                          </View>
+                        </View>
+
+                        <Ionicons name="chevron-forward" size={15} color="#94A3B8" style={{ marginLeft: 6 }} />
+                      </TouchableOpacity>
+                    ));
+                  })()}
                 </View>
 
                 {/* Bottom Mini Player: "Davom ettirish: Nikoh shartnomasi" */}

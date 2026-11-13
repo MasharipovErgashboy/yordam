@@ -705,13 +705,17 @@ function readHuquqMaktabi() {
       }
     }
 
+    if (!Array.isArray(data.courses)) data.courses = [];
+    if (!Array.isArray(data.lessons)) data.lessons = [];
+    if (!Array.isArray(data.certificates)) data.certificates = [];
+
     if (changed) {
       fs.writeFileSync(HUQUQ_MAKTABI_FILE, JSON.stringify(data, null, 2), 'utf8');
     }
     return data;
   } catch (e) {
     console.error('Error reading huquq maktabi data:', e);
-    return { banners: [], topics: [], store: { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] } };
+    return { banners: [], topics: [], store: { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] }, courses: [], lessons: [], certificates: [] };
   }
 }
 
@@ -872,6 +876,187 @@ app.put('/api/huquq-maktabi/store/items/:id', (req, res) => {
     return res.json({ success: true, message: 'Do‘kon ma’lumoti muvaffaqiyatli yangilandi' });
   } catch (err) {
     console.error('Error updating store item:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 17. Add Course to Topic
+app.post('/api/huquq-maktabi/courses', (req, res) => {
+  try {
+    const { topicId, title, lessons, duration, imageUrl, iconType, iconBg, progressColor } = req.body;
+    if (!topicId || !title) {
+      return res.status(400).json({ success: false, message: 'Mavzu va kurs nomi talab qilinadi' });
+    }
+    const data = readHuquqMaktabi();
+    if (!Array.isArray(data.courses)) data.courses = [];
+
+    const newCourse = {
+      id: `course_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      topicId,
+      title: title.trim(),
+      lessons: lessons ? (typeof lessons === 'number' || !lessons.includes('dars') ? `${lessons} dars` : lessons) : '0 dars',
+      duration: duration || '30 daqiqa',
+      imageUrl: imageUrl || '',
+      progress: 0,
+      progressColor: progressColor || '#10B981',
+      iconBg: iconBg || '#EFF6FF',
+      iconType: iconType || 'rings',
+      createdAt: Date.now(),
+    };
+
+    data.courses.unshift(newCourse);
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'course:added', course: newCourse, data });
+
+    return res.status(201).json({ success: true, course: newCourse, message: 'Kurs muvaffaqiyatli yaratildi' });
+  } catch (err) {
+    console.error('Error adding course:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 18. Delete Course
+app.delete('/api/huquq-maktabi/courses/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = readHuquqMaktabi();
+    if (Array.isArray(data.courses)) {
+      data.courses = data.courses.filter((c) => c.id !== id);
+    }
+    if (Array.isArray(data.lessons)) {
+      data.lessons = data.lessons.filter((l) => l.courseId !== id);
+    }
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'course:deleted', id, data });
+
+    return res.json({ success: true, message: 'Kurs muvaffaqiyatli o‘chirildi' });
+  } catch (err) {
+    console.error('Error deleting course:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 19. Add Lesson to Course
+app.post('/api/huquq-maktabi/lessons', (req, res) => {
+  try {
+    const { courseId, topicId, title, duration, order, imageUrl, youtubeUrl, description, plan, materials } = req.body;
+    if (!courseId || !title) {
+      return res.status(400).json({ success: false, message: 'Kurs va dars nomi talab qilinadi' });
+    }
+    const data = readHuquqMaktabi();
+    if (!Array.isArray(data.lessons)) data.lessons = [];
+
+    const existingLessons = data.lessons.filter((l) => l.courseId === courseId);
+    const newLesson = {
+      id: `lesson_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      courseId,
+      topicId: topicId || '',
+      title: title.trim(),
+      duration: duration || '10 daqiqa',
+      order: order ? Number(order) : existingLessons.length + 1,
+      imageUrl: imageUrl || '',
+      youtubeUrl: youtubeUrl || '',
+      description: description || '',
+      plan: Array.isArray(plan) ? plan : [],
+      materials: Array.isArray(materials) ? materials : [],
+      status: 'in_progress',
+      createdAt: Date.now(),
+    };
+
+    data.lessons.push(newLesson);
+    data.lessons.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+    // Update lesson count in course if present
+    if (Array.isArray(data.courses)) {
+      const cIdx = data.courses.findIndex((c) => c.id === courseId);
+      if (cIdx !== -1) {
+        const count = data.lessons.filter((l) => l.courseId === courseId).length;
+        data.courses[cIdx].lessons = `${count} dars`;
+      }
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'lesson:added', lesson: newLesson, data });
+
+    return res.status(201).json({ success: true, lesson: newLesson, message: 'Dars muvaffaqiyatli qo‘shildi' });
+  } catch (err) {
+    console.error('Error adding lesson:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 20. Delete Lesson
+app.delete('/api/huquq-maktabi/lessons/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = readHuquqMaktabi();
+    let courseId = null;
+    if (Array.isArray(data.lessons)) {
+      const target = data.lessons.find((l) => l.id === id);
+      if (target) courseId = target.courseId;
+      data.lessons = data.lessons.filter((l) => l.id !== id);
+    }
+    if (courseId && Array.isArray(data.courses)) {
+      const cIdx = data.courses.findIndex((c) => c.id === courseId);
+      if (cIdx !== -1) {
+        const count = data.lessons.filter((l) => l.courseId === courseId).length;
+        data.courses[cIdx].lessons = `${count} dars`;
+      }
+    }
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'lesson:deleted', id, data });
+
+    return res.json({ success: true, message: 'Dars muvaffaqiyatli o‘chirildi' });
+  } catch (err) {
+    console.error('Error deleting lesson:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 21. Add Certificate Stub
+app.post('/api/huquq-maktabi/certificates', (req, res) => {
+  try {
+    const { topicId, title, pdfUrl, pdfName } = req.body;
+    if (!topicId || !title) {
+      return res.status(400).json({ success: false, message: 'Mavzu va sertifikat nomi talab qilinadi' });
+    }
+    const data = readHuquqMaktabi();
+    if (!Array.isArray(data.certificates)) data.certificates = [];
+
+    const newCert = {
+      id: `cert_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      topicId,
+      title: title.trim(),
+      pdfUrl: pdfUrl || '',
+      pdfName: pdfName || 'sertifikat_shablon.pdf',
+      createdAt: Date.now(),
+    };
+
+    data.certificates.unshift(newCert);
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'certificate:added', certificate: newCert, data });
+
+    return res.status(201).json({ success: true, certificate: newCert, message: 'Sertifikat muvaffaqiyatli yaratildi' });
+  } catch (err) {
+    console.error('Error adding certificate:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 22. Delete Certificate
+app.delete('/api/huquq-maktabi/certificates/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = readHuquqMaktabi();
+    if (Array.isArray(data.certificates)) {
+      data.certificates = data.certificates.filter((c) => c.id !== id);
+    }
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'certificate:deleted', id, data });
+
+    return res.json({ success: true, message: 'Sertifikat muvaffaqiyatli o‘chirildi' });
+  } catch (err) {
+    console.error('Error deleting certificate:', err);
     return res.status(500).json({ success: false, message: 'Server xatosi' });
   }
 });

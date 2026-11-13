@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-dark: #070B14;
+  --bg-card: rgba(16, 24, 40, 0.65);
+  --bg-card-hover: rgba(22, 33, 56, 0.75);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-light: rgba(255, 255, 255, 0.14);
+  --cyan-primary: #00A3FF;
+  --cyan-glow: rgba(0, 163, 255, 0.45);
+  --cyan-bright: #00E5FF;
+  --text-main: #FFFFFF;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --green-badge: #10B981;
+  --purple-accent: #A855F7;
+  --orange-accent: #F97316;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient Background Nebula Glows */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 65% 35%, rgba(180, 83, 9, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 80% 25%, rgba(245, 158, 11, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 15% 40%, rgba(0, 163, 255, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(13, 148, 136, 0.08) 0%, transparent 50%),
+    #070B14;
+}
+
+/* Star dust / subtle noise effect */
+.ambient-dust {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.6;
+}
+
+/* Glass Card Utility */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.06),
+    0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+}
+
+.glass-panel-interactive {
+  background: var(--bg-card);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.06),
+    0 15px 35px -10px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-interactive:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glass-light);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    0 25px 50px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* Glow Pill Active Button */
+.cyan-glow-pill {
+  background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%);
+  color: #FFFFFF;
+  box-shadow: 
+    0 0 25px rgba(0, 163, 255, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}

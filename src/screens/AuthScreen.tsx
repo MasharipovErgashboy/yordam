@@ -249,16 +249,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <View style={{ width: 40 }} />
           </View>
 
-          {/* Logo & Platform Title */}
+          {/* Logo & Platform Title (matches MainHomeScreen 1:1) */}
           <View style={styles.brandContainer}>
-            <View style={styles.logoWrapper}>
-              <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
-            </View>
-            <View style={styles.brandTitleRow}>
-              <Text style={styles.brandBlue}>Y</Text>
-              <Text style={styles.brandOrange}>o</Text>
-              <Text style={styles.brandBlue}>rdam</Text>
-            </View>
+            <Image
+              source={logoImage}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.brandTitleText}>
+              Y<Text style={styles.brandTitleAccent}>o</Text>rdam
+            </Text>
           </View>
 
           {/* Auth Tab Switcher */}
@@ -718,45 +718,25 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   brandContainer: {
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  logoWrapper: {
-    width: 68,
-    height: 68,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#0284C7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: 60,
-    height: 60,
-  },
-  brandTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginVertical: 14,
   },
-  brandBlue: {
-    fontSize: 30,
-    fontWeight: '900',
-    color: '#0284C7',
-    letterSpacing: -0.5,
+  logoImage: {
+    width: 50,
+    height: 44,
   },
-  brandOrange: {
-    fontSize: 30,
-    fontWeight: '900',
-    color: '#FF7A00',
-    letterSpacing: -0.5,
+  brandTitleText: {
+    fontSize: 26,
+    fontWeight: '600',
+    color: '#033B6A',
+    letterSpacing: 0.5,
+  },
+  brandTitleAccent: {
+    color: '#F59E0B',
+    fontWeight: '600',
   },
   tabSwitcher: {
     flexDirection: 'row',

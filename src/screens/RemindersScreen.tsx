@@ -412,7 +412,7 @@ export default function RemindersScreen() {
                 color={activeTab === 'calendar' ? C.white : C.textGrey}
               />
               <Text style={[styles.tabText, activeTab === 'calendar' && styles.tabTextActive]}>
-                Taqvim ({todayStr})
+                Taqvim
               </Text>
             </View>
           </TouchableOpacity>
@@ -517,18 +517,8 @@ export default function RemindersScreen() {
           </View>
         )}
 
-        <View style={{ height: 60 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
-
-      {/* ── FLOATING ACTION BUTTON (FAB) ── */}
-      <TouchableOpacity
-        style={styles.fabBtn}
-        onPress={() => setModalVisible(true)}
-        activeOpacity={0.85}
-      >
-        <Ionicons name="add" size={20} color={C.white} />
-        <Text style={styles.fabText}>Yangi eslatma</Text>
-      </TouchableOpacity>
 
       {/* ── ADD REMINDER MODAL ── */}
       <Modal
@@ -689,31 +679,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-  },
-
-  // FAB
-  fabBtn: {
-    position: 'absolute',
-    right: 16,
-    bottom: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.primary,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 28,
-    elevation: 6,
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    gap: 6,
-    zIndex: 10,
-  },
-  fabText: {
-    color: C.white,
-    fontSize: 14,
-    fontWeight: '700',
   },
 
   // Modal styles

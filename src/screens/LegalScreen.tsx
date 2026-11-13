@@ -77,8 +77,12 @@ export default function LegalScreen() {
 
       {/* ── HEADER ── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerLeftBtn}>
-          <Ionicons name="arrow-back" size={22} color={C.textDark} />
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.headerLeftBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
         </TouchableOpacity>
         <View style={styles.logoBox}>
           <Ionicons name="briefcase-outline" size={16} color={C.primary} />

@@ -79,7 +79,10 @@ export default function DetailsScreen() {
 
         {/* ── HEADER ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Ionicons name="chevron-back" size={24} color={C.textDark} />
           </TouchableOpacity>
           <View style={styles.logoBox}>

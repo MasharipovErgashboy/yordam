@@ -383,16 +383,31 @@ export default function RemindersScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── TOP CONTROLS (BACK + TABS + QUICK ADD) ── */}
-      <View style={styles.topControlRow}>
-        <TouchableOpacity
-          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
-          style={styles.backBtn}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="chevron-back" size={24} color={C.textDark} />
-        </TouchableOpacity>
+      {/* ── TOP HEADER (BACK + TITLE + QUICK ADD) ── */}
+      <View style={styles.topHeader}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+            style={styles.backBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={C.textDark} />
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>Eslatmalar</Text>
+        </View>
 
+        {/* Sleek top-right add button */}
+        <TouchableOpacity
+          style={styles.topAddBtn}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={20} color={C.white} />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── TABS ── */}
+      <View style={styles.tabContainer}>
         <View style={styles.tabRow}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'list' && styles.tabActive]}
@@ -425,15 +440,6 @@ export default function RemindersScreen() {
             </View>
           </TouchableOpacity>
         </View>
-
-        {/* Sleek top-right add button */}
-        <TouchableOpacity
-          style={styles.topAddBtn}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={20} color={C.white} />
-        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -653,21 +659,33 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   scroll: { paddingHorizontal: 14, paddingTop: 4 },
 
-  // Top controls
-  topControlRow: {
+  // Top header & controls
+  topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    marginTop: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 14,
     marginBottom: 10,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   backBtn: {
     padding: 4,
-    marginRight: 2,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: C.textDark,
+  },
+  tabContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 10,
   },
   tabRow: {
-    flex: 1,
     flexDirection: 'row',
     backgroundColor: C.white,
     borderRadius: 12,

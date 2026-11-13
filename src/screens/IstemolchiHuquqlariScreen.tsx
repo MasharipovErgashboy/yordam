@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   Alert,
   Share,
   TextInput,
+  Linking,
+  Modal,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -103,14 +105,395 @@ export const CONSUMER_DOC_TEMPLATES: ConsumerDocTemplate[] = [
   },
 ];
 
+const BANNER_WIDTH = width - 32;
+
+export interface HeroBannerSlide {
+  id: string;
+  badge: string;
+  badgeBg: string;
+  badgeColor: string;
+  titlePart1: string;
+  titleGold: string;
+  subtitle: string;
+  ctaText: string;
+  colors: [string, string, string];
+  action: 'issues' | 'constructor' | 'authorities';
+}
+
+export const HERO_BANNER_SLIDES: HeroBannerSlide[] = [
+  {
+    id: 'slide_1',
+    badge: 'Qonuniy kafolat',
+    badgeBg: 'rgba(234, 179, 8, 0.25)',
+    badgeColor: '#FDE047',
+    titlePart1: 'Xaridor sifatida\nhuquqlaringizni biling\nva ',
+    titleGold: 'himoya qiling',
+    subtitle: 'Sifatsiz mahsulot, kafolat, qaytariş va boshqa muammolarda amaliy yordam.',
+    ctaText: 'Muammom bor',
+    colors: ['#07192F', '#0D274A', '#133563'],
+    action: 'issues',
+  },
+  {
+    id: 'slide_2',
+    badge: '10 kunlik muddat',
+    badgeBg: 'rgba(52, 211, 153, 0.25)',
+    badgeColor: '#6EE7B7',
+    titlePart1: 'Tovar uchun to‘langan\npulingizni 100%\n',
+    titleGold: 'qaytarib oling!',
+    subtitle: 'Nuqsonli tovar uchun do‘konga yuridik kuchga ega rasmiy talabnoma yozing.',
+    ctaText: 'Talabnoma yozish',
+    colors: ['#064E3B', '#047857', '#0F766E'],
+    action: 'constructor',
+  },
+  {
+    id: 'slide_3',
+    badge: 'Davlat himoyasi',
+    badgeBg: 'rgba(167, 139, 250, 0.25)',
+    badgeColor: '#C4B5FD',
+    titlePart1: 'Do‘kon talabingizni\nrad etdimi?\n',
+    titleGold: '1159 ga qo‘ng‘iroq qiling',
+    subtitle: 'Raqobat qo‘mitasi va rasmiy davlat organlariga bepul murojaat qiling.',
+    ctaText: 'Tashkilotlar',
+    colors: ['#3B0764', '#581C87', '#6D28D9'],
+    action: 'authorities',
+  },
+];
+
+export interface QuickIssueDetail {
+  id: string;
+  key: string;
+  badge: string;
+  badgeBg: string;
+  badgeColor: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  themeColor: string;
+  title: string;
+  subtitle: string;
+  legalModda: string;
+  legalQuote: string;
+  consumerRights: string[];
+  actionSteps: {
+    step: number;
+    title: string;
+    desc: string;
+  }[];
+  warningBox: {
+    title: string;
+    text: string;
+  };
+  recommendedTemplateKey: string;
+  targetBookPage: number;
+  aiPromptSeed: string;
+}
+
+export const QUICK_ISSUES_DATA: QuickIssueDetail[] = [
+  {
+    id: 'sifatsiz',
+    key: 'sifatsiz',
+    badge: '13, 14, 17-moddalar',
+    badgeBg: '#FFE4E6',
+    badgeColor: '#E11D48',
+    icon: 'cube-outline',
+    themeColor: '#E11D48',
+    title: 'Sifatsiz yoki nuqsonli tovar muammosi',
+    subtitle: 'Zavod nuqsoni, kamchilik yoki yaroqsizlik aniqlanganda xaridorni himoya qilish.',
+    legalModda: 'Qonunning 13-14-moddalari',
+    legalQuote: 'Iste’molchiga nuqsonli tovar sotilganda, u shartnomani bekor qilishga va to‘langan pul summasini to‘liq qaytarib olishga yoki boshqa maqbul sifatlisiga almashtirib berishni talab qilishga haqli.',
+    consumerRights: [
+      'Pulingizni 10 kun ichida to‘liq qaytarib olish huquqi',
+      'Tovarni xuddi shunday markadagi yangisiga almashtirish',
+      'Nuqsonni sotuvchi hisobidan bepul tuzatib berish',
+      'Har bir kechiktirilgan kun uchun 1% penya undirish',
+    ],
+    actionSteps: [
+      { step: 1, title: 'Dalillarni to‘plang', desc: 'Kassa cheki, fotosurat, video va tovar qadog‘ini asrab qo‘ying. Agar chek yo‘qolgan bo‘lsa, bank ko‘chirmasi yoki guvohlar ko‘rsatmasi ham o‘tadi.' },
+      { step: 2, title: 'Yozma talabnoma topshiring', desc: 'Og‘zaki aytilgan gap isbot bo‘lmaydi. Rasmiy 2 nusxada talabnoma yozib, bir nusxasiga do‘kondan qabul qilinganlik imzosini oling.' },
+      { step: 3, title: 'Ekspertiza muddati (10 kun)', desc: 'Sotuvchi tovar sifatini tekshirish uchun ekspertizani o‘z hisobidan o‘tkazishi shart. Xaridor ekspertizada shaxsan qatnashishga haqli.' },
+      { step: 4, title: 'Natija bermasa — 1159 yoki Sud', desc: 'Sotuvchi 10 kunda talabni bajarmasa, Raqobat qo‘mitasiga (1159) murojaat qilinadi va sud orqali ma’naviy zarar ham undiriladi.' },
+    ],
+    warningBox: {
+      title: 'Muhim qonuniy eslatma!',
+      text: 'Do‘kon ma’muriyatining «Mahsulot qaytarib olinmaydi» yoki «Cheksiz tovar qabul qilinmaydi» degan ogohlantirishlari qonunga zid va hech qanday yuridik kuchga ega emas!',
+    },
+    recommendedTemplateKey: 'd1',
+    targetBookPage: 4,
+    aiPromptSeed: 'Do‘kondan olgan tovarim sifatsiz chiqdi, sotuvchi pulimni qaytarmayapti. Qanday qonuniy choralar ko‘rsam bo‘ladi?',
+  },
+  {
+    id: 'kafolat',
+    key: 'kafolat',
+    badge: '11, 15, 17-moddalar',
+    badgeBg: '#DBEAFE',
+    badgeColor: '#2563EB',
+    icon: 'shield-checkmark-outline',
+    themeColor: '#2563EB',
+    title: 'Kafolat (garantiya) davridagi muammo',
+    subtitle: 'Kafolat muddati tugamasdan buyum buzilganda servis markazi va do‘kon majburiyatlari.',
+    legalModda: 'Qonunning 15-moddasi',
+    legalQuote: 'Kafolat muddati davrida tovardagi nuqsonlar sotuvchi (ta’mirlash korxonasi) tomonidan talab qo‘yilgan kundan boshlab ko‘pi bilan 20 kun ichida bepul bartaraf etilishi shart.',
+    consumerRights: [
+      '20 kun ichida bepul va sifatli ta’mirlab berish majburiyati',
+      'Ta’mirlash davrida 3 kun ichida vaqtinchalik o‘xshash tovardan bepul foydalanib turish',
+      'Ta’mir 20 kundan oshsa — to‘liq yangisiga almashtirish yoki pulni 100% qaytarish',
+      'Kafolat muddatini ta’mirlashda yotgan kunlarga teng muddatga uzaytirish',
+    ],
+    actionSteps: [
+      { step: 1, title: 'Kafolat talonini tayyorlang', desc: 'Xarid sanasi va do‘kon muhri bosilgan kafolat talonini oling.' },
+      { step: 2, title: 'Topshirish dalolatnomasini (akt) oling', desc: 'Servis markaziga tovar topshirilayotganda topshirilgan sana va tashqi holati ko‘rsatilgan qabul kvitansiyasini oling.' },
+      { step: 3, title: 'Vaqtinchalik tovar talab qiling', desc: 'Telefon, muzlatgich yoki kir yuvish mashinasi ta’mirlanayotganda 3 kun ichida foydalanib turish uchun bepul shunday tovar talab qiling.' },
+      { step: 4, title: '20 kundan oshsa yangisini talab qiling', desc: '20 kun ichida tuzatib berilmasa, qonun bo‘yicha tovar yangisiga almashtiriladi yoki puli to‘liq qaytariladi.' },
+    ],
+    warningBox: {
+      title: 'Ehtiyot qismlar bahonasi!',
+      text: 'Servis markazining «Ehtiyot qism yo‘q, chet eldan kelyapti» degan bahonasi 20 kunlik qonuniy muddatni to‘xtatmaydi!',
+    },
+    recommendedTemplateKey: 'd2',
+    targetBookPage: 6,
+    aiPromptSeed: 'Kafolatdagi texnikam buzildi, servis markazi 1 oydan beri tuzatmayapti. Qanday ariza berishim kerak?',
+  },
+  {
+    id: 'qaytarish',
+    key: 'qaytarish',
+    badge: '18-modda',
+    badgeBg: '#DCFCE7',
+    badgeColor: '#16A34A',
+    icon: 'sync-outline',
+    themeColor: '#16A34A',
+    title: 'Tovarni qaytarish yoki almashtirish',
+    subtitle: 'Maqbul sifatli buyum yoqmaganda (10 kun) yoki nuqsonli tovar sotilganda pulni qaytarish.',
+    legalModda: 'Qonunning 18-moddasi',
+    legalQuote: 'Iste’molchi nooziq-ovqat tovarini sotib olgan kundan e’tiboran 10 kun ichida maqbul sifatlisiga almashtirib olishga, bunday tovar sotuvda bo‘lmasa, to‘langan pulni qaytarib olishga haqlidir.',
+    consumerRights: [
+      '10 kun ichida sabab ko‘rsatmasdan ham almashtirish (o‘lchami, fasoni, rangi mos kelmasa)',
+      'Do‘konda mos tovar bo‘lmasa — pulni darhol 100% qaytarib olish',
+      'Sotuvchi chek yo‘qligini bahona qilib qaytarishdan bosh tortishi qonunan taqiqlanadi',
+      'Plastik karta yoki naqd shaklda to‘langan mablag‘ to‘liq qaytarilishi shart',
+    ],
+    actionSteps: [
+      { step: 1, title: '10 kunlik muddatni o‘tkazmang', desc: 'Xarid qilingan kun hisobga olinmaydi, hisob ertasi kundan boshlanadi.' },
+      { step: 2, title: 'Tovar ko‘rinishini saqlang', desc: 'Tovar ishlatilmagan, yorliqlari (etiketka), plombalari va qadog‘i butun bo‘lishi lozim.' },
+      { step: 3, title: 'Do‘konga murojaat qiling', desc: 'Kassa cheki yoki to‘lov skrinshoti bilan do‘konga boring.' },
+      { step: 4, title: 'Qaytarmasa — Talabnoma bering', desc: 'Agar sotuvchi rad etsa, ilovadagi tayyor talabnomani imzolab topshiring.' },
+    ],
+    warningBox: {
+      title: 'Istisno tovarlar!',
+      text: 'Vazirlar Mahkamasi ro‘yxatiga asosan dori-darmonlar, shaxsiy gigiyena vositalari, paypoq-ichki kiyimlar sifatli bo‘lsa qaytarilmaydi (faqat nuqsoni bo‘lsa qaytariladi).',
+    },
+    recommendedTemplateKey: 'd1',
+    targetBookPage: 5,
+    aiPromptSeed: 'Kiyim sotib olgandim, o‘lchami to‘g‘ri kelmadi. Do‘kon qaytarib olmayman deyapti, nima qilishim kerak?',
+  },
+  {
+    id: 'xizmat',
+    key: 'xizmat',
+    badge: '19, 20, 21-moddalar',
+    badgeBg: '#FEF3C7',
+    badgeColor: '#D97706',
+    icon: 'headset-outline',
+    themeColor: '#D97706',
+    title: 'Xizmat sifati va boshqa muammolar',
+    subtitle: 'Yetkazib berish kechikishi, sifatsiz ta’mirlash, kommunal va servis xizmatlari.',
+    legalModda: 'Qonunning 19-moddasi',
+    legalQuote: 'Ijrochi ishni bajarish (xizmat ko‘rsatish) shartnomasida belgilangan muddatda, hajmda va tegishli sifatda amalga oshirishi shart. Muddat buzilganda har bir kun uchun 3% penya to‘laydi.',
+    consumerRights: [
+      'Kechiktirilgan har bir kun uchun xizmat narxining 3% miqdorida penya',
+      'Kamchiliklarni ijrochi hisobidan bepul qayta bartaraf etish',
+      'Yetkazilgan zararni va boy berilgan foydani to‘liq undirish',
+      'Xizmatdan voz kechib, to‘langan avansni to‘liq qaytarib olish',
+    ],
+    actionSteps: [
+      { step: 1, title: 'Shartnoma va kvitansiyani tekshiring', desc: 'Xizmat muddati, kafolatlari va to‘lov summasi ko‘rsatilgan hujjatni toping.' },
+      { step: 2, title: 'Kamchiliklar aktini tuzing', desc: 'Bajarilmagan ishlar yoki kechikish yuzasidan dalolatnoma tuzing yoki foto/video oling.' },
+      { step: 3, title: 'Rasmiy e’tiroz xati yo‘llang', desc: 'Xizmat ijrochisiga penya hisoblangan rasmiy talabnoma taqdim eting.' },
+      { step: 4, title: 'Raqobat qo‘mitasiga murojaat', desc: '1159 raqami orqali shikoyat arizasi qoldiring yoki sudga da’vo kiriting.' },
+    ],
+    warningBox: {
+      title: 'Majburiy xizmatlar taqiqlanadi!',
+      text: 'Sizga ruxsatingizsiz qo‘shilgan pullik xizmatlar (masalan, servis to‘lovi, qo‘shimcha sug‘urta) noqonuniy hisoblanadi va to‘liq qaytarilishi shart.',
+    },
+    recommendedTemplateKey: 'd3',
+    targetBookPage: 7,
+    aiPromptSeed: 'Usta uyni ta’mirlashni 2 oyga kechiktirdi, qanday qonuniy jarima va kompensatsiya talab qilsam bo‘ladi?',
+  },
+];
+
+export interface ConsumerProofItem {
+  id: string;
+  type: 'receipt' | 'warranty' | 'photo' | 'other';
+  title: string;
+  store: string;
+  date: string;
+  price?: string;
+  receiptNum?: string;
+  note: string;
+  status: string;
+}
+
+export interface AuthorityItem {
+  id: string;
+  name: string;
+  short: string;
+  roleBadge: string;
+  category: 'komitet' | 'federatsiya' | 'ses' | 'standart' | 'sud';
+  badgeBg: string;
+  themeColor: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  callNum: string;
+  web: string;
+  address: string;
+  hours: string;
+  scope: string;
+  docTemplateKey?: string;
+}
+
+export const AUTHORITIES_LIST: AuthorityItem[] = [
+  {
+    id: 'auth_1',
+    name: 'Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasi',
+    short: '1159',
+    roleBadge: 'Bosh vakolatli davlat organi',
+    category: 'komitet',
+    badgeBg: '#FEE2E2',
+    themeColor: '#DC2626',
+    icon: 'shield-checkmark',
+    callNum: '1159',
+    web: 'raqobat.gov.uz',
+    address: 'Toshkent sh., Labzak ko‘chasi, 3-uy',
+    hours: 'Dush - Juma: 09:00 - 18:00 (13:00 - 14:00 tushlik)',
+    scope: 'Do‘kon pulni qaytarmasa, sifatsiz tovar sotilsa, sun’iy narx oshirilishi, aldamchi reklama yoki monopoliyaga qarshi qat’iy davlat nazorati.',
+    docTemplateKey: 'd3',
+  },
+  {
+    id: 'auth_2',
+    name: 'O‘zbekiston iste’molchilar huquqlarini himoya qilish jamiyatlari federatsiyasi',
+    short: '1091',
+    roleBadge: 'Jamoatchilik himoyasi',
+    category: 'federatsiya',
+    badgeBg: '#DBEAFE',
+    themeColor: '#2563EB',
+    icon: 'people',
+    callNum: '1091',
+    web: 'istemol.uz',
+    address: 'Toshkent sh., Navoiy ko‘chasi, 16-uy',
+    hours: 'Dush - Juma: 09:00 - 18:00',
+    scope: 'Iste’molchilar manfaatlarini sudlarda bepul himoya qilish, ekspertizalar o‘tkazish va nizolarni tinch yo‘l bilan hal qilish.',
+  },
+  {
+    id: 'auth_3',
+    name: 'Sanitariya-epidemiologik osoyishtalik qo‘mitasi (SES)',
+    short: '+998 71 276-58-75',
+    roleBadge: 'Oziq-ovqat va salomatlik',
+    category: 'ses',
+    badgeBg: '#DCFCE7',
+    themeColor: '#16A34A',
+    icon: 'nutrition',
+    callNum: '+998712765875',
+    web: 'sanepid.uz',
+    address: 'Toshkent sh., Chilonzor tumani, Bunyodkor ko‘chasi, 46-uy',
+    hours: '24/7 Navbatchilik xizmati',
+    scope: 'Muddati o‘tgan oziq-ovqat, sifatsiz dori-darmonlar, sanitariya-gigiyena talablari buzilgan restoran va oshxonalar nazorati.',
+  },
+  {
+    id: 'auth_4',
+    name: 'O‘zbekiston texnik jihatdan tartibga solish agentligi (UzTest)',
+    short: '1200',
+    roleBadge: 'Standart va sertifikat',
+    category: 'standart',
+    badgeBg: '#EDE9FE',
+    themeColor: '#7C3AED',
+    icon: 'ribbon',
+    callNum: '1200',
+    web: 'standart.uz',
+    address: 'Toshkent sh., Farobiy ko‘chasi, 333-A uy',
+    hours: 'Dush - Juma: 09:00 - 18:00',
+    scope: 'Xavfsizlik talablariga mos kelmaydigan texnikalar, soxta sertifikatlar, metrologiya va nosoz tarozilar yuzasidan tekshiruvlar.',
+  },
+  {
+    id: 'auth_5',
+    name: 'Fuqarolik ishlari bo‘yicha tumanlararo sudlari',
+    short: '1100 (Sud ishonch telefoni)',
+    roleBadge: 'Yakuniy sud himoyasi (Boj 0 so‘m)',
+    category: 'sud',
+    badgeBg: '#F1F5F9',
+    themeColor: '#0F172A',
+    icon: 'business',
+    callNum: '1100',
+    web: 'my.sud.uz',
+    address: 'Yashash joyingizdagi tuman Fuqarolik ishlari bo‘yicha sudi',
+    hours: 'Dush - Juma: 09:00 - 18:00',
+    scope: 'Yetkazilgan moddiy va ma’naviy zararni undirish. Qonunning 27-moddasiga ko‘ra iste’molchilar sudlarda davlat boji to‘lashdan 100% ozod etilgan.',
+    docTemplateKey: 'd4',
+  },
+];
+
 export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps> = ({ onBack }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<IstemolchiTab>('home');
   const [heroSlideIdx, setHeroSlideIdx] = useState<number>(0);
+  const bannerScrollRef = useRef<any>(null);
 
   // Online Book Screen State
   const [showKitob, setShowKitob] = useState<boolean>(false);
   const [kitobInitialPage, setKitobInitialPage] = useState<number>(1);
+
+  // Sub-screens States
+  const [selectedQuickIssue, setSelectedQuickIssue] = useState<QuickIssueDetail | null>(null);
+  const [showProofsScreen, setShowProofsScreen] = useState<boolean>(false);
+  const [showAuthoritiesScreen, setShowAuthoritiesScreen] = useState<boolean>(false);
+
+  // Proofs States
+  const [proofsList, setProofsList] = useState<ConsumerProofItem[]>([
+    {
+      id: 'p1',
+      type: 'receipt',
+      title: 'Samsung Galaxy A54 kassa cheki',
+      store: 'MediaPark Bozori',
+      date: '15.10.2026',
+      price: '3 850 000 so‘m',
+      receiptNum: '№ 482910',
+      note: 'QR-kodli fiskal kassa cheki saqlangan, to‘lov plastik karta orqali amalga oshirilgan.',
+      status: 'Asl nusxa saqlangan',
+    },
+    {
+      id: 'p2',
+      type: 'warranty',
+      title: 'Artel muzlatgich kafolat taloni',
+      store: 'Artel rasmiy dileri',
+      date: '20.06.2026',
+      price: '5 200 000 so‘m',
+      receiptNum: 'Kafolat taloni № AR-9921',
+      note: '3 yillik rasmiy kafolat muddati belgilangan, xarid muhri mavjud.',
+      status: 'Amalda (2029-yilgacha)',
+    },
+    {
+      id: 'p3',
+      type: 'photo',
+      title: 'Zavod nuqsoni va ekran nosozligi surati',
+      store: 'Texnomart Chilonzor',
+      date: '02.11.2026',
+      price: '1 450 000 so‘m',
+      receiptNum: 'Kassa cheki №TX-7731',
+      note: 'Qadoq ochilishi jarayonida aniqlangan zavod nuqsoni fotosuratlari.',
+      status: 'Dalil biriktirilgan',
+    },
+  ]);
+  const [proofFilter, setProofFilter] = useState<'all' | 'receipt' | 'warranty' | 'photo'>('all');
+  const [isAddProofModalVisible, setIsAddProofModalVisible] = useState<boolean>(false);
+  const [selectedProofDetail, setSelectedProofDetail] = useState<ConsumerProofItem | null>(null);
+
+  // New proof form inputs
+  const [newProofType, setNewProofType] = useState<'receipt' | 'warranty' | 'photo' | 'other'>('receipt');
+  const [newProofTitle, setNewProofTitle] = useState<string>('');
+  const [newProofStore, setNewProofStore] = useState<string>('');
+  const [newProofPrice, setNewProofPrice] = useState<string>('');
+  const [newProofReceiptNum, setNewProofReceiptNum] = useState<string>('');
+  const [newProofNote, setNewProofNote] = useState<string>('');
+
+  // Authorities search & filter
+  const [authoritiesSearchQuery, setAuthoritiesSearchQuery] = useState<string>('');
+  const [authoritiesCategory, setAuthoritiesCategory] = useState<
+    'all' | 'komitet' | 'federatsiya' | 'ses' | 'standart' | 'sud'
+  >('all');
 
   // Document Preview & Constructor States
   const [previewDoc, setPreviewDoc] = useState<ConsumerDocTemplate | null>(null);
@@ -132,8 +515,20 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     bankAccount: '',
   });
 
-  // Handle Header Back - Preview, Konstruktor yoki Xizmatlar sahifasiga qaytish
+  // Handle Header Back - Sub-screens, Preview, Konstruktor yoki Xizmatlar sahifasiga qaytish
   const handleHeaderBack = () => {
+    if (selectedQuickIssue) {
+      setSelectedQuickIssue(null);
+      return;
+    }
+    if (showProofsScreen) {
+      setShowProofsScreen(false);
+      return;
+    }
+    if (showAuthoritiesScreen) {
+      setShowAuthoritiesScreen(false);
+      return;
+    }
     if (previewDoc) {
       setPreviewDoc(null);
       return;
@@ -143,6 +538,20 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
       return;
     }
     onBack();
+  };
+
+  const handleCallPhone = (phoneNum: string) => {
+    const cleanNum = phoneNum.replace(/[^0-9+]/g, '');
+    Linking.openURL(`tel:${cleanNum}`).catch(() => {
+      Alert.alert('Aloqa', `${phoneNum} raqamiga qo‘ng‘iroq qilib bo‘lmadi.`);
+    });
+  };
+
+  const handleOpenWebsite = (url: string) => {
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    Linking.openURL(fullUrl).catch(() => {
+      Alert.alert('Sayt', `${url} sahifasini ochib bo‘lmadi.`);
+    });
   };
 
   const handleOpenConstructor = (doc?: ConsumerDocTemplate) => {
@@ -246,34 +655,39 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     },
   ]);
 
-  // Handle Quick Issue Press
-  const handleQuickIssuePress = (issueTitle: string) => {
-    let pageNum = 1;
-    if (issueTitle.includes('Sifatsiz')) pageNum = 4;
-    else if (issueTitle.includes('Kafolat')) pageNum = 6;
-    else if (issueTitle.includes('Qaytariş') || issueTitle.includes('Qaytarish')) pageNum = 5;
-    else if (issueTitle.includes('Xizmat')) pageNum = 7;
+  // Handle Hero Slide CTA
+  const handleHeroSlideCta = (slide: HeroBannerSlide) => {
+    if (slide.action === 'issues') {
+      handleQuickIssuePress('sifatsiz');
+    } else if (slide.action === 'constructor') {
+      const template = CONSUMER_DOC_TEMPLATES[0];
+      setConstructorForm((prev) => ({
+        ...prev,
+        sellerName: '«MEDIAPARK BOZORI» MChJ',
+        productName: 'Samsung Galaxy A55 smartfoni',
+        price: '4 200 000 so‘m',
+        receiptNumber: '№ 482910-chek',
+        defectDesc: 'Tovar nuqsonli bo‘lib chiqdi va ishlamayapti',
+      }));
+      setActiveTab('documents');
+      handleOpenConstructor(template);
+    } else if (slide.action === 'authorities') {
+      setShowAuthoritiesScreen(true);
+    }
+  };
 
-    Alert.alert(
-      issueTitle,
-      `«${issueTitle}» bo‘yicha qonuniy huquqlaringiz va tartib-qoidalar bilan to‘liq tanishish uchun qonun kitobini ochishingiz yoki tayyor talabnoma yaratishingiz mumkin.`,
-      [
-        { text: 'Yopish', style: 'cancel' },
-        {
-          text: '📖 Qonunni o‘qish',
-          onPress: () => {
-            setKitobInitialPage(pageNum);
-            setShowKitob(true);
-          },
-        },
-        {
-          text: 'Talabnoma yaratish',
-          onPress: () => {
-            setActiveTab('documents');
-          },
-        },
-      ]
-    );
+  // Handle Quick Issue Press - Dedicated detail screen
+  const handleQuickIssuePress = (issueKeyOrTitle: string) => {
+    const matched =
+      QUICK_ISSUES_DATA.find(
+        (item) =>
+          item.id === issueKeyOrTitle ||
+          item.key === issueKeyOrTitle ||
+          item.title.toLowerCase().includes(issueKeyOrTitle.toLowerCase()) ||
+          issueKeyOrTitle.toLowerCase().includes(item.key.toLowerCase())
+      ) || QUICK_ISSUES_DATA[0];
+
+    setSelectedQuickIssue(matched);
   };
 
   // Handle Main Service Press
@@ -283,20 +697,9 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     } else if (serviceId === 'docs') {
       setActiveTab('documents');
     } else if (serviceId === 'proofs') {
-      Alert.alert(
-        'Dalillarim (Şaxsiy himoya arxivi)',
-        '📸 Xarid qilingan tovar çeki, kafolat taloni, fotosuratlar va audio/video yozuvlarni xavfsiz saqlash bölimi.\n\nYangi dalil (çek yoki foto) qöşilsinmi?',
-        [
-          { text: 'Bekor qiliş', style: 'cancel' },
-          { text: 'Çek rasmini yuklash', onPress: () => Alert.alert('Muvaffaqiyatli', 'Çek rasmi dalillar arxiviga saqlandi.') },
-        ]
-      );
+      setShowProofsScreen(true);
     } else if (serviceId === 'authorities') {
-      Alert.alert(
-        'Rasmiy tashkilotlar va ishonch telefonlari',
-        '🏛️ Iste’molchi huquqlari buzilganda murojaat qilinadigan davlat organlari:\n\n1. Raqobatni rivojlantirish va iste’molchilar huquqlarini himoya qilish qo‘mitasi: 1159\n2. Iste’molchilar huquqlarini himoya qilish jamiyatlari federatsiyasi: 1091\n3. Sanitariya-epidemiologiya xizmati (SES): +998 71 276-58-75\n4. O‘zbekiston texnik jihatdan tartibga solish agentligi: 1200\n5. Fuqarolik ishlari bo‘yicha sudlar\n\nQo‘ng‘iroq qilish yoki rasmiy shikoyat xati yo‘llash mumkin.',
-        [{ text: 'Tuşundim' }]
-      );
+      setShowAuthoritiesScreen(true);
     }
   };
 
@@ -902,6 +1305,859 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
     );
   };
 
+  // -------------------------------------------------------------
+  // RENDER: TEZKOR MUAMMOLAR DEDICATED SCREEN
+  // -------------------------------------------------------------
+  const renderQuickIssueDetail = () => {
+    if (!selectedQuickIssue) return null;
+
+    return (
+      <View style={styles.inlinePageContainer}>
+        {/* Sub Header */}
+        <View style={styles.inlineSubHeaderRow}>
+          <TouchableOpacity
+            style={styles.inlineBackToCatalogBtn}
+            activeOpacity={0.7}
+            onPress={() => setSelectedQuickIssue(null)}
+          >
+            <Ionicons name="arrow-back" size={18} color="#0F172A" />
+            <Text style={styles.inlineBackToCatalogText}>Bosh sahifaga</Text>
+          </TouchableOpacity>
+
+          <View style={[styles.issuePillBadge, { backgroundColor: selectedQuickIssue.badgeBg }]}>
+            <Text style={[styles.issuePillBadgeText, { color: selectedQuickIssue.badgeColor }]}>
+              {selectedQuickIssue.badge}
+            </Text>
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.inlinePaperScroll}
+          contentContainerStyle={[
+            styles.inlinePaperScrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 80 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main Issue Card Banner */}
+          <View style={[styles.issueHeroCard, { borderColor: selectedQuickIssue.badgeColor + '30' }]}>
+            <View style={[styles.issueIconLarge, { backgroundColor: selectedQuickIssue.badgeBg }]}>
+              <Ionicons name={selectedQuickIssue.icon} size={28} color={selectedQuickIssue.themeColor} />
+            </View>
+            <Text style={styles.issueHeroTitle}>{selectedQuickIssue.title}</Text>
+            <Text style={styles.issueHeroSubtitle}>{selectedQuickIssue.subtitle}</Text>
+          </View>
+
+          {/* Legal Quote Card */}
+          <View style={styles.issueLegalQuoteCard}>
+            <View style={styles.issueLegalHeaderRow}>
+              <Ionicons name="shield-checkmark" size={16} color="#D97706" />
+              <Text style={styles.issueLegalHeaderTitle}>Qonuniy kafolat ({selectedQuickIssue.legalModda})</Text>
+            </View>
+            <Text style={styles.issueLegalQuoteText}>
+              «{selectedQuickIssue.legalQuote}»
+            </Text>
+          </View>
+
+          {/* Consumer Rights Checklist */}
+          <View style={styles.issueSectionBox}>
+            <View style={styles.issueSectionTitleRow}>
+              <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
+              <Text style={styles.issueSectionTitle}>Sizning qonuniy huquqlaringiz:</Text>
+            </View>
+            {selectedQuickIssue.consumerRights.map((right, idx) => (
+              <View key={idx} style={styles.issueRightItemRow}>
+                <View style={styles.issueCheckBullet}>
+                  <Ionicons name="checkmark" size={12} color="#16A34A" />
+                </View>
+                <Text style={styles.issueRightItemText}>{right}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Action Steps */}
+          <View style={styles.issueSectionBox}>
+            <View style={styles.issueSectionTitleRow}>
+              <Ionicons name="list" size={18} color="#2563EB" />
+              <Text style={styles.issueSectionTitle}>Qadam-baqadam yechim yo‘riqnomasi:</Text>
+            </View>
+            {selectedQuickIssue.actionSteps.map((step) => (
+              <View key={step.step} style={styles.issueStepCard}>
+                <View style={styles.issueStepNumCircle}>
+                  <Text style={styles.issueStepNumText}>{step.step}</Text>
+                </View>
+                <View style={styles.issueStepContent}>
+                  <Text style={styles.issueStepTitle}>{step.title}</Text>
+                  <Text style={styles.issueStepDesc}>{step.desc}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* Warning / Important Tip */}
+          <View style={styles.issueWarningCard}>
+            <View style={styles.issueWarningTitleRow}>
+              <Ionicons name="warning" size={16} color="#B45309" />
+              <Text style={styles.issueWarningTitle}>{selectedQuickIssue.warningBox.title}</Text>
+            </View>
+            <Text style={styles.issueWarningText}>{selectedQuickIssue.warningBox.text}</Text>
+          </View>
+
+          {/* Actions Button Group */}
+          <View style={styles.issueActionsCard}>
+            <Text style={styles.issueActionsHeading}>Amaliy harakatlar:</Text>
+
+            {/* Primary CTA: Create Document */}
+            <TouchableOpacity
+              style={styles.issuePrimaryActionBtn}
+              activeOpacity={0.85}
+              onPress={() => {
+                const template =
+                  CONSUMER_DOC_TEMPLATES.find(
+                    (t) => t.id === selectedQuickIssue.recommendedTemplateKey
+                  ) || CONSUMER_DOC_TEMPLATES[0];
+                setSelectedQuickIssue(null);
+                setActiveTab('documents');
+                handleOpenConstructor(template);
+              }}
+            >
+              <Ionicons name="document-text" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+              <Text style={styles.issuePrimaryActionBtnText}>Rasmiy talabnoma / ariza tuzish</Text>
+            </TouchableOpacity>
+
+            {/* Secondary CTA: Read Book */}
+            <TouchableOpacity
+              style={styles.issueSecondaryActionBtn}
+              activeOpacity={0.8}
+              onPress={() => {
+                setKitobInitialPage(selectedQuickIssue.targetBookPage);
+                setShowKitob(true);
+              }}
+            >
+              <Ionicons name="book-outline" size={17} color="#2563EB" style={{ marginRight: 8 }} />
+              <Text style={styles.issueSecondaryActionBtnText}>Qonun bobini o‘qish (Online kitob)</Text>
+            </TouchableOpacity>
+
+            {/* Secondary CTA: AI Chat */}
+            <TouchableOpacity
+              style={[styles.issueSecondaryActionBtn, { borderColor: '#DDD6FE', backgroundColor: '#F5F3FF' }]}
+              activeOpacity={0.8}
+              onPress={() => {
+                setSelectedQuickIssue(null);
+                setActiveTab('ai');
+                handleSendAi(selectedQuickIssue.aiPromptSeed);
+              }}
+            >
+              <Ionicons name="sparkles" size={17} color="#7C3AED" style={{ marginRight: 8 }} />
+              <Text style={[styles.issueSecondaryActionBtnText, { color: '#6D28D9' }]}>AI Maslahatchidan so‘rash</Text>
+            </TouchableOpacity>
+
+            {/* Secondary CTA: Call 1159 */}
+            <TouchableOpacity
+              style={[styles.issueSecondaryActionBtn, { borderColor: '#BBF7D0', backgroundColor: '#F0FDF4' }]}
+              activeOpacity={0.8}
+              onPress={() => handleCallPhone('1159')}
+            >
+              <Ionicons name="call" size={17} color="#16A34A" style={{ marginRight: 8 }} />
+              <Text style={[styles.issueSecondaryActionBtnText, { color: '#15803D' }]}>1159 Ishonch telefoni (Bepul qo‘ng‘iroq)</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  // -------------------------------------------------------------
+  // RENDER: DALILLARIM - ADD PROOF MODAL
+  // -------------------------------------------------------------
+  const renderAddProofModal = () => (
+    <Modal
+      visible={isAddProofModalVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={() => setIsAddProofModalVisible(false)}
+    >
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCardContainer}>
+          <View style={styles.modalHeaderRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="add-circle" size={20} color="#D97706" style={{ marginRight: 6 }} />
+              <Text style={styles.modalTitle}>Yangi dalil qo‘shish</Text>
+            </View>
+            <TouchableOpacity onPress={() => setIsAddProofModalVisible(false)}>
+              <Ionicons name="close" size={22} color="#64748B" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+            <Text style={styles.modalInputLabel}>Dalil turi:</Text>
+            <View style={styles.modalTypeRow}>
+              {[
+                { key: 'receipt', label: 'Kassa cheki' },
+                { key: 'warranty', label: 'Kafolat taloni' },
+                { key: 'photo', label: 'Foto/Video' },
+                { key: 'other', label: 'Boshqa' },
+              ].map((t) => (
+                <TouchableOpacity
+                  key={t.key}
+                  style={[
+                    styles.modalTypePill,
+                    newProofType === t.key && styles.modalTypePillActive,
+                  ]}
+                  onPress={() => setNewProofType(t.key as any)}
+                >
+                  <Text
+                    style={[
+                      styles.modalTypePillText,
+                      newProofType === t.key && styles.modalTypePillTextActive,
+                    ]}
+                  >
+                    {t.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.modalInputLabel}>Mahsulot / Dalil nomi *:</Text>
+            <TextInput
+              style={styles.modalTextInput}
+              placeholder="Masalan: Samsung Galaxy A54 cheki"
+              placeholderTextColor="#94A3B8"
+              value={newProofTitle}
+              onChangeText={setNewProofTitle}
+            />
+
+            <Text style={styles.modalInputLabel}>Do‘kon yoki sotuvchi nomi *:</Text>
+            <TextInput
+              style={styles.modalTextInput}
+              placeholder="Masalan: MediaPark Chilonzor"
+              placeholderTextColor="#94A3B8"
+              value={newProofStore}
+              onChangeText={setNewProofStore}
+            />
+
+            <Text style={styles.modalInputLabel}>Xarid narxi (so‘mda):</Text>
+            <TextInput
+              style={styles.modalTextInput}
+              placeholder="Masalan: 3 850 000 so‘m"
+              placeholderTextColor="#94A3B8"
+              value={newProofPrice}
+              onChangeText={setNewProofPrice}
+            />
+
+            <Text style={styles.modalInputLabel}>Chek yoki kafolat raqami:</Text>
+            <TextInput
+              style={styles.modalTextInput}
+              placeholder="Masalan: №482910"
+              placeholderTextColor="#94A3B8"
+              value={newProofReceiptNum}
+              onChangeText={setNewProofReceiptNum}
+            />
+
+            <Text style={styles.modalInputLabel}>Qisqa izoh yoki dalil tavsifi:</Text>
+            <TextInput
+              style={[styles.modalTextInput, { height: 60, textAlignVertical: 'top' }]}
+              placeholder="Masalan: QR-kodli fiskal chek saqlangan..."
+              placeholderTextColor="#94A3B8"
+              multiline
+              value={newProofNote}
+              onChangeText={setNewProofNote}
+            />
+          </ScrollView>
+
+          <View style={styles.modalBtnRow}>
+            <TouchableOpacity
+              style={styles.modalCancelBtn}
+              onPress={() => setIsAddProofModalVisible(false)}
+            >
+              <Text style={styles.modalCancelBtnText}>Bekor qilish</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalSaveBtn}
+              onPress={() => {
+                if (!newProofTitle.trim() || !newProofStore.trim()) {
+                  Alert.alert('Xatolik', 'Iltimos, mahsulot va do‘kon nomini kiriting.');
+                  return;
+                }
+                const newId = `p_${Date.now()}`;
+                const newItem: ConsumerProofItem = {
+                  id: newId,
+                  type: newProofType,
+                  title: newProofTitle.trim(),
+                  store: newProofStore.trim(),
+                  date: 'Bugun',
+                  price: newProofPrice.trim() || undefined,
+                  receiptNum: newProofReceiptNum.trim() || undefined,
+                  note: newProofNote.trim() || 'Foydalanuvchi tomonidan arxivga qo‘shildi.',
+                  status: 'Saqlangan',
+                };
+                setProofsList((prev) => [newItem, ...prev]);
+                setIsAddProofModalVisible(false);
+                Alert.alert('Muvaffaqiyatli', 'Yangi dalil shaxsiy arxivga muvaffaqiyatli qo‘shildi!');
+              }}
+            >
+              <Text style={styles.modalSaveBtnText}>Saqlash</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // -------------------------------------------------------------
+  // RENDER: DALILLARIM - PROOF DETAIL MODAL
+  // -------------------------------------------------------------
+  const renderProofDetailModal = () => {
+    if (!selectedProofDetail) return null;
+    const isReceipt = selectedProofDetail.type === 'receipt';
+    const isWarranty = selectedProofDetail.type === 'warranty';
+
+    return (
+      <Modal
+        visible={!!selectedProofDetail}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setSelectedProofDetail(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCardContainer}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons
+                  name={isReceipt ? 'receipt' : isWarranty ? 'shield-checkmark' : 'camera'}
+                  size={20}
+                  color="#D97706"
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.modalTitle}>Dalil tafsilotlari</Text>
+              </View>
+              <TouchableOpacity onPress={() => setSelectedProofDetail(null)}>
+                <Ionicons name="close" size={22} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+              <View style={styles.proofPaperSimBox}>
+                <View style={styles.proofPaperSimHeader}>
+                  <Ionicons name="barcode-outline" size={24} color="#0F172A" />
+                  <Text style={styles.proofPaperSimBrand}>YURIDIK DALIL ARXIVI</Text>
+                  <Text style={styles.proofPaperSimDate}>{selectedProofDetail.date}</Text>
+                </View>
+
+                <View style={styles.proofPaperDivider} />
+
+                <Text style={styles.proofPaperSimTitle}>{selectedProofDetail.title}</Text>
+                <Text style={styles.proofPaperSimStore}>Sotuvchi: {selectedProofDetail.store}</Text>
+
+                {selectedProofDetail.price ? (
+                  <Text style={styles.proofPaperSimPrice}>Summa: {selectedProofDetail.price}</Text>
+                ) : null}
+
+                {selectedProofDetail.receiptNum ? (
+                  <Text style={styles.proofPaperSimNum}>{selectedProofDetail.receiptNum}</Text>
+                ) : null}
+
+                <Text style={styles.proofPaperSimNote}>{selectedProofDetail.note}</Text>
+
+                <View style={styles.proofPaperSealBadge}>
+                  <Ionicons name="shield-checkmark" size={14} color="#16A34A" />
+                  <Text style={styles.proofPaperSealText}>RASMIY DALIL SIFATIDA TAYYOR</Text>
+                </View>
+              </View>
+
+              <View style={[styles.proofLegalNotice, { marginTop: 12 }]}>
+                <Ionicons name="checkmark-done-circle" size={16} color="#16A34A" style={{ marginRight: 6 }} />
+                <Text style={[styles.proofLegalNoticeText, { color: '#166534' }]}>
+                  Ushbu dalil ma’lumotlari asosida sotuvchiga rasmiy talabnoma tuzish mumkin.
+                </Text>
+              </View>
+            </ScrollView>
+
+            <View style={{ gap: 8, marginTop: 14 }}>
+              <TouchableOpacity
+                style={styles.modalPrimaryActionBtn}
+                activeOpacity={0.85}
+                onPress={() => {
+                  const item = selectedProofDetail;
+                  setConstructorForm((prev) => ({
+                    ...prev,
+                    sellerName: item.store || prev.sellerName,
+                    productName: item.title || prev.productName,
+                    price: item.price || prev.price,
+                    receiptNumber: item.receiptNum || prev.receiptNumber,
+                  }));
+                  setSelectedProofDetail(null);
+                  setShowProofsScreen(false);
+                  setActiveTab('documents');
+                  handleOpenConstructor(CONSUMER_DOC_TEMPLATES[0]);
+                }}
+              >
+                <Ionicons name="document-text" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.modalPrimaryActionBtnText}>Ushbu dalil bilan talabnoma yaratish</Text>
+              </TouchableOpacity>
+
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={[styles.modalSecondaryActionBtn, { flex: 1 }]}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    Share.share({
+                      title: selectedProofDetail.title,
+                      message: `📌 Dalil: ${selectedProofDetail.title}\nSotuvchi: ${selectedProofDetail.store}\nSana: ${selectedProofDetail.date}\nSumma: ${selectedProofDetail.price || 'Mavjud emas'}\nEslatma: ${selectedProofDetail.note}\n\nYordam ilovasi shaxsiy arxividan`,
+                    });
+                  }}
+                >
+                  <Ionicons name="share-social-outline" size={15} color="#0F172A" style={{ marginRight: 4 }} />
+                  <Text style={styles.modalSecondaryActionBtnText}>Ulashish</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalSecondaryActionBtn, { borderColor: '#FECACA', backgroundColor: '#FEF2F2' }]}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    Alert.alert(
+                      'O‘chirish',
+                      'Haqiqatan ham ushbu dalilni o‘chirmoqchimisiz?',
+                      [
+                        { text: 'Bekor qilish', style: 'cancel' },
+                        {
+                          text: 'O‘chirish',
+                          style: 'destructive',
+                          onPress: () => {
+                            setProofsList((prev) => prev.filter((p) => p.id !== selectedProofDetail.id));
+                            setSelectedProofDetail(null);
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <Ionicons name="trash-outline" size={15} color="#DC2626" />
+                  <Text style={[styles.modalSecondaryActionBtnText, { color: '#DC2626', marginLeft: 4 }]}>O‘chirish</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  // -------------------------------------------------------------
+  // RENDER: DALILLARIM SCREEN
+  // -------------------------------------------------------------
+  const renderProofsScreen = () => {
+    const filteredProofs = proofsList.filter((p) => {
+      if (proofFilter === 'all') return true;
+      return p.type === proofFilter;
+    });
+
+    const receiptCount = proofsList.filter((p) => p.type === 'receipt').length;
+    const warrantyCount = proofsList.filter((p) => p.type === 'warranty').length;
+    const photoCount = proofsList.filter((p) => p.type === 'photo').length;
+
+    return (
+      <View style={styles.inlinePageContainer}>
+        {/* Sub Header */}
+        <View style={styles.inlineSubHeaderRow}>
+          <TouchableOpacity
+            style={styles.inlineBackToCatalogBtn}
+            activeOpacity={0.7}
+            onPress={() => setShowProofsScreen(false)}
+          >
+            <Ionicons name="arrow-back" size={18} color="#0F172A" />
+            <Text style={styles.inlineBackToCatalogText}>Bosh sahifa</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.addProofHeaderBtn}
+            activeOpacity={0.85}
+            onPress={() => {
+              setNewProofType('receipt');
+              setNewProofTitle('');
+              setNewProofStore('');
+              setNewProofPrice('');
+              setNewProofReceiptNum('');
+              setNewProofNote('');
+              setIsAddProofModalVisible(true);
+            }}
+          >
+            <Ionicons name="add" size={16} color="#FFFFFF" style={{ marginRight: 4 }} />
+            <Text style={styles.addProofHeaderBtnText}>Yangi dalil</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          style={styles.inlinePaperScroll}
+          contentContainerStyle={[
+            styles.inlinePaperScrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 80 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Stats Row */}
+          <View style={styles.proofStatsRow}>
+            <View style={styles.proofStatBox}>
+              <Text style={styles.proofStatVal}>{proofsList.length}</Text>
+              <Text style={styles.proofStatLabel}>Jami dalil</Text>
+            </View>
+            <View style={styles.proofStatBox}>
+              <Text style={[styles.proofStatVal, { color: '#2563EB' }]}>{receiptCount}</Text>
+              <Text style={styles.proofStatLabel}>Cheklar</Text>
+            </View>
+            <View style={styles.proofStatBox}>
+              <Text style={[styles.proofStatVal, { color: '#16A34A' }]}>{warrantyCount}</Text>
+              <Text style={styles.proofStatLabel}>Kafolatlar</Text>
+            </View>
+            <View style={styles.proofStatBox}>
+              <Text style={[styles.proofStatVal, { color: '#D97706' }]}>{photoCount}</Text>
+              <Text style={styles.proofStatLabel}>Foto/Video</Text>
+            </View>
+          </View>
+
+          {/* Filter Pills */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.proofFilterScroll}
+          >
+            {[
+              { key: 'all', label: `Barchasi (${proofsList.length})` },
+              { key: 'receipt', label: `Cheklar (${receiptCount})` },
+              { key: 'warranty', label: `Kafolatlar (${warrantyCount})` },
+              { key: 'photo', label: `Foto/Video (${photoCount})` },
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                style={[
+                  styles.proofFilterChip,
+                  proofFilter === tab.key && styles.proofFilterChipActive,
+                ]}
+                activeOpacity={0.8}
+                onPress={() => setProofFilter(tab.key as any)}
+              >
+                <Text
+                  style={[
+                    styles.proofFilterChipText,
+                    proofFilter === tab.key && styles.proofFilterChipTextActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Legal Tip Card */}
+          <View style={styles.proofLegalNotice}>
+            <Ionicons name="information-circle" size={18} color="#0284C7" style={{ marginRight: 8, marginTop: 1 }} />
+            <Text style={styles.proofLegalNoticeText}>
+              <Text style={{ fontWeight: '800' }}>Qonuniy eslatma:</Text> Elektron cheklar, fotosuratlar va to‘lov skrinshotlari Fuqarolik protsessual kodeksiga asosan sudda to‘laqonli yuridik dalil hisoblanadi.
+            </Text>
+          </View>
+
+          {/* Proofs List */}
+          {filteredProofs.length === 0 ? (
+            <View style={styles.emptyProofBox}>
+              <Ionicons name="folder-open-outline" size={48} color="#94A3B8" style={{ marginBottom: 10 }} />
+              <Text style={styles.emptyProofTitle}>Hozircha dalillar yo‘q</Text>
+              <Text style={styles.emptyProofSub}>
+                Yuqoridagi «Yangi dalil» tugmasini bosib xarid cheki yoki fotosuratni saqlang.
+              </Text>
+            </View>
+          ) : (
+            filteredProofs.map((item) => {
+              const isReceipt = item.type === 'receipt';
+              const isWarranty = item.type === 'warranty';
+              const iconName = isReceipt ? 'receipt-outline' : isWarranty ? 'shield-checkmark-outline' : 'camera-outline';
+              const iconColor = isReceipt ? '#2563EB' : isWarranty ? '#16A34A' : '#D97706';
+              const iconBg = isReceipt ? '#EFF6FF' : isWarranty ? '#F0FDF4' : '#FFFBEB';
+              const typeLabel = isReceipt ? 'Kassa cheki' : isWarranty ? 'Kafolat taloni' : 'Foto dalil';
+
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.proofCard}
+                  activeOpacity={0.9}
+                  onPress={() => setSelectedProofDetail(item)}
+                >
+                  <View style={styles.proofCardTop}>
+                    <View style={[styles.proofCardIconCircle, { backgroundColor: iconBg }]}>
+                      <Ionicons name={iconName} size={20} color={iconColor} />
+                    </View>
+                    <View style={styles.proofCardTitleCol}>
+                      <View style={styles.proofCardBadgeRow}>
+                        <View style={[styles.proofBadgePill, { backgroundColor: iconBg }]}>
+                          <Text style={[styles.proofBadgePillText, { color: iconColor }]}>{typeLabel}</Text>
+                        </View>
+                        <Text style={styles.proofDateText}>{item.date}</Text>
+                      </View>
+                      <Text style={styles.proofCardMainTitle}>{item.title}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.proofMetaRow}>
+                    <View style={styles.proofMetaItem}>
+                      <Ionicons name="storefront-outline" size={13} color="#64748B" />
+                      <Text style={styles.proofMetaText} numberOfLines={1}>{item.store}</Text>
+                    </View>
+                    {item.price ? (
+                      <View style={styles.proofMetaItem}>
+                        <Ionicons name="cash-outline" size={13} color="#16A34A" />
+                        <Text style={[styles.proofMetaText, { color: '#16A34A', fontWeight: '700' }]}>{item.price}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+
+                  <Text style={styles.proofNoteText} numberOfLines={2}>{item.note}</Text>
+
+                  <View style={styles.proofCardActions}>
+                    <TouchableOpacity
+                      style={styles.proofCardSecondaryBtn}
+                      activeOpacity={0.7}
+                      onPress={() => setSelectedProofDetail(item)}
+                    >
+                      <Ionicons name="eye-outline" size={14} color="#0F172A" style={{ marginRight: 4 }} />
+                      <Text style={styles.proofCardSecondaryBtnText}>Ko‘rish</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.proofCardPrimaryBtn}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        setConstructorForm((prev) => ({
+                          ...prev,
+                          sellerName: item.store || prev.sellerName,
+                          productName: item.title || prev.productName,
+                          price: item.price || prev.price,
+                          receiptNumber: item.receiptNum || prev.receiptNumber,
+                        }));
+                        setShowProofsScreen(false);
+                        setActiveTab('documents');
+                        handleOpenConstructor(CONSUMER_DOC_TEMPLATES[0]);
+                      }}
+                    >
+                      <Ionicons name="document-text" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+                      <Text style={styles.proofCardPrimaryBtnText}>Talabnomaga biriktirish</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+
+        {renderAddProofModal()}
+        {renderProofDetailModal()}
+      </View>
+    );
+  };
+
+  // -------------------------------------------------------------
+  // RENDER: RASMIY TASHKILOTLAR SCREEN
+  // -------------------------------------------------------------
+  const renderAuthoritiesScreen = () => {
+    const filteredAuthorities = AUTHORITIES_LIST.filter((auth) => {
+      const matchesCategory =
+        authoritiesCategory === 'all' || auth.category === authoritiesCategory;
+      const matchesQuery =
+        authoritiesSearchQuery.trim() === '' ||
+        auth.name.toLowerCase().includes(authoritiesSearchQuery.toLowerCase()) ||
+        auth.short.toLowerCase().includes(authoritiesSearchQuery.toLowerCase()) ||
+        auth.scope.toLowerCase().includes(authoritiesSearchQuery.toLowerCase());
+      return matchesCategory && matchesQuery;
+    });
+
+    return (
+      <View style={styles.inlinePageContainer}>
+        {/* Sub Header */}
+        <View style={styles.inlineSubHeaderRow}>
+          <TouchableOpacity
+            style={styles.inlineBackToCatalogBtn}
+            activeOpacity={0.7}
+            onPress={() => setShowAuthoritiesScreen(false)}
+          >
+            <Ionicons name="arrow-back" size={18} color="#0F172A" />
+            <Text style={styles.inlineBackToCatalogText}>Bosh sahifa</Text>
+          </TouchableOpacity>
+
+          <View style={styles.authoritiesHeaderBadge}>
+            <Text style={styles.authoritiesHeaderBadgeText}>Ishonch telefonlari</Text>
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.inlinePaperScroll}
+          contentContainerStyle={[
+            styles.inlinePaperScrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 80 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Search Bar */}
+          <View style={styles.authoritiesSearchBox}>
+            <Ionicons name="search" size={17} color="#0F172A" style={{ marginRight: 8 }} />
+            <TextInput
+              style={styles.authoritiesSearchInput}
+              placeholder="Tashkilot nomi yoki 1159 ni qidiring..."
+              placeholderTextColor="#94A3B8"
+              value={authoritiesSearchQuery}
+              onChangeText={setAuthoritiesSearchQuery}
+            />
+            {authoritiesSearchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setAuthoritiesSearchQuery('')}>
+                <Ionicons name="close-circle" size={17} color="#94A3B8" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Category Pills */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.authoritiesCatScroll}
+          >
+            {[
+              { key: 'all', label: 'Barchasi' },
+              { key: 'komitet', label: 'Raqobat qo‘mitasi (1159)' },
+              { key: 'federatsiya', label: 'Federatsiya (1091)' },
+              { key: 'ses', label: 'SES (Oziq-ovqat)' },
+              { key: 'standart', label: 'Standart (1200)' },
+              { key: 'sud', label: 'Sudlar (1100)' },
+            ].map((cat) => (
+              <TouchableOpacity
+                key={cat.key}
+                style={[
+                  styles.authoritiesCatChip,
+                  authoritiesCategory === cat.key && styles.authoritiesCatChipActive,
+                ]}
+                activeOpacity={0.8}
+                onPress={() => setAuthoritiesCategory(cat.key as any)}
+              >
+                <Text
+                  style={[
+                    styles.authoritiesCatChipText,
+                    authoritiesCategory === cat.key && styles.authoritiesCatChipTextActive,
+                  ]}
+                >
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Organizations Cards */}
+          {filteredAuthorities.map((item) => (
+            <View key={item.id} style={styles.authOrgCard}>
+              <View style={styles.authCardHeaderRow}>
+                <View style={[styles.authIconCircle, { backgroundColor: item.badgeBg }]}>
+                  <Ionicons name={item.icon as any} size={22} color={item.themeColor} />
+                </View>
+                <View style={styles.authTitleCol}>
+                  <View style={[styles.authBadgePill, { backgroundColor: item.badgeBg }]}>
+                    <Text style={[styles.authBadgePillText, { color: item.themeColor }]}>
+                      {item.roleBadge}
+                    </Text>
+                  </View>
+                  <Text style={styles.authNameText}>{item.name}</Text>
+                </View>
+              </View>
+
+              <Text style={styles.authScopeText}>{item.scope}</Text>
+
+              <View style={styles.authContactsBox}>
+                <TouchableOpacity
+                  style={styles.authContactRow}
+                  activeOpacity={0.7}
+                  onPress={() => handleCallPhone(item.callNum)}
+                >
+                  <Ionicons name="call" size={15} color="#16A34A" />
+                  <Text style={styles.authContactPhoneText}>
+                    Ishonch telefoni: <Text style={{ fontWeight: '800', color: '#16A34A' }}>{item.short}</Text>
+                  </Text>
+                  <Ionicons name="chevron-forward" size={14} color="#94A3B8" style={{ marginLeft: 'auto' }} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.authContactRow}
+                  activeOpacity={0.7}
+                  onPress={() => handleOpenWebsite(item.web)}
+                >
+                  <Ionicons name="globe-outline" size={15} color="#2563EB" />
+                  <Text style={styles.authContactWebText}>{item.web}</Text>
+                  <Ionicons name="open-outline" size={14} color="#94A3B8" style={{ marginLeft: 'auto' }} />
+                </TouchableOpacity>
+
+                <View style={styles.authInfoRow}>
+                  <Ionicons name="location-outline" size={15} color="#64748B" />
+                  <Text style={styles.authInfoText}>{item.address}</Text>
+                </View>
+
+                <View style={styles.authInfoRow}>
+                  <Ionicons name="time-outline" size={15} color="#64748B" />
+                  <Text style={styles.authInfoText}>{item.hours}</Text>
+                </View>
+              </View>
+
+              <View style={styles.authActionsRow}>
+                <TouchableOpacity
+                  style={styles.authCallBtn}
+                  activeOpacity={0.8}
+                  onPress={() => handleCallPhone(item.callNum)}
+                >
+                  <Ionicons name="call" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.authCallBtnText}>Qo‘ng‘iroq qilish</Text>
+                </TouchableOpacity>
+
+                {item.docTemplateKey ? (
+                  <TouchableOpacity
+                    style={styles.authDocBtn}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      const tpl = CONSUMER_DOC_TEMPLATES.find((t) => t.id === item.docTemplateKey);
+                      setShowAuthoritiesScreen(false);
+                      setActiveTab('documents');
+                      handleOpenConstructor(tpl);
+                    }}
+                  >
+                    <Ionicons name="document-text" size={15} color="#0F172A" style={{ marginRight: 6 }} />
+                    <Text style={styles.authDocBtnText}>Ariza yaratish</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+          ))}
+
+          {/* 4 Golden Rules Box */}
+          <View style={styles.authRulesCard}>
+            <View style={styles.authRulesTitleRow}>
+              <Ionicons name="ribbon-outline" size={20} color="#D97706" />
+              <Text style={styles.authRulesTitle}>Rasmiy organga murojaat qilishning 4 oltin qoidasi:</Text>
+            </View>
+
+            <View style={styles.authRuleItem}>
+              <Text style={styles.authRuleBullet}>1.</Text>
+              <Text style={styles.authRuleText}>Avval sotuvchiga yozma talabnoma topshiring (og‘zaki gap sudda dalil bo‘lmaydi).</Text>
+            </View>
+            <View style={styles.authRuleItem}>
+              <Text style={styles.authRuleBullet}>2.</Text>
+              <Text style={styles.authRuleText}>Chek, kafolat taloni yoki to‘lov skrinshotini saqlab, arizangizga ilova qiling.</Text>
+            </View>
+            <View style={styles.authRuleItem}>
+              <Text style={styles.authRuleBullet}>3.</Text>
+              <Text style={styles.authRuleText}>1159 va 1091 raqamlariga qo‘ng‘iroq qilish va shikoyat yuborish bepul.</Text>
+            </View>
+            <View style={styles.authRuleItem}>
+              <Text style={styles.authRuleBullet}>4.</Text>
+              <Text style={styles.authRuleText}>Qonunning 27-moddasiga binoan iste’molchilar sudlarda davlat boji to‘lashdan butunlay ozod qilingan.</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
@@ -921,7 +2177,17 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
 
           <View style={styles.headerIconCircle}>
             <Ionicons
-              name={previewDoc || isConstructorVisible ? 'document-text' : 'bag-handle'}
+              name={
+                selectedQuickIssue
+                  ? selectedQuickIssue.icon
+                  : showProofsScreen
+                  ? 'folder-open'
+                  : showAuthoritiesScreen
+                  ? 'business'
+                  : previewDoc || isConstructorVisible
+                  ? 'document-text'
+                  : 'bag-handle'
+              }
               size={19}
               color="#FFFFFF"
             />
@@ -929,17 +2195,43 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
 
           <View style={styles.headerTitlesCol}>
             <Text style={styles.headerMainTitle}>
-              {previewDoc ? 'Hujjat ko‘rish' : isConstructorVisible ? 'Hujjat konstruktori' : 'Iste’molçi huquqlari'}
+              {selectedQuickIssue
+                ? 'Tezkor yechim'
+                : showProofsScreen
+                ? 'Dalillarim'
+                : showAuthoritiesScreen
+                ? 'Rasmiy tashkilotlar'
+                : previewDoc
+                ? 'Hujjat ko‘rish'
+                : isConstructorVisible
+                ? 'Hujjat konstruktori'
+                : 'Iste’molçi huquqlari'}
             </Text>
             <Text style={styles.headerSubtitle} numberOfLines={1}>
-              {previewDoc ? previewDoc.title : isConstructorVisible ? 'Rasmiy talabnoma va ariza yaratish' : 'Xaridorlar uçun huquqiy yordam'}
+              {selectedQuickIssue
+                ? selectedQuickIssue.title
+                : showProofsScreen
+                ? 'Shaxsiy himoya arxivi (Chek, kafolat, foto)'
+                : showAuthoritiesScreen
+                ? 'Davlat organlari va ishonch telefonlari'
+                : previewDoc
+                ? previewDoc.title
+                : isConstructorVisible
+                ? 'Rasmiy talabnoma va ariza yaratish'
+                : 'Xaridorlar uçun huquqiy yordam'}
             </Text>
           </View>
         </View>
       </View>
 
       {/* ===================== 2. MAIN BODY AREA ===================== */}
-      {activeTab === 'documents' && previewDoc ? (
+      {selectedQuickIssue ? (
+        renderQuickIssueDetail()
+      ) : showProofsScreen ? (
+        renderProofsScreen()
+      ) : showAuthoritiesScreen ? (
+        renderAuthoritiesScreen()
+      ) : activeTab === 'documents' && previewDoc ? (
         renderDocPreview()
       ) : activeTab === 'documents' && isConstructorVisible ? (
         renderDocConstructor()
@@ -954,53 +2246,81 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
         >
         {activeTab === 'home' && (
           <>
-            {/* 1. HERO BANNER CARD */}
-            <View style={styles.heroCardOuter}>
-              <LinearGradient
-                colors={['#07192F', '#0D274A', '#133563']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.heroGradient}
+            {/* 1. HERO BANNER SWIPER */}
+            <View style={styles.heroSwiperOuter}>
+              <ScrollView
+                ref={bannerScrollRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                decelerationRate="fast"
+                snapToInterval={BANNER_WIDTH}
+                snapToAlignment="start"
+                contentContainerStyle={{ gap: 0 }}
+                onMomentumScrollEnd={(e) => {
+                  const idx = Math.round(e.nativeEvent.contentOffset.x / BANNER_WIDTH);
+                  if (idx >= 0 && idx < HERO_BANNER_SLIDES.length) {
+                    setHeroSlideIdx(idx);
+                  }
+                }}
               >
-                {/* Left Content */}
-                <View style={styles.heroLeftCol}>
-                  <Text style={styles.heroTitle}>
-                    Xaridor sifatida{'\n'}
-                    huquqlaringizni biling{'\n'}
-                    va <Text style={styles.heroTitleGold}>himoya qiling</Text>
-                  </Text>
+                {HERO_BANNER_SLIDES.map((slide) => (
+                  <View key={slide.id} style={[styles.heroCardOuter, { width: BANNER_WIDTH }]}>
+                    <LinearGradient
+                      colors={slide.colors}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.heroGradient}
+                    >
+                      {/* Left Content */}
+                      <View style={styles.heroLeftCol}>
+                        <View style={[styles.heroSlideBadge, { backgroundColor: slide.badgeBg }]}>
+                          <Text style={[styles.heroSlideBadgeText, { color: slide.badgeColor }]}>
+                            {slide.badge}
+                          </Text>
+                        </View>
+                        <Text style={styles.heroTitle}>
+                          {slide.titlePart1}
+                          <Text style={styles.heroTitleGold}>{slide.titleGold}</Text>
+                        </Text>
 
-                  <Text style={styles.heroSubtitle}>
-                    Sifatsiz mahsulot, kafolat, qaytariş va boşqa muammolarda amaliy yordam.
-                  </Text>
+                        <Text style={styles.heroSubtitle}>
+                          {slide.subtitle}
+                        </Text>
 
-                  <TouchableOpacity
-                    style={styles.heroCtaBtn}
-                    activeOpacity={0.85}
-                    onPress={() => handleQuickIssuePress('Umumiy iste’molchi huquqlari')}
-                  >
-                    <Text style={styles.heroCtaText}>Muammom bor</Text>
-                    <Ionicons name="arrow-forward" size={13} color="#0F172A" style={{ marginLeft: 4 }} />
-                  </TouchableOpacity>
-                </View>
+                        <TouchableOpacity
+                          style={styles.heroCtaBtn}
+                          activeOpacity={0.85}
+                          onPress={() => handleHeroSlideCta(slide)}
+                        >
+                          <Text style={styles.heroCtaText}>{slide.ctaText}</Text>
+                          <Ionicons name="arrow-forward" size={13} color="#0F172A" style={{ marginLeft: 4 }} />
+                        </TouchableOpacity>
+                      </View>
 
-                {/* Right 3D Illustration Graphic */}
-                <View style={styles.heroGraphicWrap}>
-                  <Image
-                    source={heroGraphic}
-                    style={styles.heroGraphicImg}
-                    resizeMode="contain"
-                  />
-                </View>
-              </LinearGradient>
+                      {/* Right 3D Illustration Graphic */}
+                      <View style={styles.heroGraphicWrap}>
+                        <Image
+                          source={heroGraphic}
+                          style={styles.heroGraphicImg}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    </LinearGradient>
+                  </View>
+                ))}
+              </ScrollView>
             </View>
 
             {/* Pagination Dots */}
             <View style={styles.paginationRow}>
-              {[0, 1, 2].map((idx) => (
+              {HERO_BANNER_SLIDES.map((slide, idx) => (
                 <TouchableOpacity
-                  key={idx}
-                  onPress={() => setHeroSlideIdx(idx)}
+                  key={slide.id}
+                  onPress={() => {
+                    setHeroSlideIdx(idx);
+                    bannerScrollRef.current?.scrollTo({ x: idx * BANNER_WIDTH, animated: true });
+                  }}
                   style={idx === heroSlideIdx ? styles.dotActive : styles.dotInactive}
                 />
               ))}
@@ -1051,7 +2371,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
               <TouchableOpacity
                 style={[styles.quickIssueCard, { backgroundColor: '#FFF1F2', borderColor: '#FFE4E6' }]}
                 activeOpacity={0.8}
-                onPress={() => handleQuickIssuePress('Sifatsiz mahsulot')}
+                onPress={() => handleQuickIssuePress('sifatsiz')}
               >
                 <View style={styles.quickIssueIconWrap}>
                   <Ionicons name="cube-outline" size={22} color="#E11D48" />
@@ -1064,7 +2384,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
               <TouchableOpacity
                 style={[styles.quickIssueCard, { backgroundColor: '#EFF6FF', borderColor: '#DBEAFE' }]}
                 activeOpacity={0.8}
-                onPress={() => handleQuickIssuePress('Kafolat bilan bog‘liq muammo')}
+                onPress={() => handleQuickIssuePress('kafolat')}
               >
                 <View style={styles.quickIssueIconWrap}>
                   <Ionicons name="shield-checkmark-outline" size={22} color="#2563EB" />
@@ -1077,7 +2397,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
               <TouchableOpacity
                 style={[styles.quickIssueCard, { backgroundColor: '#F0FDF4', borderColor: '#DCFCE7' }]}
                 activeOpacity={0.8}
-                onPress={() => handleQuickIssuePress('Qaytarish yoki almashtirish')}
+                onPress={() => handleQuickIssuePress('qaytarish')}
               >
                 <View style={styles.quickIssueIconWrap}>
                   <Ionicons name="sync-outline" size={22} color="#16A34A" />
@@ -1090,7 +2410,7 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
               <TouchableOpacity
                 style={[styles.quickIssueCard, { backgroundColor: '#FFFBEB', borderColor: '#FEF3C7' }]}
                 activeOpacity={0.8}
-                onPress={() => handleQuickIssuePress('Xizmat sifati va boshqa muammolar')}
+                onPress={() => handleQuickIssuePress('xizmat')}
               >
                 <View style={styles.quickIssueIconWrap}>
                   <Ionicons name="headset-outline" size={22} color="#D97706" />
@@ -1515,15 +2835,39 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           onPress={() => {
             setPreviewDoc(null);
             setIsConstructorVisible(false);
+            setSelectedQuickIssue(null);
+            setShowProofsScreen(false);
+            setShowAuthoritiesScreen(false);
             setActiveTab('home');
           }}
         >
           <Ionicons
-            name={activeTab === 'home' && !previewDoc && !isConstructorVisible ? 'home' : 'home-outline'}
+            name={
+              (activeTab === 'home' || selectedQuickIssue !== null || showProofsScreen || showAuthoritiesScreen) &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? 'home'
+                : 'home-outline'
+            }
             size={22}
-            color={activeTab === 'home' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
+            color={
+              (activeTab === 'home' || selectedQuickIssue !== null || showProofsScreen || showAuthoritiesScreen) &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? '#EAB308'
+                : '#64748B'
+            }
           />
-          <Text style={[styles.navLabel, activeTab === 'home' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text
+            style={[
+              styles.navLabel,
+              (activeTab === 'home' || selectedQuickIssue !== null || showProofsScreen || showAuthoritiesScreen) &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? styles.navLabelActive
+                : styles.navLabelInactive,
+            ]}
+          >
             Boş sahifa
           </Text>
         </TouchableOpacity>
@@ -1535,15 +2879,48 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           onPress={() => {
             setPreviewDoc(null);
             setIsConstructorVisible(false);
+            setSelectedQuickIssue(null);
+            setShowProofsScreen(false);
+            setShowAuthoritiesScreen(false);
             setActiveTab('rights');
           }}
         >
           <Ionicons
-            name={activeTab === 'rights' && !previewDoc && !isConstructorVisible ? 'book' : 'book-outline'}
+            name={
+              activeTab === 'rights' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? 'book'
+                : 'book-outline'
+            }
             size={22}
-            color={activeTab === 'rights' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
+            color={
+              activeTab === 'rights' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? '#EAB308'
+                : '#64748B'
+            }
           />
-          <Text style={[styles.navLabel, activeTab === 'rights' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'rights' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? styles.navLabelActive
+                : styles.navLabelInactive,
+            ]}
+          >
             Huquqlar
           </Text>
         </TouchableOpacity>
@@ -1555,15 +2932,48 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           onPress={() => {
             setPreviewDoc(null);
             setIsConstructorVisible(false);
+            setSelectedQuickIssue(null);
+            setShowProofsScreen(false);
+            setShowAuthoritiesScreen(false);
             setActiveTab('ai');
           }}
         >
           <Ionicons
-            name={activeTab === 'ai' && !previewDoc && !isConstructorVisible ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'}
+            name={
+              activeTab === 'ai' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? 'chatbubble-ellipses'
+                : 'chatbubble-ellipses-outline'
+            }
             size={22}
-            color={activeTab === 'ai' && !previewDoc && !isConstructorVisible ? '#EAB308' : '#64748B'}
+            color={
+              activeTab === 'ai' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? '#EAB308'
+                : '#64748B'
+            }
           />
-          <Text style={[styles.navLabel, activeTab === 'ai' && !previewDoc && !isConstructorVisible ? styles.navLabelActive : styles.navLabelInactive]}>
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'ai' &&
+              !selectedQuickIssue &&
+              !showProofsScreen &&
+              !showAuthoritiesScreen &&
+              !previewDoc &&
+              !isConstructorVisible
+                ? styles.navLabelActive
+                : styles.navLabelInactive,
+            ]}
+          >
             AI yordamçi
           </Text>
         </TouchableOpacity>
@@ -1575,6 +2985,9 @@ export const IstemolchiHuquqlariScreen: React.FC<IstemolchiHuquqlariScreenProps>
           onPress={() => {
             setPreviewDoc(null);
             setIsConstructorVisible(false);
+            setSelectedQuickIssue(null);
+            setShowProofsScreen(false);
+            setShowAuthoritiesScreen(false);
             setActiveTab('documents');
           }}
         >
@@ -2765,6 +4178,877 @@ const styles = StyleSheet.create({
     color: '#15803D',
     marginLeft: 6,
     flex: 1,
+  },
+
+  // Swiper Banner Styles
+  heroSwiperOuter: {
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  heroSlideBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  heroSlideBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // Quick Issue Detail Screen Styles
+  issueHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  issueIconLarge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  issueHeroTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  issueHeroSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  issueLegalQuoteCard: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 12,
+  },
+  issueLegalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  issueLegalHeaderTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  issueLegalQuoteText: {
+    fontSize: 12,
+    color: '#78350F',
+    lineHeight: 18,
+    fontStyle: 'italic',
+  },
+  issueSectionBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+  },
+  issueSectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  issueSectionTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  issueRightItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  issueCheckBullet: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  issueRightItemText: {
+    fontSize: 12.5,
+    color: '#334155',
+    flex: 1,
+    fontWeight: '600',
+  },
+  issueStepCard: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+    alignItems: 'flex-start',
+  },
+  issueStepNumCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  issueStepNumText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2563EB',
+  },
+  issueStepContent: {
+    flex: 1,
+  },
+  issueStepTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  issueStepDesc: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 17,
+  },
+  issueWarningCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginBottom: 14,
+  },
+  issueWarningTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  issueWarningTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#B91C1C',
+  },
+  issueWarningText: {
+    fontSize: 12,
+    color: '#991B1B',
+    lineHeight: 17,
+  },
+  issueActionsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 8,
+    marginBottom: 16,
+  },
+  issueActionsHeading: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  issuePrimaryActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#D97706',
+    height: 44,
+    borderRadius: 12,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  issuePrimaryActionBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  issueSecondaryActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 42,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    backgroundColor: '#EFF6FF',
+  },
+  issueSecondaryActionBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#2563EB',
+  },
+  issuePillBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  issuePillBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+
+  // Dalillarim Styles
+  addProofHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D97706',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  addProofHeaderBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  proofStatsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  proofStatBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  proofStatVal: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  proofStatLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  proofFilterScroll: {
+    gap: 6,
+    paddingBottom: 10,
+  },
+  proofFilterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  proofFilterChipActive: {
+    backgroundColor: '#0F172A',
+    borderColor: '#0F172A',
+  },
+  proofFilterChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  proofFilterChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  proofLegalNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    marginBottom: 12,
+  },
+  proofLegalNoticeText: {
+    fontSize: 11.5,
+    color: '#0369A1',
+    flex: 1,
+    lineHeight: 16,
+  },
+  emptyProofBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 10,
+  },
+  emptyProofTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  emptyProofSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 17,
+  },
+  proofCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  proofCardTop: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  proofCardIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  proofCardTitleCol: {
+    flex: 1,
+  },
+  proofCardBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 3,
+  },
+  proofBadgePill: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  proofBadgePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  proofDateText: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  proofCardMainTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  proofMetaRow: {
+    flexDirection: 'row',
+    gap: 14,
+    marginBottom: 6,
+  },
+  proofMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  proofMetaText: {
+    fontSize: 11.5,
+    color: '#64748B',
+  },
+  proofNoteText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 16,
+    marginBottom: 10,
+  },
+  proofCardActions: {
+    flexDirection: 'row',
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 10,
+  },
+  proofCardSecondaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+  },
+  proofCardSecondaryBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  proofCardPrimaryBtn: {
+    flex: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#D97706',
+  },
+  proofCardPrimaryBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // Modal Styles
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalCardContainer: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  modalInputLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  modalTypeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 6,
+  },
+  modalTypePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  modalTypePillActive: {
+    backgroundColor: '#D97706',
+    borderColor: '#D97706',
+  },
+  modalTypePillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  modalTypePillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  modalTextInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    fontSize: 12.5,
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  modalBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 14,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  modalCancelBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  modalCancelBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  modalSaveBtn: {
+    flex: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#D97706',
+  },
+  modalSaveBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  proofPaperSimBox: {
+    backgroundColor: '#FFFDF9',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
+  },
+  proofPaperSimHeader: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  proofPaperSimBrand: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  proofPaperSimDate: {
+    fontSize: 10,
+    color: '#94A3B8',
+  },
+  proofPaperDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 8,
+  },
+  proofPaperSimTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  proofPaperSimStore: {
+    fontSize: 12,
+    color: '#475569',
+    marginBottom: 3,
+  },
+  proofPaperSimPrice: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#16A34A',
+    marginBottom: 3,
+  },
+  proofPaperSimNum: {
+    fontSize: 11,
+    color: '#64748B',
+    fontStyle: 'italic',
+    marginBottom: 4,
+  },
+  proofPaperSimNote: {
+    fontSize: 11.5,
+    color: '#475569',
+    lineHeight: 16,
+  },
+  proofPaperSealBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    backgroundColor: '#F0FDF4',
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    marginTop: 10,
+  },
+  proofPaperSealText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#15803D',
+    letterSpacing: 0.5,
+  },
+  modalPrimaryActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#D97706',
+    height: 42,
+    borderRadius: 10,
+  },
+  modalPrimaryActionBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  modalSecondaryActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 38,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  modalSecondaryActionBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+
+  // Authorities Styles
+  authoritiesHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#EFF6FF',
+  },
+  authoritiesHeaderBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#2563EB',
+  },
+  authoritiesSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 42,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  authoritiesSearchInput: {
+    flex: 1,
+    fontSize: 12.5,
+    color: '#0F172A',
+  },
+  authoritiesCatScroll: {
+    gap: 6,
+    paddingBottom: 10,
+  },
+  authoritiesCatChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  authoritiesCatChipActive: {
+    backgroundColor: '#0F172A',
+    borderColor: '#0F172A',
+  },
+  authoritiesCatChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  authoritiesCatChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  authOrgCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  authCardHeaderRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  authIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  authTitleCol: {
+    flex: 1,
+  },
+  authBadgePill: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+    marginBottom: 3,
+  },
+  authBadgePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  authNameText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    lineHeight: 18,
+  },
+  authScopeText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 17,
+    marginBottom: 10,
+  },
+  authContactsBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    padding: 10,
+    gap: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  authContactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  authContactPhoneText: {
+    fontSize: 12,
+    color: '#334155',
+  },
+  authContactWebText: {
+    fontSize: 12,
+    color: '#2563EB',
+    textDecorationLine: 'underline',
+  },
+  authInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  authInfoText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    flex: 1,
+  },
+  authActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  authCallBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: '#16A34A',
+  },
+  authCallBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  authDocBtn: {
+    flex: 1.2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 38,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  authDocBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  authRulesCard: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 16,
+  },
+  authRulesTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
+  authRulesTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  authRuleItem: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 6,
+  },
+  authRuleBullet: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  authRuleText: {
+    fontSize: 11.5,
+    color: '#78350F',
+    flex: 1,
+    lineHeight: 16,
   },
 });
 

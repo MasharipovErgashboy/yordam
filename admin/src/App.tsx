@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { UserSession, ApplicationItem, RegisteredUser } from './types';
+import type { UserSession, ApplicationItem, RegisteredUser, LegalServiceItem } from './types';
 import { LoginScreen } from './components/LoginScreen';
 import { Sidebar } from './components/Sidebar';
 import { DashboardHeader } from './components/DashboardHeader';
@@ -17,6 +17,14 @@ import {
   Trash2,
   Mail,
   Phone,
+  GraduationCap,
+  Scale,
+  Eye,
+  Star,
+  Layers,
+  TrendingUp,
+  Award,
+  X,
 } from 'lucide-react';
 
 export default function App() {
@@ -79,49 +87,88 @@ export default function App() {
     },
   ]);
 
-  // Services tab state
-  const [servicesList, setServicesList] = useState([
+  // Services tab state - 3 Core Legal Services
+  const [servicesList, setServicesList] = useState<LegalServiceItem[]>([
     {
-      id: 'srv_1',
+      id: 'srv_huquq_maktabi',
+      title: 'Huquq maktabi',
+      slug: 'huquq-maktabi',
+      category: 'Ta’lim & Savodxonlik',
+      categoryBadge: 'Ta’lim',
+      desc: 'Interaktiv darslar, huquqiy testlar, amaliy keyslar va audio/video qo‘llanmalar orqali fuqarolarning huquqiy savodxonligini oshirish.',
+      icon: 'school',
+      badgeColor: '#8B5CF6',
+      modulesCount: 12,
+      materialsCount: 48,
+      materialsLabel: '48 ta darslik',
+      usageCount: '14,250 ta o‘quvchi',
+      successRate: '98.4%',
+      rating: '4.9 ★',
+      ratingValue: 4.9,
+      isActive: true,
+      features: [
+        '12 ta interaktiv huquqiy o‘quv moduli',
+        '48 ta video va audio darsliklar bazasi',
+        'Amaliy hayotiy huquqiy keyslar va tahlillar',
+        'Bilimni tekshirish testlari va yakuniy sertifikat',
+      ],
+      lastUpdated: 'Bugun, 18:30',
+    },
+    {
+      id: 'srv_istemolchi',
       title: 'Iste’molchi huquqlari',
-      desc: 'Sifatsiz mahsulotlar, kafolat muddati, qaytarish va 1159 Raqobat qo‘mitasi arizalari',
-      templatesCount: 18,
-      usageCount: '6,850 ta ariza',
-      successRate: '96%',
-      isActive: true,
+      slug: 'istemolchi-huquqlari',
+      category: 'Iste’molchi himoyasi',
+      categoryBadge: 'Himoya',
+      desc: 'Sifatsiz tovar va xizmatlar, 14 kun ichida almashtirish/qaytarish, kafolat ta’mirlari va 1159 Raqobat qo‘mitasi rasmiy talabnomalari.',
+      icon: 'consumer',
       badgeColor: '#00A3FF',
+      modulesCount: 6,
+      materialsCount: 18,
+      materialsLabel: '18 ta andoza',
+      usageCount: '8,420 ta ariza',
+      successRate: '96.8%',
+      rating: '4.8 ★',
+      ratingValue: 4.8,
+      isActive: true,
+      features: [
+        '14 kun ichida nuqsonsiz tovarni qaytarish arizasi',
+        'Kafolat muddati davomida bepul ta’mirlash talabi',
+        '1159 Raqobat qo‘mitasiga rasmiy shikoyat xati',
+        'Sotuvchiga nisbatan sudga da’vo arizalari generatori',
+      ],
+      lastUpdated: 'Bugun, 17:15',
     },
     {
-      id: 'srv_2',
+      id: 'srv_ish_mehnat',
       title: 'Ish va mehnat huquqi',
-      desc: 'Mehnat kodeksi bo‘yicha shartnomalar, noqonuniy bo‘shatish va ish haqi undirish',
-      templatesCount: 24,
-      usageCount: '4,210 ta ariza',
-      successRate: '98%',
+      slug: 'ish-va-mehnat',
+      category: 'Mehnat munosabatlari',
+      categoryBadge: 'Mehnat',
+      desc: 'Yangi Mehnat kodeksi me’yorlari, noqonuniy bo‘shatish, kechiktirilgan oylik maosh, kompensatsiya va Mehnat inspeksiyasi arizalari.',
+      icon: 'labor',
+      badgeColor: '#F59E0B',
+      modulesCount: 8,
+      materialsCount: 24,
+      materialsLabel: '24 ta andoza',
+      usageCount: '5,630 ta ariza',
+      successRate: '97.5%',
+      rating: '4.9 ★',
+      ratingValue: 4.9,
       isActive: true,
-      badgeColor: '#F97316',
-    },
-    {
-      id: 'srv_3',
-      title: 'Fuqarolik sudi da’volari',
-      desc: 'Moddiy va ma’naviy zararni qoplash, shartnoma majburiyatlarini bajarish talablari',
-      templatesCount: 15,
-      usageCount: '2,140 ta da’vo',
-      successRate: '91%',
-      isActive: true,
-      badgeColor: '#A855F7',
-    },
-    {
-      id: 'srv_4',
-      title: 'Sun’iy intellekt (AI) yordamchi',
-      desc: '24/7 qonunchilik normalari asosida foydalanuvchilar savollariga avtomatik yuridik javoblar',
-      templatesCount: 1,
-      usageCount: '18,900 ta suhbat',
-      successRate: '99%',
-      isActive: true,
-      badgeColor: '#10B981',
+      features: [
+        'Yangi Mehnat kodeksi asosidagi huquqiy kafolatlar',
+        'Noqonuniy ishdan bo‘shatishni bekor qilish talabi',
+        'Ish haqi va zararlarni undirish bo‘yicha sud arizasi',
+        'Davlat mehnat inspeksiyasiga to‘g‘ridan-to‘g‘ri murojaat',
+      ],
+      lastUpdated: 'Kecha, 20:45',
     },
   ]);
+
+  const [serviceFilter, setServiceFilter] = useState<string>('all');
+  const [serviceSearchQuery, setServiceSearchQuery] = useState<string>('');
+  const [selectedServiceDetail, setSelectedServiceDetail] = useState<LegalServiceItem | null>(null);
 
   // Application list state
   const [applications, setApplications] = useState<ApplicationItem[]>([
@@ -712,113 +759,549 @@ export default function App() {
         )}
 
         {/* =========================================================================
-            TAB 3: XIZMATLAR
+            TAB 3: XIZMATLAR (3 TA ASOSIY XIZMAT JADVAL KO'RINISHIDA)
            ========================================================================= */}
         {activeTab === 'xizmatlar' && (
-          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Services Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
-              {servicesList.map((srv) => (
+          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+            {/* Top Overview KPI Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+              {[
+                {
+                  title: 'Asosiy xizmatlar',
+                  value: '3 ta yo‘nalish',
+                  desc: '100% faol va integratsiyalangan',
+                  icon: <Layers size={18} color="#8B5CF6" />,
+                  color: '#8B5CF6',
+                },
+                {
+                  title: 'Jami qamrov',
+                  value: '28,300+ nafar',
+                  desc: 'Foydalanuvchilar va o‘quvchilar',
+                  icon: <Users size={18} color="#00A3FF" />,
+                  color: '#00A3FF',
+                },
+                {
+                  title: 'O‘rtacha natijadorlik',
+                  value: '97.6%',
+                  desc: 'Ijobiy hal etilgan va yakunlangan',
+                  icon: <TrendingUp size={18} color="#10B981" />,
+                  color: '#10B981',
+                },
+                {
+                  title: 'Materiallar bazasi',
+                  value: '90 ta material',
+                  desc: 'Darsliklar va rasmiy andozalar',
+                  icon: <Award size={18} color="#F59E0B" />,
+                  color: '#F59E0B',
+                },
+              ].map((kpi, idx) => (
                 <div
-                  key={srv.id}
+                  key={idx}
                   className="glass-panel"
                   style={{
-                    padding: '24px',
-                    borderRadius: '22px',
+                    padding: '18px 20px',
+                    borderRadius: '18px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: '220px',
                   }}
                 >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '12px',
-                          background: `${srv.badgeColor}18`,
-                          border: `1px solid ${srv.badgeColor}35`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: srv.badgeColor,
-                        }}>
-                          <Briefcase size={20} />
-                        </div>
-                        <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
-                          {srv.title}
-                        </h3>
-                      </div>
-
-                      {/* Status Toggle Switch */}
-                      <button
-                        onClick={() => toggleServiceStatus(srv.id)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          background: srv.isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                          color: srv.isActive ? '#10B981' : '#EF4444',
-                          fontWeight: 700,
-                          fontSize: '11.5px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {srv.isActive ? 'Faol' : 'To‘xtatilgan'}
-                      </button>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '12.5px', color: '#94A3B8', fontWeight: 600 }}>{kpi.title}</span>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      background: `${kpi.color}18`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      {kpi.icon}
                     </div>
-
-                    <p style={{ fontSize: '13px', color: '#94A3B8', margin: '0 0 16px 0', lineHeight: '19px' }}>
-                      {srv.desc}
-                    </p>
                   </div>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingTop: '16px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                  }}>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>
-                      Andozalar: <span style={{ color: '#FFFFFF', fontWeight: 700 }}>{srv.templatesCount} ta</span>
+                  <div>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.3px', marginBottom: '2px' }}>
+                      {kpi.value}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>
-                      Foydalanildi: <span style={{ color: '#00E5FF', fontWeight: 700 }}>{srv.usageCount}</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>
-                      Muvaffaqiyat: <span style={{ color: '#10B981', fontWeight: 700 }}>{srv.successRate}</span>
+                    <div style={{ fontSize: '11.5px', color: '#64748B' }}>
+                      {kpi.desc}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Quick action button */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => alert('Yangi xizmat yoki andoza yaratish oynasi tez orada qo‘shiladi.')}
+            {/* Services Table Card */}
+            <div
+              className="glass-panel"
+              style={{
+                padding: '24px',
+                borderRadius: '22px',
+              }}
+            >
+              {/* Header: Title & Filter / Search Controls */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '14px',
+                marginBottom: '20px',
+              }}>
+                <div>
+                  <h2 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 3px 0' }}>
+                    Yordam Asosiy Huquqiy Xizmatlari
+                  </h2>
+                  <p style={{ fontSize: '12.5px', color: '#94A3B8', margin: 0 }}>
+                    Mobil ilova orqali fuqarolarga taqdim etilayotgan 3 ta asosiy xizmatlar reyestri va ko‘rsatkichlari
+                  </p>
+                </div>
+
+                {/* Filter Pills + Search */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  {/* Category Filter Pills */}
+                  <div style={{
+                    display: 'flex',
+                    background: 'rgba(8, 14, 27, 0.6)',
+                    borderRadius: '10px',
+                    padding: '3px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                  }}>
+                    {[
+                      { key: 'all', label: `Barchasi (${servicesList.length})` },
+                      { key: 'faol', label: `Faol (${servicesList.filter((s) => s.isActive).length})` },
+                      { key: 'talim', label: 'Ta’lim' },
+                      { key: 'himoya', label: 'Iste’molchi' },
+                      { key: 'mehnat', label: 'Mehnat' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setServiceFilter(tab.key)}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: serviceFilter === tab.key ? '#00A3FF' : 'transparent',
+                          color: serviceFilter === tab.key ? '#FFFFFF' : '#94A3B8',
+                          fontSize: '12px',
+                          fontWeight: serviceFilter === tab.key ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Input */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'rgba(8, 14, 27, 0.6)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '10px',
+                    padding: '0 10px',
+                    height: '34px',
+                  }}>
+                    <Search size={14} color="#64748B" style={{ marginRight: '6px' }} />
+                    <input
+                      type="text"
+                      placeholder="Qidirish..."
+                      value={serviceSearchQuery}
+                      onChange={(e) => setServiceSearchQuery(e.target.value)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        color: '#FFFFFF',
+                        fontSize: '12.5px',
+                        width: '140px',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Table Element */}
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Xizmat nomi va yo‘nalishi
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Kategoriya
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Material & Modullar
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Foydalanish qamrovi
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Natijadorlik / Reyting
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Holati
+                      </th>
+                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>
+                        Amal
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {servicesList
+                      .filter((srv) => {
+                        const matchesFilter =
+                          serviceFilter === 'all' ||
+                          (serviceFilter === 'faol' && srv.isActive) ||
+                          (serviceFilter === 'talim' && srv.categoryBadge === 'Ta’lim') ||
+                          (serviceFilter === 'himoya' && srv.categoryBadge === 'Himoya') ||
+                          (serviceFilter === 'mehnat' && srv.categoryBadge === 'Mehnat');
+
+                        const matchesQuery =
+                          serviceSearchQuery.trim() === '' ||
+                          srv.title.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
+                          srv.desc.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
+                          srv.category.toLowerCase().includes(serviceSearchQuery.toLowerCase());
+
+                        return matchesFilter && matchesQuery;
+                      })
+                      .map((srv) => (
+                        <tr
+                          key={srv.id}
+                          className="table-row-hover"
+                          style={{
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {/* Service Title & Icon & Desc */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: '42px',
+                                height: '42px',
+                                borderRadius: '12px',
+                                background: `${srv.badgeColor}18`,
+                                border: `1px solid ${srv.badgeColor}35`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}>
+                                {srv.icon === 'school' && <GraduationCap size={20} color={srv.badgeColor} />}
+                                {srv.icon === 'consumer' && <Scale size={20} color={srv.badgeColor} />}
+                                {srv.icon === 'labor' && <Briefcase size={20} color={srv.badgeColor} />}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#FFFFFF', marginBottom: '3px' }}>
+                                  {srv.title}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#94A3B8', maxWidth: '320px', lineHeight: '16px' }}>
+                                  {srv.desc}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Category Badge */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 10px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              background: `${srv.badgeColor}15`,
+                              color: srv.badgeColor,
+                              border: `1px solid ${srv.badgeColor}30`,
+                            }}>
+                              {srv.categoryBadge}
+                            </span>
+                          </td>
+
+                          {/* Materials / Modules */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FFFFFF', marginBottom: '2px' }}>
+                              {srv.materialsLabel}
+                            </div>
+                            <div style={{ fontSize: '11.5px', color: '#64748B' }}>
+                              {srv.modulesCount} ta yo‘nalish
+                            </div>
+                          </td>
+
+                          {/* Usage Count */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Users size={14} color="#00E5FF" />
+                              <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#00E5FF' }}>
+                                {srv.usageCount}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                              So‘nggi yangilanish: {srv.lastUpdated}
+                            </div>
+                          </td>
+
+                          {/* Success Rate & Rating */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                              <span style={{
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#10B981',
+                              }}>
+                                {srv.successRate}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: '#F59E0B', fontWeight: 700 }}>
+                                <Star size={13} fill="#F59E0B" color="#F59E0B" />
+                                <span>{srv.rating}</span>
+                              </div>
+                            </div>
+                            {/* Small progress line */}
+                            <div style={{
+                              width: '90px',
+                              height: '4px',
+                              borderRadius: '2px',
+                              background: 'rgba(255, 255, 255, 0.08)',
+                              overflow: 'hidden',
+                            }}>
+                              <div style={{
+                                width: srv.successRate,
+                                height: '100%',
+                                background: '#10B981',
+                                borderRadius: '2px',
+                              }} />
+                            </div>
+                          </td>
+
+                          {/* Status toggle */}
+                          <td style={{ padding: '16px 14px' }}>
+                            <button
+                              onClick={() => toggleServiceStatus(srv.id)}
+                              style={{
+                                padding: '5px 12px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: srv.isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                color: srv.isActive ? '#10B981' : '#EF4444',
+                                fontWeight: 700,
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              <span style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                background: srv.isActive ? '#10B981' : '#EF4444',
+                              }} />
+                              {srv.isActive ? 'Faol' : 'To‘xtatilgan'}
+                            </button>
+                          </td>
+
+                          {/* Action Button */}
+                          <td style={{ padding: '16px 14px', textAlign: 'right' }}>
+                            <button
+                              onClick={() => setSelectedServiceDetail(srv)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '6px 14px',
+                                borderRadius: '9px',
+                                border: '1px solid rgba(0, 163, 255, 0.35)',
+                                background: 'rgba(0, 163, 255, 0.12)',
+                                color: '#00A3FF',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              <Eye size={13} />
+                              <span>Batafsil</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Service Detail Modal */}
+            {selectedServiceDetail && (
+              <div
                 style={{
-                  padding: '12px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #00B2FF 0%, #0077FF 100%)',
-                  color: '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '13.5px',
-                  cursor: 'pointer',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(3, 7, 18, 0.75)',
+                  backdropFilter: 'blur(16px)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 0 20px rgba(0, 163, 255, 0.4)',
+                  justifyContent: 'center',
+                  zIndex: 9999,
+                  padding: '20px',
                 }}
+                onClick={() => setSelectedServiceDetail(null)}
               >
-                <Plus size={16} />
-                <span>Yangi xizmat qo‘shish</span>
-              </button>
-            </div>
+                <div
+                  className="glass-panel animate-scale-up"
+                  style={{
+                    width: '100%',
+                    maxWidth: '560px',
+                    borderRadius: '24px',
+                    padding: '30px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(11, 18, 33, 0.94)',
+                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal Header */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '14px',
+                        background: `${selectedServiceDetail.badgeColor}20`,
+                        border: `1px solid ${selectedServiceDetail.badgeColor}40`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        {selectedServiceDetail.icon === 'school' && <GraduationCap size={24} color={selectedServiceDetail.badgeColor} />}
+                        {selectedServiceDetail.icon === 'consumer' && <Scale size={24} color={selectedServiceDetail.badgeColor} />}
+                        {selectedServiceDetail.icon === 'labor' && <Briefcase size={24} color={selectedServiceDetail.badgeColor} />}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 4px 0' }}>
+                          {selectedServiceDetail.title}
+                        </h3>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          background: `${selectedServiceDetail.badgeColor}18`,
+                          color: selectedServiceDetail.badgeColor,
+                        }}>
+                          {selectedServiceDetail.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedServiceDetail(null)}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        border: 'none',
+                        color: '#94A3B8',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Description */}
+                  <p style={{ fontSize: '13.5px', color: '#CBD5E1', lineHeight: '20px', margin: '0 0 20px 0' }}>
+                    {selectedServiceDetail.desc}
+                  </p>
+
+                  {/* Stats Grid inside modal */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '22px' }}>
+                    <div style={{
+                      padding: '14px',
+                      borderRadius: '14px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Modullar & Baza</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>{selectedServiceDetail.materialsLabel}</div>
+                    </div>
+                    <div style={{
+                      padding: '14px',
+                      borderRadius: '14px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Foydalanish</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#00E5FF' }}>{selectedServiceDetail.usageCount}</div>
+                    </div>
+                    <div style={{
+                      padding: '14px',
+                      borderRadius: '14px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Muvaffaqiyat</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#10B981' }}>{selectedServiceDetail.successRate}</div>
+                    </div>
+                  </div>
+
+                  {/* Key Features List */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.4px' }}>
+                      Asosiy imkoniyatlar va bo‘limlar:
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {selectedServiceDetail.features.map((feature, fIdx) => (
+                        <div key={fIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <CheckCircle2 size={16} color="#10B981" />
+                          <span style={{ fontSize: '13px', color: '#E2E8F0' }}>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Footer Modal Action */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <button
+                      onClick={() => setSelectedServiceDetail(null)}
+                      style={{
+                        padding: '10px 20px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #00B2FF 0%, #0077FF 100%)',
+                        color: '#FFFFFF',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Tushunarli, yopish
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

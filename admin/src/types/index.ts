@@ -53,4 +53,25 @@ export interface RegisteredUser {
   avatar: string;
 }
 
+export interface LegalServiceItem {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  categoryBadge: string;
+  desc: string;
+  icon: 'school' | 'consumer' | 'labor';
+  badgeColor: string;
+  modulesCount: number;
+  materialsCount: number;
+  materialsLabel: string;
+  usageCount: string;
+  successRate: string;
+  rating: string;
+  ratingValue: number;
+  isActive: boolean;
+  features: string[];
+  lastUpdated: string;
+}
+
 

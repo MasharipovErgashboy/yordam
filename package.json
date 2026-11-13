@@ -36,7 +36,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "admin": "npm --prefix admin run dev",
+    "admin:build": "npm --prefix admin run build",
+    "backend": "node backend/src/server.js"
   },
   "private": true
 }

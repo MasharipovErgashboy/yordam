@@ -29,8 +29,10 @@
     "iconName": "cart",
     "badgeColor": "#00A3FF",
     "isActive": true,
-    "usedUserIds": [],
-    "usersCount": 0,
+    "usedUserIds": [
+      "u_1794578344256_724"
+    ],
+    "usersCount": 1,
     "lastUpdated": "Bugun, 20:00",
     "features": [
       "14 kun ichida nuqsonsiz tovarni qaytarish arizasi",

@@ -7,6 +7,7 @@ import { KPICards } from './components/KPICards';
 import { ChartsSection } from './components/ChartsSection';
 import { ApplicationsTable } from './components/ApplicationsTable';
 import { NewApplicationModal } from './components/NewApplicationModal';
+import { HuquqMaktabiDetailView } from './components/HuquqMaktabiDetailView';
 import {
   Briefcase,
   Search,
@@ -162,6 +163,26 @@ export default function App() {
   const [editIsActive, setEditIsActive] = useState(true);
   const [isSavingService, setIsSavingService] = useState(false);
 
+  // Huquq Maktabi subview & data state
+  const [currentServiceSubView, setCurrentServiceSubView] = useState<string | null>(null);
+  const [huquqMaktabiData, setHuquqMaktabiData] = useState<any>({
+    banners: [],
+    topics: [],
+    store: { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] },
+  });
+
+  const fetchHuquqMaktabiData = useCallback(async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/huquq-maktabi');
+      const data = await res.json();
+      if (data && data.success && data.data) {
+        setHuquqMaktabiData(data.data);
+      }
+    } catch {
+      // Backend offline fallback
+    }
+  }, []);
+
   // Fetch Services from backend
   const fetchServicesFromBackend = useCallback(async () => {
     try {
@@ -177,7 +198,8 @@ export default function App() {
 
   useEffect(() => {
     fetchServicesFromBackend();
-  }, [fetchServicesFromBackend]);
+    fetchHuquqMaktabiData();
+  }, [fetchServicesFromBackend, fetchHuquqMaktabiData]);
 
   const openEditModal = (srv: LegalServiceItem) => {
     setEditingService(srv);
@@ -391,6 +413,12 @@ export default function App() {
                 setServicesList((prev) =>
                   prev.map((s) => (s.id === msg.data.service.id ? msg.data.service : s))
                 );
+              }
+            } else if (msg.event === 'huquq-maktabi:updated') {
+              if (msg.data && msg.data.data) {
+                setHuquqMaktabiData(msg.data.data);
+              } else {
+                fetchHuquqMaktabiData();
               }
             } else if (msg.event === 'user:registered') {
               if (msg.data.user) {
@@ -943,6 +971,13 @@ export default function App() {
             TAB 3: XIZMATLAR (3 TA ASOSIY XIZMAT JADVAL KO'RINISHIDA)
            ========================================================================= */}
         {activeTab === 'xizmatlar' && (
+          currentServiceSubView === 'huquq_maktabi' ? (
+            <HuquqMaktabiDetailView
+              data={huquqMaktabiData}
+              onBack={() => setCurrentServiceSubView(null)}
+              onRefresh={fetchHuquqMaktabiData}
+            />
+          ) : (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             {/* Top Overview KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
@@ -1256,8 +1291,14 @@ export default function App() {
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
                               {/* Eye button (Faqatgina ko'z iconi) */}
                               <button
-                                onClick={() => setSelectedServiceDetail(srv)}
-                                title="Batafsil ma’lumot"
+                                onClick={() => {
+                                  if (srv.id === 'huquq_maktabi') {
+                                    setCurrentServiceSubView('huquq_maktabi');
+                                  } else {
+                                    setSelectedServiceDetail(srv);
+                                  }
+                                }}
+                                title={srv.id === 'huquq_maktabi' ? 'Huquq maktabi boshqaruvi' : 'Batafsil ma’lumot'}
                                 style={{
                                   width: '34px',
                                   height: '34px',
@@ -1747,6 +1788,7 @@ export default function App() {
               </div>
             )}
           </div>
+          )
         )}
 
         {/* =========================================================================

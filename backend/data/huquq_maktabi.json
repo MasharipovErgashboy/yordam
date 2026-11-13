@@ -1,0 +1,228 @@
+{
+  "banners": [
+    {
+      "id": "hm_b_2",
+      "title": "Konstitutsiya darslari yangilandi",
+      "subtitle": "Yangi tahrirdagi moddalar, interaktiv keyslar va yangi testlar bazasi qo'shildi.",
+      "imageUrl": "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
+      "durationKey": "forever",
+      "durationLabel": "Bir umr",
+      "createdAt": 1731530000000,
+      "expiresAt": null,
+      "isActive": true
+    }
+  ],
+  "topics": [
+    {
+      "id": "konstitutsiya",
+      "order": 1,
+      "title": "Konstitutsiyaviy huquq",
+      "iconName": "scale-outline",
+      "subtitle": "Davlat tuzilishi, asosiy qonun va inson huquqlari kafolatlari",
+      "lessonsCount": 12,
+      "level": "Boshlang'ich",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "fuqarolik",
+      "order": 2,
+      "title": "Fuqarolik huquqi",
+      "iconName": "people",
+      "subtitle": "Mulk huquqi, oldi-sotdi, shartnomalar va majburiyatlar",
+      "lessonsCount": 18,
+      "level": "O'rta",
+      "color": "#00A3FF"
+    },
+    {
+      "id": "oila",
+      "order": 3,
+      "title": "Oila huquqi",
+      "iconName": "people",
+      "subtitle": "Nikoh, mulkiy munosabatlar, aliment va bola huquqlari",
+      "lessonsCount": 14,
+      "level": "Boshlang'ich",
+      "color": "#EC4899"
+    },
+    {
+      "id": "mehnat",
+      "order": 4,
+      "title": "Mehnat huquqi",
+      "iconName": "hard-hat",
+      "subtitle": "Mehnat shartnomasi, xodim huquqlari, oylik va dam olish",
+      "lessonsCount": 10,
+      "level": "O'rta",
+      "color": "#F59E0B"
+    },
+    {
+      "id": "istemolchi",
+      "order": 5,
+      "title": "Iste’molchi huquqlari",
+      "iconName": "cart",
+      "subtitle": "Sifatsiz tovarlar, kafolat, 14 kunda qaytarish va tovon",
+      "lessonsCount": 8,
+      "level": "Boshlang'ich",
+      "color": "#10B981"
+    },
+    {
+      "id": "mamuriy",
+      "order": 6,
+      "title": "Ma’muriy huquq",
+      "iconName": "shield-checkmark",
+      "subtitle": "Yo‘l harakati, jarimalar va davlat idoralari murojaatlari",
+      "lessonsCount": 11,
+      "level": "O'rta",
+      "color": "#6366F1"
+    },
+    {
+      "id": "jinoyat",
+      "order": 7,
+      "title": "Jinoyat huquqi",
+      "iconName": "gavel",
+      "subtitle": "Jinoiy javobgarlik, jazo turlari va protsessual normalar",
+      "lessonsCount": 16,
+      "level": "Murakkab",
+      "color": "#EF4444"
+    },
+    {
+      "id": "uy_joy",
+      "order": 8,
+      "title": "Uy-joy huquqi",
+      "iconName": "home",
+      "subtitle": "Ijara, xususiylashtirish, propiska va kommunal xizmatlar",
+      "lessonsCount": 9,
+      "level": "Boshlang'ich",
+      "color": "#14B8A6"
+    },
+    {
+      "id": "raqamli",
+      "order": 9,
+      "title": "Raqamli huquqlar",
+      "iconName": "laptop",
+      "subtitle": "Shaxsiy ma’lumotlar, kiberjinoyat, IT shartnomalari",
+      "lessonsCount": 12,
+      "level": "O'rta",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "moliyaviy",
+      "order": 10,
+      "title": "Moliyaviy huquqlar",
+      "iconName": "coins",
+      "subtitle": "Kreditlar, soliqlar, bank shartnomalari va qarzdorlik",
+      "lessonsCount": 10,
+      "level": "O'rta",
+      "color": "#EAB308"
+    }
+  ],
+  "store": {
+    "banners": [
+      {
+        "id": "st_b_1",
+        "title": "Coin Shop Super Chegirma",
+        "subtitle": "To‘plangan coinlaringiz evaziga qimmatbaho sovg‘alar va chegirmalarni oling!",
+        "imageUrl": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80",
+        "durationKey": "forever",
+        "durationLabel": "Bir umr",
+        "createdAt": 1731530000000,
+        "expiresAt": null,
+        "isActive": true
+      }
+    ],
+    "talimItems": [
+      {
+        "id": "talim_1",
+        "title": "O‘zbekiston Konstitutsiyasi (Sharhlangan)",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Elektron kitoblar",
+        "priceCoins": 350,
+        "iconName": "book-outline",
+        "desc": "O‘zbekiston Respublikasi Konstitutsiyasining yangi tahrirdagi moddalari va amaliy huquqiy sharhlar to‘plami (PDF va ePub formatda)."
+      },
+      {
+        "id": "talim_2",
+        "title": "Yangi Mehnat kodeksi sharhi (2025)",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Qo‘llanmalar",
+        "priceCoins": 450,
+        "iconName": "briefcase",
+        "desc": "Xodim va ish beruvchi munosabatlari bo‘yicha to‘liq sharhlar, 60+ shablonlar to‘plami."
+      },
+      {
+        "id": "talim_3",
+        "title": "Huquqiy master-klass bilet",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Vebinar",
+        "priceCoins": 600,
+        "iconName": "videocam",
+        "desc": "Taniqli advokatlar bilan yopiq vebinar va savol-javob sessiyasiga taklifnoma."
+      }
+    ],
+    "maxsusItems": [
+      {
+        "id": "maxsus_1",
+        "title": "Yordam brendli charm bloknot",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Aksessuarlar",
+        "priceCoins": 1200,
+        "iconName": "journal",
+        "desc": "Tabiiy charmdan tayyorlangan, zarhal logotipli premium kundalik va ruchka."
+      },
+      {
+        "id": "maxsus_2",
+        "title": "Yordam 'Legal Champion' Xudi",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Kiyimlar",
+        "priceCoins": 2500,
+        "iconName": "shirt",
+        "desc": "100% paxta, yuqori sifatli oversize xudi, ichki issiq qatlamli."
+      },
+      {
+        "id": "maxsus_3",
+        "title": "Smart Watch (Aqlli soat)",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Gadjetlar",
+        "priceCoins": 4500,
+        "iconName": "watch",
+        "desc": "Yurak urishi, bildirishnomalar va sport rejimlarini qo‘llab-quvvatlovchi zamonaviy smart soat."
+      }
+    ],
+    "hamkorlarItems": [
+      {
+        "id": "hamkor_1",
+        "title": "'Book House' 30% chegirma vaucheri",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "Chegirma kuponi",
+        "priceCoins": 200,
+        "iconName": "ticket",
+        "desc": "Barcha yuridik va o‘quv adabiyotlariga 30% lik bir martalik promokod."
+      },
+      {
+        "id": "hamkor_2",
+        "title": "'EduCenter' IT va huquq kurslariga 20%",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "O‘quv kursi",
+        "priceCoins": 500,
+        "iconName": "school",
+        "desc": "Hamkor o‘quv markazining offline va online barcha kurslariga taalluqli promokod."
+      },
+      {
+        "id": "hamkor_3",
+        "title": "'Legal Cafe' bepul qahva sertifikati",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "Kofe kuponi",
+        "priceCoins": 150,
+        "iconName": "cafe",
+        "desc": "Toshkent shahridagi hamkor kafelarda istalgan qahvani bepul olish uchun QR-kupon."
+      }
+    ]
+  }
+}

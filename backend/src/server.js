@@ -652,6 +652,230 @@ app.post('/api/services/:id/use', (req, res) => {
   }
 });
 
+// ============================================================================
+// HUQUQ MAKTABI (ADMIN & MOBILE) ENDPOINTS
+// ============================================================================
+
+const HUQUQ_MAKTABI_FILE = path.join(__dirname, '../data/huquq_maktabi.json');
+
+const DURATION_MS_MAP = {
+  '1_day': 1 * 24 * 60 * 60 * 1000,
+  '3_days': 3 * 24 * 60 * 60 * 1000,
+  '1_week': 7 * 24 * 60 * 60 * 1000,
+  '2_weeks': 14 * 24 * 60 * 60 * 1000,
+  '1_month': 30 * 24 * 60 * 60 * 1000,
+  '3_months': 90 * 24 * 60 * 60 * 1000,
+  'forever': null,
+};
+
+const DURATION_LABEL_MAP = {
+  '1_day': '1 kunlik',
+  '3_days': '3 kunlik',
+  '1_week': '1 haftalik',
+  '2_weeks': '2 haftalik',
+  '1_month': '1 oylik',
+  '3_months': '3 oylik',
+  'forever': 'Bir umr',
+};
+
+function readHuquqMaktabi() {
+  try {
+    if (!fs.existsSync(HUQUQ_MAKTABI_FILE)) {
+      return { banners: [], topics: [], store: { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] } };
+    }
+    const data = JSON.parse(fs.readFileSync(HUQUQ_MAKTABI_FILE, 'utf8'));
+    const now = Date.now();
+    let changed = false;
+
+    // Prune expired main banners
+    if (Array.isArray(data.banners)) {
+      const activeBanners = data.banners.filter((b) => !b.expiresAt || b.expiresAt > now);
+      if (activeBanners.length !== data.banners.length) {
+        data.banners = activeBanners;
+        changed = true;
+      }
+    }
+
+    // Prune expired store banners
+    if (data.store && Array.isArray(data.store.banners)) {
+      const activeStoreBanners = data.store.banners.filter((b) => !b.expiresAt || b.expiresAt > now);
+      if (activeStoreBanners.length !== data.store.banners.length) {
+        data.store.banners = activeStoreBanners;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      fs.writeFileSync(HUQUQ_MAKTABI_FILE, JSON.stringify(data, null, 2), 'utf8');
+    }
+    return data;
+  } catch (e) {
+    console.error('Error reading huquq maktabi data:', e);
+    return { banners: [], topics: [], store: { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] } };
+  }
+}
+
+function saveHuquqMaktabi(data) {
+  try {
+    fs.writeFileSync(HUQUQ_MAKTABI_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Error saving huquq maktabi data:', e);
+  }
+}
+
+// 12. Get All Huquq Maktabi Data
+app.get('/api/huquq-maktabi', (req, res) => {
+  try {
+    const data = readHuquqMaktabi();
+    return res.json({ success: true, data });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 13. Add Advertising Banner (Main or Store)
+app.post('/api/huquq-maktabi/banners', (req, res) => {
+  try {
+    const { target = 'main', title, subtitle, imageUrl, durationKey = '1_month' } = req.body;
+    if (!imageUrl) {
+      return res.status(400).json({ success: false, message: 'Swiper rasmi talab qilinadi' });
+    }
+
+    const data = readHuquqMaktabi();
+    const durationMs = DURATION_MS_MAP[durationKey] ?? DURATION_MS_MAP['1_month'];
+    const now = Date.now();
+    const expiresAt = durationKey === 'forever' || durationMs === null ? null : now + durationMs;
+
+    const newBanner = {
+      id: `b_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      title: title || 'Yangi reklama',
+      subtitle: subtitle || 'Maxsus imtiyoz va e’lonlar',
+      imageUrl,
+      durationKey,
+      durationLabel: DURATION_LABEL_MAP[durationKey] || '1 oylik',
+      createdAt: now,
+      expiresAt,
+      isActive: true,
+    };
+
+    if (target === 'store') {
+      if (!data.store) data.store = { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] };
+      if (!Array.isArray(data.store.banners)) data.store.banners = [];
+      data.store.banners.unshift(newBanner);
+    } else {
+      if (!Array.isArray(data.banners)) data.banners = [];
+      data.banners.unshift(newBanner);
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'banner:added', target, banner: newBanner, data });
+
+    return res.status(201).json({ success: true, banner: newBanner, message: 'Reklama muvaffaqiyatli qo‘shildi' });
+  } catch (err) {
+    console.error('Error adding banner:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 14. Delete Advertising Banner
+app.delete('/api/huquq-maktabi/banners/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { target = 'main' } = req.query;
+    const data = readHuquqMaktabi();
+
+    if (target === 'store') {
+      if (data.store && Array.isArray(data.store.banners)) {
+        data.store.banners = data.store.banners.filter((b) => b.id !== id);
+      }
+    } else {
+      if (Array.isArray(data.banners)) {
+        data.banners = data.banners.filter((b) => b.id !== id);
+      }
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'banner:deleted', target, id, data });
+
+    return res.json({ success: true, message: 'Reklama muvaffaqiyatli o‘chirildi' });
+  } catch (err) {
+    console.error('Error deleting banner:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 15. Update Topic (Title, Order, Icon, Subtitle, LessonsCount, etc.)
+app.put('/api/huquq-maktabi/topics/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, order, iconName, subtitle, lessonsCount, level, color } = req.body;
+    const data = readHuquqMaktabi();
+
+    const idx = (data.topics || []).findIndex((t) => t.id === id);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Mavzu topilmadi' });
+    }
+
+    const current = data.topics[idx];
+    const updated = {
+      ...current,
+      title: title !== undefined ? title : current.title,
+      order: order !== undefined ? Number(order) : current.order,
+      iconName: iconName !== undefined ? iconName : current.iconName,
+      subtitle: subtitle !== undefined ? subtitle : current.subtitle,
+      lessonsCount: lessonsCount !== undefined ? Number(lessonsCount) : current.lessonsCount,
+      level: level !== undefined ? level : current.level,
+      color: color !== undefined ? color : current.color,
+    };
+
+    data.topics[idx] = updated;
+    // Keep topics sorted by order
+    data.topics.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'topic:updated', topic: updated, data });
+
+    return res.json({ success: true, topic: updated, message: 'Mavzu muvaffaqiyatli yangilandi' });
+  } catch (err) {
+    console.error('Error updating topic:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 16. Update / Add Store Item
+app.put('/api/huquq-maktabi/store/items/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, title, subcategory, priceCoins, iconName, desc } = req.body;
+    const data = readHuquqMaktabi();
+    if (!data.store) data.store = { banners: [], talimItems: [], maxsusItems: [], hamkorlarItems: [] };
+
+    const catKey = category === 'talim' ? 'talimItems' : category === 'maxsus' ? 'maxsusItems' : 'hamkorlarItems';
+    if (!Array.isArray(data.store[catKey])) data.store[catKey] = [];
+
+    const idx = data.store[catKey].findIndex((item) => item.id === id);
+    if (idx !== -1) {
+      const cur = data.store[catKey][idx];
+      data.store[catKey][idx] = {
+        ...cur,
+        title: title !== undefined ? title : cur.title,
+        subcategory: subcategory !== undefined ? subcategory : cur.subcategory,
+        priceCoins: priceCoins !== undefined ? Number(priceCoins) : cur.priceCoins,
+        iconName: iconName !== undefined ? iconName : cur.iconName,
+        desc: desc !== undefined ? desc : cur.desc,
+      };
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'store:updated', data });
+
+    return res.json({ success: true, message: 'Do‘kon ma’lumoti muvaffaqiyatli yangilandi' });
+  } catch (err) {
+    console.error('Error updating store item:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
 // Start Server
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Yordam Backend Server (with WebSocket Real-time) running on http://0.0.0.0:${PORT}`);

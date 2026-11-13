@@ -96,6 +96,25 @@ export const legalServicesApi = {
   },
 
   /**
+   * Fetch Huquq Maktabi banners, topics and store from backend
+   */
+  async getHuquqMaktabi(): Promise<any> {
+    try {
+      const res = await apiFetch('/api/huquq-maktabi', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data && data.success && data.data) {
+        return data.data;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
    * Record when a user taps "Xizmatdan foydalanish" in mobile app
    */
   async recordUsage(serviceId: string, user: UserProfile | null): Promise<void> {

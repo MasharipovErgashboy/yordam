@@ -144,22 +144,6 @@ export default function DocumentsScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>‹</Text>
-        </TouchableOpacity>
-        <View style={styles.headerMid}>
-          <View style={styles.logoBox}>
-            <Text>💼</Text>
-          </View>
-          <View>
-            <Text style={styles.appName}>Hujjatlarim</Text>
-            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-          </View>
-        </View>
-      </View>
-
       {/* ── TITLE ── */}
       <View style={styles.titleRow}>
         <Text style={styles.pageTitle}>Hujjatlarim</Text>
@@ -320,17 +304,8 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
 
-  // Header
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6 },
-  backBtn: { marginRight: 8 },
-  backArrow: { fontSize: 28, color: C.textDark, fontWeight: '300' },
-  headerMid: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 8 },
-  logoBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
-  appName: { fontSize: 13, fontWeight: '700', color: C.textDark },
-  appSub: { fontSize: 11, color: C.textGrey },
-
   // Title
-  titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, gap: 10 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginTop: 14, marginBottom: 12, gap: 10 },
   pageTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
   countBadge: { backgroundColor: C.blueLight, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
   countText: { fontSize: 13, color: C.primary, fontWeight: '700' },

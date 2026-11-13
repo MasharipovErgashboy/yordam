@@ -287,24 +287,13 @@ export default function RemindersScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>‹</Text>
-        </TouchableOpacity>
-        <View style={styles.logoBox}><Text>💼</Text></View>
-        <View>
-          <Text style={styles.appName}>Eslatmalar</Text>
-          <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-        </View>
-        <View style={{ flex: 1 }} />
+      {/* ── TITLE ── */}
+      <View style={styles.titleRow}>
+        <Text style={styles.pageTitle}>Eslatmalar va Muddatlar</Text>
         <TouchableOpacity style={styles.newBtn} onPress={() => Alert.alert('Yangi eslatma', "Yangi eslatma qo'shish oynasi")}>
           <Text style={styles.newBtnText}>+ Yangi eslatma</Text>
         </TouchableOpacity>
       </View>
-
-      {/* ── TITLE ── */}
-      <Text style={styles.pageTitle}>Eslatmalar va Muddatlar</Text>
 
       {/* ── TABS ── */}
       <View style={styles.tabRow}>
@@ -450,24 +439,23 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   scroll: { paddingHorizontal: 14, paddingTop: 8 },
 
-  // Header
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6, gap: 8 },
-  backBtn: { paddingRight: 4 },
-  backArrow: { fontSize: 28, color: C.textDark, fontWeight: '300' },
-  logoBox: { width: 30, height: 30, borderRadius: 8, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
-  appName: { fontSize: 13, fontWeight: '700', color: C.textDark },
-  appSub: { fontSize: 11, color: C.textGrey },
-  newBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
-  newBtnText: { fontSize: 12, color: C.white, fontWeight: '700' },
-
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    marginTop: 14,
+    marginBottom: 14,
+  },
   pageTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: C.textDark,
-    paddingHorizontal: 14,
-    marginTop: 22,
-    marginBottom: 16,
+    flex: 1,
+    marginRight: 8,
   },
+  newBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
+  newBtnText: { fontSize: 12, color: C.white, fontWeight: '700' },
 
   // Tabs
   tabRow: { flexDirection: 'row', marginHorizontal: 14, backgroundColor: C.white, borderRadius: 12, padding: 4, marginBottom: 14, elevation: 1 },

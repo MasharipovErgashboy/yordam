@@ -60,21 +60,6 @@ export default function ProfileScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>‹</Text>
-        </TouchableOpacity>
-        <View style={styles.headerTitleCol}>
-          <View style={styles.headerTitleRow}>
-            <View style={styles.logoBox}><Text style={{ fontSize: 14 }}>💼</Text></View>
-            <Text style={styles.appName}>Profil va xavfsizlik</Text>
-            <Text style={styles.checkBadge}>✓</Text>
-          </View>
-          <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-        </View>
-      </View>
-
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── USER CARD ── */}
@@ -250,19 +235,7 @@ export default function ProfileScreen() {
 // ─── STYLES ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: 16, paddingTop: 6 },
-
-  // Header
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 10 },
-  backBtn: { padding: 4 },
-  backArrow: { fontSize: 26, color: C.textDark, fontWeight: '300' },
-  headerTitleCol: { justifyContent: 'center' },
-  headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  logoBox: { width: 22, height: 22, borderRadius: 6, backgroundColor: C.blueBadge, alignItems: 'center', justifyContent: 'center' },
-  appName: { fontSize: 14, fontWeight: '700', color: C.textDark },
-  checkBadge: { fontSize: 12, color: C.primary, fontWeight: '800' },
-  appSub: { fontSize: 11, color: C.textGrey, marginTop: 1 },
-  avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
+  scroll: { paddingHorizontal: 16, paddingTop: 14 },
 
   // User card
   userCard: { backgroundColor: C.white, borderRadius: 18, padding: 14, marginBottom: 14, elevation: 1 },

@@ -18,6 +18,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'yordam_super_secure_jwt_secret_202
 const DATA_DIR = path.join(__dirname, '../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SERVICES_FILE = path.join(DATA_DIR, 'services.json');
+const HUQUQ_MAKTABI_FILE = path.join(DATA_DIR, 'huquq_maktabi.json');
 
 // Ensure data folder and files exist
 if (!fs.existsSync(DATA_DIR)) {
@@ -65,9 +66,10 @@ wss.on('connection', (ws) => {
   try {
     const services = readServices();
     const users = readUsers().map(({ password: _, ...u }) => u);
+    const huquqMaktabi = readHuquqMaktabi();
     ws.send(JSON.stringify({
       event: 'initial:sync',
-      data: { services, users, usersCount: users.length },
+      data: { services, users, usersCount: users.length, huquqMaktabi },
       timestamp: Date.now(),
     }));
   } catch (err) {
@@ -655,8 +657,6 @@ app.post('/api/services/:id/use', (req, res) => {
 // ============================================================================
 // HUQUQ MAKTABI (ADMIN & MOBILE) ENDPOINTS
 // ============================================================================
-
-const HUQUQ_MAKTABI_FILE = path.join(__dirname, '../data/huquq_maktabi.json');
 
 const DURATION_MS_MAP = {
   '1_day': 1 * 24 * 60 * 60 * 1000,

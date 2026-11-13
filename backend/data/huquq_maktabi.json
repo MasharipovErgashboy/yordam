@@ -16,7 +16,7 @@
     {
       "id": "konstitutsiya",
       "order": 1,
-      "title": "Konstitutsiyaviy huquq",
+      "title": "Konstitutsiyaviy huquqi",
       "iconName": "scale-outline",
       "subtitle": "Davlat tuzilishi, asosiy qonun va inson huquqlari kafolatlari",
       "lessonsCount": 12,
@@ -28,9 +28,9 @@
       "order": 2,
       "title": "Fuqarolik huquqi",
       "iconName": "people",
-      "subtitle": "Mulk huquqi, oldi-sotdi, shartnomalar va majburiyatlar",
+      "subtitle": "Mulk huquqi, oldi-sotdi, shartnomalar va majburiyatlar tartibi",
       "lessonsCount": 18,
-      "level": "O'rta",
+      "level": "O‘rta",
       "color": "#00A3FF"
     },
     {

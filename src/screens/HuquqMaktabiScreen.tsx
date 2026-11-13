@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { legalServicesApi } from '../services/legalServicesApi';
 
 const { width } = Dimensions.get('window');
 const SLIDE_WIDTH = width - 32;
@@ -1833,12 +1834,60 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
   },
 ];
 
+const mapBackendTopicsToCategories = (backendTopics: any[]): LegalCategory[] => {
+  if (!Array.isArray(backendTopics) || backendTopics.length === 0) {
+    return LEGAL_CATEGORIES;
+  }
+
+  // Sort strictly by order
+  const sorted = [...backendTopics].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+  return sorted.map((bt) => {
+    const fallback = LEGAL_CATEGORIES.find((c) => c.id === bt.id);
+
+    let formattedTitle = bt.title || fallback?.title || '';
+    if (!formattedTitle.includes('\n')) {
+      const parts = formattedTitle.split(' ');
+      if (parts.length === 2) {
+        formattedTitle = `${parts[0]}\n${parts[1]}`;
+      }
+    }
+
+    const levelStr = (bt.level || '').toLowerCase();
+    const mappedLevel: 'boshlangich' | 'orta' | 'ilgor' =
+      levelStr.includes('bosh') ? 'boshlangich' : levelStr.includes('orta') ? 'orta' : 'ilgor';
+
+    const ic = (bt.iconName || fallback?.iconName || 'book-outline').toLowerCase();
+    let iconFamily: 'Ionicons' | 'MaterialCommunityIcons' | 'FontAwesome5' = 'Ionicons';
+    if (ic === 'gavel' || ic === 'coins' || ic === 'hard-hat') {
+      iconFamily = 'FontAwesome5';
+    }
+
+    return {
+      id: bt.id,
+      title: formattedTitle,
+      subtitle: bt.subtitle || fallback?.subtitle || '',
+      iconName: bt.iconName || fallback?.iconName || 'book-outline',
+      iconFamily,
+      iconColor: bt.color || fallback?.iconColor || '#0284C7',
+      lessonsCount: Number(bt.lessonsCount) || fallback?.lessonsCount || 10,
+      coursesCount: fallback?.coursesCount || 3,
+      progress: fallback?.progress ?? 50,
+      progressColor: fallback?.progressColor,
+      level: mappedLevel,
+    };
+  });
+};
+
 export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<SchoolTab>('home');
   const [dailyQuizAnswered, setDailyQuizAnswered] = useState(false);
   const [quizModalVisible, setQuizModalVisible] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+
+  // Dynamic real-time legal topics synchronized with Admin Panel & Backend
+  const [legalCategories, setLegalCategories] = useState<LegalCategory[]>(LEGAL_CATEGORIES);
 
   // Topics tab search & level filter state
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
@@ -1847,6 +1896,25 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   // Topic Detail Screen state
   const [selectedTopicDetail, setSelectedTopicDetail] = useState<LegalCategory | null>(null);
   const [detailSubTab, setDetailSubTab] = useState<'courses' | 'lessons' | 'tests' | 'stats'>('courses');
+
+  // Real-time listener for Huquq Maktabi topics, banners and store
+  useEffect(() => {
+    const unsubscribe = legalServicesApi.subscribeToHuquqMaktabi((data) => {
+      if (data && Array.isArray(data.topics) && data.topics.length > 0) {
+        const mapped = mapBackendTopicsToCategories(data.topics);
+        setLegalCategories(mapped);
+        setSelectedTopicDetail((prev) => {
+          if (!prev) return null;
+          const updated = mapped.find((c) => c.id === prev.id);
+          return updated ? { ...prev, ...updated } : prev;
+        });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Course Detail Screen state (1:1 design matching user upload)
   const [selectedCourseDetail, setSelectedCourseDetail] = useState<TopicCourseItem | null>(null);
@@ -2369,7 +2437,14 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   };
 
   const renderCategoryIcon = (cat: LegalCategory) => {
-    if (cat.id === 'oila') {
+    const ic = (cat.iconName || '').toLowerCase();
+    if (cat.iconFamily === 'FontAwesome5' || ic === 'gavel' || ic === 'coins' || ic === 'hard-hat') {
+      return <FontAwesome5 name={cat.iconName as any} size={22} color={cat.iconColor || '#F59E0B'} />;
+    }
+    if (cat.iconFamily === 'MaterialCommunityIcons') {
+      return <MaterialCommunityIcons name={cat.iconName as any} size={24} color={cat.iconColor || '#0284C7'} />;
+    }
+    if (cat.id === 'oila' && (cat.iconName === 'people' || !cat.iconName)) {
       return (
         <View style={{ position: 'relative', width: 30, height: 28, justifyContent: 'center', alignItems: 'center' }}>
           <Ionicons name="people" size={25} color="#0284C7" />
@@ -2377,19 +2452,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
         </View>
       );
     }
-    if (cat.id === 'jinoyat') {
-      return <FontAwesome5 name="gavel" size={23} color="#B45309" />;
-    }
-    if (cat.id === 'raqamli') {
-      return <Ionicons name="laptop" size={25} color="#0284C7" />;
-    }
-    if (cat.iconFamily === 'FontAwesome5') {
-      return <FontAwesome5 name={cat.iconName as any} size={22} color={cat.iconColor} />;
-    }
-    if (cat.iconFamily === 'MaterialCommunityIcons') {
-      return <MaterialCommunityIcons name={cat.iconName as any} size={24} color={cat.iconColor} />;
-    }
-    return <Ionicons name={cat.iconName as any} size={25} color={cat.iconColor} />;
+    return <Ionicons name={(cat.iconName || 'book-outline') as any} size={25} color={cat.iconColor || '#0284C7'} />;
   };
 
   return (
@@ -5746,7 +5809,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.topicsGrid}>
-              {LEGAL_CATEGORIES.filter((cat) => {
+              {legalCategories.filter((cat) => {
                 const matchesLevel =
                   selectedTopicLevel === 'all' || cat.level === selectedTopicLevel;
                 const matchesSearch =
@@ -8014,7 +8077,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 style={{ marginBottom: 16 }}
                 onPress={() => {
                   const oilaCat =
-                    LEGAL_CATEGORIES.find((c) => c.id === 'oila') || LEGAL_CATEGORIES[2];
+                    legalCategories.find((c) => c.id === 'oila') || legalCategories[2] || LEGAL_CATEGORIES[2];
                   setSelectedTopicDetail(oilaCat);
                 }}
               >
@@ -8124,7 +8187,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
 
               {/* 4 Featured Categories in Clean 2x2 Grid */}
               <View style={styles.featuredCategoriesGrid}>
-                {LEGAL_CATEGORIES.slice(0, 4).map((cat) => (
+                {legalCategories.slice(0, 4).map((cat) => (
                   <TouchableOpacity
                     key={cat.id}
                     style={styles.featuredCategoryCard}

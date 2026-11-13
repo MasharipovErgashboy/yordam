@@ -205,5 +205,85 @@ export const legalServicesApi = {
       } catch {}
     };
   },
+
+  /**
+   * Real-time subscription to Huquq Maktabi data (Topics, Banners, Store)
+   * Ensures instant synchronization when Admin updates topics or adds banners!
+   */
+  subscribeToHuquqMaktabi(
+    onUpdate: (data: any) => void
+  ): () => void {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: any = null;
+    let isCancelled = false;
+
+    const connect = () => {
+      if (isCancelled) return;
+      try {
+        const wsUrl = WS_BASE_URL || 'ws://localhost:5000';
+        ws = new WebSocket(wsUrl);
+
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (!msg || !msg.event) return;
+
+            if (msg.event === 'initial:sync' && msg.data?.huquqMaktabi) {
+              onUpdate(msg.data.huquqMaktabi);
+            } else if (msg.event === 'huquq-maktabi:updated') {
+              if (msg.data?.data) {
+                onUpdate(msg.data.data);
+              } else {
+                legalServicesApi.getHuquqMaktabi().then((res) => {
+                  if (res && !isCancelled) onUpdate(res);
+                });
+              }
+            }
+          } catch {}
+        };
+
+        ws.onclose = () => {
+          if (!isCancelled) {
+            reconnectTimeout = setTimeout(connect, 2500);
+          }
+        };
+
+        ws.onerror = () => {
+          ws?.close();
+        };
+      } catch {
+        if (!isCancelled) {
+          reconnectTimeout = setTimeout(connect, 2500);
+        }
+      }
+    };
+
+    connect();
+
+    // Initial fetch immediately
+    legalServicesApi.getHuquqMaktabi().then((res) => {
+      if (res && !isCancelled) onUpdate(res);
+    });
+
+    // Resilient fallback polling every 2.5s for instant updates
+    const pollInterval = setInterval(async () => {
+      if (isCancelled) return;
+      try {
+        const data = await legalServicesApi.getHuquqMaktabi();
+        if (data && !isCancelled) {
+          onUpdate(data);
+        }
+      } catch {}
+    }, 2500);
+
+    return () => {
+      isCancelled = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      clearInterval(pollInterval);
+      try {
+        ws?.close();
+      } catch {}
+    };
+  },
 };
 

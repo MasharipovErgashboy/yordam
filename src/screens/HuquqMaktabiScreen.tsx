@@ -1886,8 +1886,9 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   const [quizModalVisible, setQuizModalVisible] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  // Dynamic real-time legal topics synchronized with Admin Panel & Backend
+  // Dynamic real-time legal topics and banners synchronized with Admin Panel & Backend
   const [legalCategories, setLegalCategories] = useState<LegalCategory[]>(LEGAL_CATEGORIES);
+  const [homeBanners, setHomeBanners] = useState<any[]>([]);
 
   // Topics tab search & level filter state
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
@@ -1900,14 +1901,21 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   // Real-time listener for Huquq Maktabi topics, banners and store
   useEffect(() => {
     const unsubscribe = legalServicesApi.subscribeToHuquqMaktabi((data) => {
-      if (data && Array.isArray(data.topics) && data.topics.length > 0) {
-        const mapped = mapBackendTopicsToCategories(data.topics);
-        setLegalCategories(mapped);
-        setSelectedTopicDetail((prev) => {
-          if (!prev) return null;
-          const updated = mapped.find((c) => c.id === prev.id);
-          return updated ? { ...prev, ...updated } : prev;
-        });
+      if (data) {
+        if (Array.isArray(data.topics) && data.topics.length > 0) {
+          const mapped = mapBackendTopicsToCategories(data.topics);
+          setLegalCategories(mapped);
+          setSelectedTopicDetail((prev) => {
+            if (!prev) return null;
+            const updated = mapped.find((c) => c.id === prev.id);
+            return updated ? { ...prev, ...updated } : prev;
+          });
+        }
+        if (Array.isArray(data.banners)) {
+          const now = Date.now();
+          const active = data.banners.filter((b: any) => !b.expiresAt || b.expiresAt > now);
+          setHomeBanners(active);
+        }
       }
     });
 
@@ -2391,27 +2399,31 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Swiper / Carousel state & controls
+  // Swiper / Carousel state & controls (Hero Banners)
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const swiperRef = useRef<any>(null);
 
+  const activeSlides = (homeBanners && homeBanners.length > 0) ? homeBanners : HERO_SLIDES;
+
   useEffect(() => {
     if (activeTab !== 'home') return;
+    if (activeSlides.length <= 1) return;
+
     const interval = setInterval(() => {
       setCurrentSlideIndex((prev) => {
-        const next = (prev + 1) % HERO_SLIDES.length;
+        const next = (prev + 1) % activeSlides.length;
         swiperRef.current?.scrollTo({ x: next * SLIDE_WIDTH, animated: true });
         return next;
       });
     }, 4500);
 
     return () => clearInterval(interval);
-  }, [activeTab]);
+  }, [activeTab, activeSlides.length]);
 
   const handleScrollEnd = (e: any) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const newIdx = Math.round(offsetX / SLIDE_WIDTH);
-    if (newIdx >= 0 && newIdx < HERO_SLIDES.length) {
+    if (newIdx >= 0 && newIdx < activeSlides.length) {
       setCurrentSlideIndex(newIdx);
     }
   };
@@ -7944,71 +7956,103 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   scrollEventThrottle={16}
                   style={styles.carouselScrollView}
                 >
-                  {HERO_SLIDES.map((slide) => (
-                    <TouchableOpacity
-                      key={slide.id}
-                      style={[styles.carouselSlideCard, { width: SLIDE_WIDTH }]}
-                      activeOpacity={0.9}
-                      onPress={() => Alert.alert(slide.actionAlertTitle, slide.actionAlertMessage)}
-                    >
-                      <View style={styles.heroTextCol}>
-                        <View style={styles.slideBadgeRow}>
-                          <View style={[styles.slideBadge, { backgroundColor: slide.badgeBg }]}>
-                            <Text style={[styles.slideBadgeText, { color: slide.badgeTextColor }]}>
-                              {slide.badge}
-                            </Text>
-                          </View>
-                        </View>
-                        <Text style={styles.slideCardTitle} numberOfLines={2}>
-                          {slide.title}
-                        </Text>
-                        <Text style={styles.slideCardSubtitle} numberOfLines={2}>
-                          {slide.subtitle}
-                        </Text>
+                  {activeSlides.map((slide, sIdx) => {
+                    const isCustomBanner = Boolean(slide.imageUrl);
+                    if (isCustomBanner) {
+                      return (
+                        <TouchableOpacity
+                          key={slide.id || sIdx}
+                          style={[
+                            styles.carouselSlideCard,
+                            {
+                              width: SLIDE_WIDTH,
+                              height: 155,
+                              paddingHorizontal: 0,
+                              paddingVertical: 0,
+                              overflow: 'hidden',
+                              borderWidth: 0,
+                              backgroundColor: '#0F172A',
+                            },
+                          ]}
+                          activeOpacity={0.92}
+                        >
+                          <Image
+                            source={{ uri: slide.imageUrl }}
+                            style={{ width: '100%', height: '100%', borderRadius: 20 }}
+                            resizeMode="cover"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
 
-                        {slide.ctaText && (
-                          <View style={styles.slideActionRow}>
-                            <Text style={styles.slideActionText}>{slide.ctaText}</Text>
-                            <Ionicons name="arrow-forward" size={13} color="#0284C7" />
+                    return (
+                      <TouchableOpacity
+                        key={slide.id}
+                        style={[styles.carouselSlideCard, { width: SLIDE_WIDTH }]}
+                        activeOpacity={0.9}
+                        onPress={() => Alert.alert(slide.actionAlertTitle, slide.actionAlertMessage)}
+                      >
+                        <View style={styles.heroTextCol}>
+                          <View style={styles.slideBadgeRow}>
+                            <View style={[styles.slideBadge, { backgroundColor: slide.badgeBg }]}>
+                              <Text style={[styles.slideBadgeText, { color: slide.badgeTextColor }]}>
+                                {slide.badge}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={styles.slideCardTitle} numberOfLines={2}>
+                            {slide.title}
+                          </Text>
+                          <Text style={styles.slideCardSubtitle} numberOfLines={2}>
+                            {slide.subtitle}
+                          </Text>
+
+                          {slide.ctaText && (
+                            <View style={styles.slideActionRow}>
+                              <Text style={styles.slideActionText}>{slide.ctaText}</Text>
+                              <Ionicons name="arrow-forward" size={13} color="#0284C7" />
+                            </View>
+                          )}
+                        </View>
+
+                        {slide.image ? (
+                          <View style={slide.image === heroIllustration ? { width: 115, height: 95 } : styles.slideImageBox}>
+                            <Image
+                              source={slide.image}
+                              style={slide.image === heroIllustration ? styles.heroIllustrationImage : styles.slideNewsImage}
+                              resizeMode={slide.image === heroIllustration ? 'contain' : 'cover'}
+                            />
+                          </View>
+                        ) : (
+                          <View style={[styles.slideIconBox, { backgroundColor: slide.badgeBg || '#F0F9FF' }]}>
+                            <Ionicons
+                              name={(slide.iconName as any) || 'bulb'}
+                              size={32}
+                              color={slide.iconColor || '#0284C7'}
+                            />
                           </View>
                         )}
-                      </View>
-
-                      {slide.image ? (
-                        <View style={slide.image === heroIllustration ? { width: 115, height: 95 } : styles.slideImageBox}>
-                          <Image
-                            source={slide.image}
-                            style={slide.image === heroIllustration ? styles.heroIllustrationImage : styles.slideNewsImage}
-                            resizeMode={slide.image === heroIllustration ? 'contain' : 'cover'}
-                          />
-                        </View>
-                      ) : (
-                        <View style={[styles.slideIconBox, { backgroundColor: slide.badgeBg || '#F0F9FF' }]}>
-                          <Ionicons
-                            name={(slide.iconName as any) || 'bulb'}
-                            size={32}
-                            color={slide.iconColor || '#0284C7'}
-                          />
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  ))}
+                      </TouchableOpacity>
+                    );
+                  })}
                 </ScrollView>
 
                 {/* Carousel Pagination Dots */}
-                <View style={styles.carouselPaginationRow}>
-                  {HERO_SLIDES.map((_, dotIdx) => (
-                    <TouchableOpacity
-                      key={dotIdx}
-                      activeOpacity={0.7}
-                      onPress={() => goToSlide(dotIdx)}
-                      style={[
-                        styles.carouselDot,
-                        currentSlideIndex === dotIdx ? styles.carouselDotActive : styles.carouselDotInactive,
-                      ]}
-                    />
-                  ))}
-                </View>
+                {activeSlides.length > 1 && (
+                  <View style={styles.carouselPaginationRow}>
+                    {activeSlides.map((_, dotIdx) => (
+                      <TouchableOpacity
+                        key={dotIdx}
+                        activeOpacity={0.7}
+                        onPress={() => goToSlide(dotIdx)}
+                        style={[
+                          styles.carouselDot,
+                          currentSlideIndex === dotIdx ? styles.carouselDotActive : styles.carouselDotInactive,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                )}
               </View>
 
               {/* ===================== 2. REYTING & STATS BAR (MINIMALIST & SLEEK) ===================== */}

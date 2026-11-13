@@ -102,8 +102,6 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
   // Modal states for Ad Banner
   const [showAddBannerModal, setShowAddBannerModal] = useState(false);
   const [bannerTarget, setBannerTarget] = useState<'main' | 'store'>('main');
-  const [bannerTitle, setBannerTitle] = useState('');
-  const [bannerSubtitle, setBannerSubtitle] = useState('');
   const [bannerImage, setBannerImage] = useState('');
   const [bannerDuration, setBannerDuration] = useState('1_month');
   const [isUploading, setIsUploading] = useState(false);
@@ -167,8 +165,6 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           target: bannerTarget,
-          title: bannerTitle || (bannerTarget === 'store' ? 'Do‘kon reklamasi' : 'Huquq maktabi reklamasi'),
-          subtitle: bannerSubtitle || 'Yangi taklif va imkoniyatlar',
           imageUrl: bannerImage,
           durationKey: bannerDuration,
         }),
@@ -179,8 +175,6 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
         showToast('Swiper reklamasi muvaffaqiyatli qo‘shildi!');
         setShowAddBannerModal(false);
         setBannerImage('');
-        setBannerTitle('');
-        setBannerSubtitle('');
         setBannerDuration('1_month');
         onRefresh();
       } else {
@@ -669,48 +663,47 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                     </button>
                   </div>
 
-                  {/* Banner Info */}
-                  <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#C084FC', letterSpacing: '0.4px', marginBottom: '4px' }}>
+                  {/* Banner Footer Info */}
+                  <div style={{
+                    padding: '14px 18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    background: 'rgba(8, 14, 27, 0.4)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        background: 'rgba(139, 92, 246, 0.2)',
+                        color: '#C084FC',
+                      }}>
                         {banner.durationLabel}
-                      </div>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px 0', lineHeight: '20px' }}>
-                        {banner.title}
-                      </h3>
-                      <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '17px' }}>
-                        {banner.subtitle}
-                      </p>
+                      </span>
+                      <span style={{ fontSize: '11.5px', color: '#64748B' }}>
+                        {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}
+                      </span>
                     </div>
 
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: '16px',
-                      paddingTop: '12px',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                      fontSize: '11.5px',
-                      color: '#64748B',
-                    }}>
-                      <span>Qo‘shilgan: {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}</span>
-                      <button
-                        onClick={() => handleDeleteBanner(banner.id, 'main')}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#EF4444',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <Trash2 size={13} /> O‘chirish
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDeleteBanner(banner.id, 'main')}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#EF4444',
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={13} /> O‘chirish
+                    </button>
                   </div>
                 </div>
               ))
@@ -1133,49 +1126,49 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                       </button>
                     </div>
 
-                    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10B981', marginBottom: '4px' }}>
-                          {banner.durationLabel}
-                        </div>
-                        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px 0' }}>
-                          {banner.title}
-                        </h3>
-                        <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: '17px' }}>
-                          {banner.subtitle}
-                        </p>
-                      </div>
+                  {/* Store Banner Footer */}
+                  <div style={{
+                    padding: '14px 18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    background: 'rgba(8, 14, 27, 0.4)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        color: '#10B981',
+                      }}>
+                        {banner.durationLabel}
+                      </span>
+                      <span style={{ fontSize: '11.5px', color: '#64748B' }}>
+                        {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}
+                      </span>
+                    </div>
 
-                      <div style={{
+                    <button
+                      onClick={() => handleDeleteBanner(banner.id, 'store')}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#EF4444',
+                        fontWeight: 700,
+                        fontSize: '12px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: '16px',
-                        paddingTop: '12px',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                        fontSize: '11.5px',
-                        color: '#64748B',
-                      }}>
-                        <span>Qo‘shilgan: {new Date(banner.createdAt).toLocaleDateString('uz-UZ')}</span>
-                        <button
-                          onClick={() => handleDeleteBanner(banner.id, 'store')}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#EF4444',
-                            fontWeight: 700,
-                            fontSize: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <Trash2 size={13} /> O‘chirish
-                        </button>
-                      </div>
-                    </div>
+                        gap: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={13} /> O‘chirish
+                    </button>
                   </div>
+                </div>
                 ))
               )}
             </div>
@@ -1603,51 +1596,6 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                     padding: '10px 14px',
                     color: '#FFFFFF',
                     fontSize: '12.5px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              {/* Title & Subtitle */}
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
-                  Reklama sarlavhasi:
-                </label>
-                <input
-                  type="text"
-                  value={bannerTitle}
-                  onChange={(e) => setBannerTitle(e.target.value)}
-                  placeholder="Masalan: Huquqiy savodxonlik oyligi"
-                  style={{
-                    width: '100%',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    padding: '11px 14px',
-                    color: '#FFFFFF',
-                    fontSize: '13px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
-                  Qisqacha izoh / tagso‘z:
-                </label>
-                <input
-                  type="text"
-                  value={bannerSubtitle}
-                  onChange={(e) => setBannerSubtitle(e.target.value)}
-                  placeholder="Masalan: 50% ko‘proq tangalar yutib oling"
-                  style={{
-                    width: '100%',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    padding: '11px 14px',
-                    color: '#FFFFFF',
-                    fontSize: '13px',
                     outline: 'none',
                   }}
                 />

@@ -383,3 +383,4 @@ export const LEGAL_ARTICLES: LegalArticle[] = [
       'Masofaviy xaridlarda siz mahsulotni hatto hech qanday nuqsonsiz ham 14 kun ichida qaytarish huquqiga egasiz.',
   },
 ];
+

@@ -30,6 +30,26 @@ export default function App() {
     loadSession();
   }, []);
 
+  const handleSplashFinish = async () => {
+    try {
+      const session = await authService.getSession();
+      if (session.user && session.token) {
+        setUser(session.user);
+        setIsAuthenticated(true);
+        setCurrentScreen('main');
+        return;
+      }
+    } catch (err) {
+      console.warn('Error checking session on splash finish:', err);
+    }
+
+    if (isAuthenticated) {
+      setCurrentScreen('main');
+    } else {
+      setCurrentScreen('onboarding');
+    }
+  };
+
   const handleAuthSuccess = (authenticatedUser: UserProfile) => {
     setUser(authenticatedUser);
     setIsAuthenticated(true);
@@ -47,7 +67,7 @@ export default function App() {
       <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
         {currentScreen === 'splash' && (
           <SplashScreen
-            onFinish={() => setCurrentScreen('onboarding')}
+            onFinish={handleSplashFinish}
           />
         )}
 

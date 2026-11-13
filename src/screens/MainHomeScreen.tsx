@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -44,6 +44,10 @@ interface MainHomeScreenProps {
 const logoImage = require('../../assets/images/logo.jpg');
 const robotImage = require('../../assets/images/onboarding_2.png');
 const articleGavelImage = require('../../assets/images/article_gavel.jpg');
+const istemolchiHeroImage = require('../../assets/images/huquqlar_scale_book.png');
+const contractAiImage = require('../../assets/images/bolimlar_checklist_3d_clean.png');
+const courtBuildingImage = require('../../assets/images/court_building.png');
+const lawyerHeroImage = require('../../assets/images/lawyer-female-call.jpg');
 
 interface ServiceGridItem {
   id: string;
@@ -373,13 +377,17 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   const [serviceSearch, setServiceSearch] = useState('');
 
   // Authentication check helper
-  const checkAuth = () => {
+  const checkAuth = useCallback(() => {
     if (!isAuthenticated) {
       onRequireAuth?.();
       return false;
     }
     return true;
-  };
+  }, [isAuthenticated, onRequireAuth]);
+
+  // Auto-rotating Swiper state
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const swiperScrollRef = useRef<any>(null);
 
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
@@ -409,6 +417,96 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   // Foydali ma'lumotlar Screen State
   const [isFoydaliMalumotlarOpen, setIsFoydaliMalumotlarOpen] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+
+  // 5 Newest Promotional Swiper Banners (Auto-rotating under Search)
+  const SWIPER_BANNERS = useMemo(() => [
+    {
+      id: 'banner_haqim_ai',
+      badge: 'HAQIM AI',
+      badgeBg: '#F59E0B',
+      title: 'AI huquqiy yordamchi',
+      desc: 'Savolingizni yozing va 24/7 tezkor huquqiy tahlil oling.',
+      ctaText: 'AI bilan suhbat',
+      colors: ['#003A70', '#074886', '#0B599E'] as const,
+      image: robotImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setActiveTab('ai_assistant');
+      },
+    },
+    {
+      id: 'banner_istemolchi',
+      badge: 'ISTE’MOLCHI HIMOYA',
+      badgeBg: '#10B981',
+      title: 'Sifatsiz tovar uchun 100% pulni qaytaring',
+      desc: '14 kun ichida almashtirish va 1159 Raqobat qo‘mitasi arizalari.',
+      ctaText: 'Arizani boshlash',
+      colors: ['#064E3B', '#047857', '#059669'] as const,
+      image: istemolchiHeroImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsIstemolchiOpen(true);
+      },
+    },
+    {
+      id: 'banner_shartnoma_ai',
+      badge: 'SHARTNOMA AI',
+      badgeBg: '#0284C7',
+      title: 'Shartnomalardagi yashirin xavflarni toping',
+      desc: 'PDF yoki foto yuklang — AI barcha tuzoqlarni fosh etadi.',
+      ctaText: 'Hujjatni tekshirish',
+      colors: ['#0C4A6E', '#0284C7', '#0369A1'] as const,
+      image: contractAiImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setShowContractAi(true);
+      },
+    },
+    {
+      id: 'banner_fraud_radar',
+      badge: 'XAVFSIZLIK RADARI',
+      badgeBg: '#DC2626',
+      title: 'Shubhali havola va kartalarni tekshiring',
+      desc: 'Moliyaviy firibgarlik va fishing hujumlaridan himoyalaning.',
+      ctaText: 'Radarni ochish',
+      colors: ['#881337', '#BE123C', '#E11D48'] as const,
+      image: courtBuildingImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsFraudRadarOpen(true);
+      },
+    },
+    {
+      id: 'banner_yurist_online',
+      badge: 'YURIST ONLINE',
+      badgeBg: '#8B5CF6',
+      title: '150+ malakali advokatlar bilan bog‘laning',
+      desc: 'Mehnat, sud, aliment va mulk bo‘yicha jonli konsultatsiya.',
+      ctaText: 'Advokat tanlash',
+      colors: ['#4C1D95', '#6D28D9', '#7C3AED'] as const,
+      image: lawyerHeroImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsYuristOnlineOpen(true);
+      },
+    },
+  ], [checkAuth]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % SWIPER_BANNERS.length;
+        const bannerWidth = width - 40;
+        swiperScrollRef.current?.scrollTo({
+          x: nextIndex * bannerWidth,
+          animated: true,
+        });
+        return nextIndex;
+      });
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [SWIPER_BANNERS.length]);
 
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (!checkAuth()) return;
@@ -845,50 +943,91 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
                 </TouchableOpacity>
               )}
 
-              {/* HAQIM AI Hero Banner Card */}
-              <TouchableOpacity
-                style={styles.heroBannerWrap}
-                activeOpacity={0.92}
-                onPress={() => {
-                  if (!checkAuth()) return;
-                  setActiveTab('ai_assistant');
-                }}
-              >
-                <LinearGradient
-                  colors={['#003A70', '#074886', '#0B599E']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.heroBanner}
+              {/* 5-Banner Auto-rotating Swiper (Reklama va Yangiliklar) */}
+              <View style={styles.swiperContainer}>
+                <ScrollView
+                  ref={swiperScrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={(e) => {
+                    const bannerWidth = width - 40;
+                    const index = Math.round(e.nativeEvent.contentOffset.x / bannerWidth);
+                    if (index >= 0 && index < SWIPER_BANNERS.length) {
+                      setCurrentSlideIndex(index);
+                    }
+                  }}
+                  style={styles.swiperScrollView}
+                  contentContainerStyle={styles.swiperContentContainer}
                 >
-                  {/* Left Texts & Button */}
-                  <View style={styles.heroLeft}>
-                    {/* HAQIM Badge */}
-                    <View style={styles.haqimBadge}>
-                      <Text style={styles.haqimBadgeText}>HAQIM</Text>
-                    </View>
+                  {SWIPER_BANNERS.map((banner) => (
+                    <TouchableOpacity
+                      key={banner.id}
+                      style={[styles.swiperSlide, { width: width - 40 }]}
+                      activeOpacity={0.92}
+                      onPress={banner.onPress}
+                    >
+                      <LinearGradient
+                        colors={banner.colors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.heroBanner}
+                      >
+                        {/* Left Texts & Button */}
+                        <View style={styles.heroLeft}>
+                          <View style={[styles.haqimBadge, { backgroundColor: banner.badgeBg }]}>
+                            <Text style={styles.haqimBadgeText}>{banner.badge}</Text>
+                          </View>
 
-                    <Text style={styles.heroTitle}>AI huquqiy yordamçi</Text>
-                    <Text style={styles.heroDesc}>
-                      Savolingizni yozing va tezkor huquqiy javob oling.
-                    </Text>
+                          <Text style={styles.heroTitle} numberOfLines={2}>
+                            {banner.title}
+                          </Text>
+                          <Text style={styles.heroDesc} numberOfLines={2}>
+                            {banner.desc}
+                          </Text>
 
-                    {/* Action CTA Button */}
-                    <View style={styles.heroCtaBtn}>
-                      <Text style={styles.heroCtaText}>AI bilan suhbat</Text>
-                      <Ionicons name="chevron-forward" size={14} color="#002B49" />
-                    </View>
-                  </View>
+                          {/* Action CTA Button */}
+                          <View style={styles.heroCtaBtn}>
+                            <Text style={styles.heroCtaText}>{banner.ctaText}</Text>
+                            <Ionicons name="chevron-forward" size={13} color="#002B49" />
+                          </View>
+                        </View>
 
-                  {/* Right 3D Robot Image */}
-                  <View style={styles.heroRight}>
-                    <Image
-                      source={robotImage}
-                      style={styles.heroRobotImage}
-                      resizeMode="contain"
+                        {/* Right Banner Image */}
+                        <View style={styles.heroRight}>
+                          <Image
+                            source={banner.image}
+                            style={styles.heroRobotImage}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                {/* Swiper Pagination Indicators */}
+                <View style={styles.swiperDotsRow}>
+                  {SWIPER_BANNERS.map((_, dotIdx) => (
+                    <TouchableOpacity
+                      key={dotIdx}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        const bannerWidth = width - 40;
+                        swiperScrollRef.current?.scrollTo({
+                          x: dotIdx * bannerWidth,
+                          animated: true,
+                        });
+                        setCurrentSlideIndex(dotIdx);
+                      }}
+                      style={[
+                        styles.swiperDot,
+                        currentSlideIndex === dotIdx && styles.swiperDotActive,
+                      ]}
                     />
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
 
               {/* Section: Asosiy xizmatlar */}
               <View style={styles.sectionHeaderRow}>
@@ -1572,6 +1711,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 12,
     elevation: 5,
+  },
+  swiperContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  swiperScrollView: {
+    borderRadius: 22,
+  },
+  swiperContentContainer: {
+    alignItems: 'center',
+  },
+  swiperSlide: {
+    borderRadius: 22,
+    overflow: 'hidden',
+    shadowColor: '#003A70',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  swiperDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  swiperDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+  },
+  swiperDotActive: {
+    width: 22,
+    backgroundColor: '#0284C7',
   },
   heroBanner: {
     flexDirection: 'row',

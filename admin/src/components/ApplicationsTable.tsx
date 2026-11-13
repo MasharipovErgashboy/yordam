@@ -112,10 +112,10 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
       }}>
         <div>
           <h2 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 3px 0' }}>
-            So‘nggi arizalar va shartnomalar
+            Sõnggi arizalar va şartnomalar
           </h2>
           <p style={{ fontSize: '12.5px', color: '#94A3B8', margin: 0 }}>
-            Mobil ilovadan kelib tushgan yangi murojaatlar va talabnomalar
+            Mobil ilovadan kelib tuşgan yangi murojaatlar va talabnomalar
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
               { key: 'all', label: 'Barchasi' },
               { key: 'faol', label: 'Faol' },
               { key: 'kutilmoqda', label: 'Kutilmoqda' },
-              { key: 'hal_qilindi', label: 'Hal qilindi' },
+              { key: 'hal_qilindi', label: 'Hal etilgan' },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -294,7 +294,7 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                       }}
                     >
                       <Eye size={13} />
-                      <span>Ko‘rish</span>
+                      <span>Kõrish</span>
                     </button>
                   </td>
                 </tr>
@@ -389,11 +389,11 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                   cursor: 'pointer',
                 }}
               >
-                Yopish
+                Yopiş
               </button>
               <button
                 onClick={() => {
-                  alert('Status muvaffaqiyatli o‘zgartirildi!');
+                  alert('Status muvaffaqiyatli õzgartirildi!');
                   setSelectedApp(null);
                 }}
                 style={{
@@ -412,7 +412,7 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                   gap: '6px',
                 }}
               >
-                <span>Ijroga qabul qilish</span>
+                <span>Ijroga qabul qiliş</span>
                 <ArrowUpRight size={15} />
               </button>
             </div>

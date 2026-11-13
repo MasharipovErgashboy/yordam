@@ -299,7 +299,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }}>
         <button
           onClick={onLogout}
-          title="Chiqish"
+          title="Çiqish"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -329,7 +329,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           <LogOut size={18} style={{ flexShrink: 0 }} />
-          {!isCollapsed && <span>Chiqish</span>}
+          {!isCollapsed && <span>Çiqish</span>}
         </button>
       </div>
     </aside>

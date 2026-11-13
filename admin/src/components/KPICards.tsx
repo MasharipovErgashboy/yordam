@@ -6,8 +6,8 @@ export const KPICards: React.FC = () => {
   const cards: MetricCardData[] = [
     {
       id: 'm1',
-      title: 'Vencem na semana',
-      value: '9',
+      title: 'Haftalik yangi arizalar',
+      value: '128 ta',
       change: '+29%',
       isPositive: true,
       icon: 'calendar',
@@ -16,9 +16,9 @@ export const KPICards: React.FC = () => {
     },
     {
       id: 'm2',
-      title: 'Prêmios a renovar',
-      value: 'R$ 14.300',
-      change: '+12%',
+      title: 'Undirilgan kompensatsiya',
+      value: '48 200 000 so‘m',
+      change: '+18%',
       isPositive: true,
       icon: 'currency',
       color: '#A855F7',
@@ -26,8 +26,8 @@ export const KPICards: React.FC = () => {
     },
     {
       id: 'm3',
-      title: 'Apólices ativas',
-      value: '642',
+      title: 'Faol arizalar va nizolar',
+      value: '642 ta',
       change: '+6%',
       isPositive: true,
       icon: 'shield',

@@ -6,18 +6,18 @@ export const ChartsSection: React.FC = () => {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   const barData: BarChartData[] = [
-    { label: 'S1', value: 52 },
-    { label: 'S2', value: 88, active: true },
-    { label: 'S3', value: 34 },
-    { label: 'S4', value: 48 },
-    { label: 'S5', value: 20 },
-    { label: 'S6', value: 4 },
-    { label: 'S7', value: 2 },
-    { label: 'S8', value: 2 },
+    { label: 'Du', value: 52 },
+    { label: 'Se', value: 88, active: true },
+    { label: 'Çor', value: 64 },
+    { label: 'Pay', value: 48 },
+    { label: 'Juma', value: 76 },
+    { label: 'Şan', value: 28 },
+    { label: 'Yak', value: 16 },
+    { label: 'Õrt', value: 55 },
   ];
 
   // Donut chart calculations
-  const percentage = 75;
+  const percentage = 78;
   const radius = 64;
   const strokeWidth = 14;
   const circumference = 2 * Math.PI * radius;
@@ -56,7 +56,7 @@ export const ChartsSection: React.FC = () => {
             margin: 0,
             letterSpacing: '-0.2px',
           }}>
-            Vencimentos por semana
+            Haftalik arizalar oqimi
           </h2>
 
           <div style={{
@@ -72,7 +72,7 @@ export const ChartsSection: React.FC = () => {
             fontWeight: 700,
           }}>
             <TrendingUp size={13} />
-            <span>9 nesta semana</span>
+            <span>128 ta bu haftada</span>
           </div>
         </div>
 
@@ -202,7 +202,7 @@ export const ChartsSection: React.FC = () => {
           margin: 0,
           letterSpacing: '-0.2px',
         }}>
-          Meta renovação
+          Muvaffaqiyat kõrsatkichi
         </h2>
 
         {/* Circular Donut Ring Graphic */}
@@ -269,7 +269,7 @@ export const ChartsSection: React.FC = () => {
               lineHeight: 1,
               letterSpacing: '-1px',
             }}>
-              75%
+              78%
             </span>
             <span style={{
               fontSize: '11.5px',
@@ -277,7 +277,7 @@ export const ChartsSection: React.FC = () => {
               marginTop: '6px',
               fontWeight: 500,
             }}>
-              de 40 apólices
+              642 ta arizadan 501 tasi
             </span>
           </div>
         </div>
@@ -294,11 +294,11 @@ export const ChartsSection: React.FC = () => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00E5FF', boxShadow: '0 0 8px #00E5FF' }} />
-            <span>Yakunlangan: 30</span>
+            <span>Hal etilgan: 501 ta</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.2)' }} />
-            <span>Kutilmoqda: 10</span>
+            <span>Kõrib çiqilmoqda: 141 ta</span>
           </div>
         </div>
       </div>

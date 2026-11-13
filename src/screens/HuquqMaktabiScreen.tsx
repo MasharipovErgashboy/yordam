@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -1856,6 +1856,53 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
   },
 ];
 
+const computeCategoryStats = (
+  cat: LegalCategory,
+  allCourses: TopicCourseItem[],
+  allLessons: CourseLesson[]
+): LegalCategory => {
+  const topicCourses = allCourses.filter(
+    (c) => c.topicId === cat.id || (!c.topicId && cat.id === 'oila')
+  );
+  const topicCourseIds = topicCourses.map((c) => c.id);
+  const topicLessons = allLessons.filter(
+    (l) => l.topicId === cat.id || topicCourseIds.includes(l.courseId || '')
+  );
+
+  const realCoursesCount = topicCourses.length > 0 ? topicCourses.length : (cat.id === 'oila' ? 4 : 0);
+  const realLessonsCount =
+    topicLessons.length > 0
+      ? topicLessons.length
+      : (Number(cat.lessonsCount) || 0);
+
+  let realProgress = 0;
+  if (topicLessons.length > 0) {
+    const completed = topicLessons.filter((l) => l.status === 'completed').length;
+    realProgress = Math.round((completed / topicLessons.length) * 100);
+  } else if (topicCourses.length > 0) {
+    realProgress = Math.round(
+      topicCourses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0) / topicCourses.length
+    );
+  }
+
+  const realProgressColor =
+    realProgress >= 75
+      ? '#10B981'
+      : realProgress >= 25
+        ? '#F59E0B'
+        : realProgress > 0
+          ? '#38BDF8'
+          : '#94A3B8';
+
+  return {
+    ...cat,
+    coursesCount: realCoursesCount,
+    lessonsCount: realLessonsCount,
+    progress: realProgress,
+    progressColor: realProgressColor,
+  };
+};
+
 const mapBackendTopicsToCategories = (backendTopics: any[]): LegalCategory[] => {
   if (!Array.isArray(backendTopics) || backendTopics.length === 0) {
     return LEGAL_CATEGORIES;
@@ -1913,6 +1960,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   const [homeBanners, setHomeBanners] = useState<any[]>([]);
   const [dynamicCourses, setDynamicCourses] = useState<TopicCourseItem[]>(FAMILY_LAW_COURSES);
   const [dynamicLessons, setDynamicLessons] = useState<CourseLesson[]>(COURSE_LESSONS);
+
+  // Memoized real categories with dynamic real-time progress, course counts and lesson counts
+  const activeCategories = useMemo(() => {
+    return legalCategories.map((cat) => computeCategoryStats(cat, dynamicCourses, dynamicLessons));
+  }, [legalCategories, dynamicCourses, dynamicLessons]);
 
   // Topics tab search & level filter state
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
@@ -5247,51 +5299,72 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             </View>
           </View>
 
-          {/* 3. Badges Row: [🎓 4 dars] [⏱ 45 daqiqa] [📊 Boshlang'ich] [⚡ +400 XP] */}
-          <View style={styles.courseBadgesRow}>
-            <View style={styles.courseMetaBadge}>
-              <Ionicons name="school-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
-              <Text style={styles.courseMetaBadgeText}>4 dars</Text>
-            </View>
+          {/* 3. Badges Row: [🎓 X dars] [⏱ Y daqiqa] [📊 Boshlang'ich] [⚡ +400 XP] */}
+          {(() => {
+            const currentCourseLessons = dynamicLessons.filter(
+              (l) => l.courseId === selectedCourseDetail.id || (!l.courseId && selectedCourseDetail.id === 'marriage')
+            );
+            const currentCourseTotal = currentCourseLessons.length > 0 ? currentCourseLessons.length : 1;
+            const currentCourseCompleted = currentCourseLessons.filter((l) => l.status === 'completed').length;
+            const currentCourseProgress = currentCourseLessons.length > 0
+              ? Math.round((currentCourseCompleted / currentCourseTotal) * 100)
+              : (selectedCourseDetail.progress || 0);
 
-            <View style={styles.courseMetaBadge}>
-              <Ionicons name="time-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
-              <Text style={styles.courseMetaBadgeText}>45 daqiqa</Text>
-            </View>
+            return (
+              <>
+                <View style={styles.courseBadgesRow}>
+                  <View style={styles.courseMetaBadge}>
+                    <Ionicons name="school-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
+                    <Text style={styles.courseMetaBadgeText}>
+                      {selectedCourseDetail.lessons || `${currentCourseTotal} dars`}
+                    </Text>
+                  </View>
 
-            <View style={styles.courseMetaBadge}>
-              <Ionicons name="bar-chart-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
-              <Text style={styles.courseMetaBadgeText}>Boşlanğiç</Text>
-            </View>
+                  <View style={styles.courseMetaBadge}>
+                    <Ionicons name="time-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
+                    <Text style={styles.courseMetaBadgeText}>
+                      {selectedCourseDetail.duration || '30 daqiqa'}
+                    </Text>
+                  </View>
 
-            <View style={[styles.courseMetaBadge, styles.courseXpBadge]}>
-              <Ionicons name="flash" size={13} color="#F59E0B" style={{ marginRight: 4 }} />
-              <Text style={styles.courseXpBadgeText}>+400 XP</Text>
-            </View>
-          </View>
+                  <View style={styles.courseMetaBadge}>
+                    <Ionicons name="bar-chart-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
+                    <Text style={styles.courseMetaBadgeText}>Boşlanğiç</Text>
+                  </View>
 
-          {/* 4. "Kurs o‘zlashtirilishi" Progress Card (75%) */}
-          <LinearGradient
-            colors={['#052544', '#001D38']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.courseProgressBanner}
-          >
-            {/* 75% Circular Ring */}
-            <View style={styles.courseRingWrap}>
-              <Text style={styles.courseRingText}>75%</Text>
-            </View>
+                  <View style={[styles.courseMetaBadge, styles.courseXpBadge]}>
+                    <Ionicons name="flash" size={13} color="#F59E0B" style={{ marginRight: 4 }} />
+                    <Text style={styles.courseXpBadgeText}>+400 XP</Text>
+                  </View>
+                </View>
 
-            <View style={styles.courseProgressRightCol}>
-              <Text style={styles.courseProgressTitle}>Kurs özlaştirilişi</Text>
-              <Text style={styles.courseProgressSubtitle}>4 darsdan 3 tasi yakunlangan</Text>
+                {/* 4. "Kurs o‘zlashtirilishi" Progress Card */}
+                <LinearGradient
+                  colors={['#052544', '#001D38']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.courseProgressBanner}
+                >
+                  {/* Circular Ring */}
+                  <View style={styles.courseRingWrap}>
+                    <Text style={styles.courseRingText}>{currentCourseProgress}%</Text>
+                  </View>
 
-              {/* Progress Bar Track & Fill */}
-              <View style={styles.courseLinearTrack}>
-                <View style={[styles.courseLinearFill, { width: '75%' }]} />
-              </View>
-            </View>
-          </LinearGradient>
+                  <View style={styles.courseProgressRightCol}>
+                    <Text style={styles.courseProgressTitle}>Kurs özlaştirilişi</Text>
+                    <Text style={styles.courseProgressSubtitle}>
+                      {currentCourseTotal} darsdan {currentCourseCompleted} tasi yakunlangan
+                    </Text>
+
+                    {/* Progress Bar Track & Fill */}
+                    <View style={styles.courseLinearTrack}>
+                      <View style={[styles.courseLinearFill, { width: `${currentCourseProgress}%` }]} />
+                    </View>
+                  </View>
+                </LinearGradient>
+              </>
+            );
+          })()}
 
           {/* 5. Sub-tabs Row: [▶ Darslar] [ℹ Kurs haqida] [🎓 Test] [💬 Sharhlar] */}
           <View style={styles.courseSubTabsRow}>
@@ -5334,11 +5407,22 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           {/* 6. Sub-tab Content: Darslar */}
           {courseSubTab === 'lessons' && (
             <>
-              {/* Header: Darslar ro'yxati | 3/4 bajarilgan */}
-              <View style={styles.lessonsSectionHeader}>
-                <Text style={styles.lessonsSectionTitle}>Darslar röyxati</Text>
-                <Text style={styles.lessonsCompletedRatio}>3/4 bajarilgan</Text>
-              </View>
+              {/* Header: Darslar ro'yxati | X/Y bajarilgan */}
+              {(() => {
+                const matchedLessons = dynamicLessons.filter(
+                  (l) => l.courseId === selectedCourseDetail?.id || (!l.courseId && selectedCourseDetail?.id === 'marriage')
+                );
+                const lessonsToRender = matchedLessons.length > 0 ? matchedLessons : COURSE_LESSONS;
+                const completedCount = lessonsToRender.filter((l) => l.status === 'completed').length;
+                return (
+                  <View style={styles.lessonsSectionHeader}>
+                    <Text style={styles.lessonsSectionTitle}>Darslar röyxati</Text>
+                    <Text style={styles.lessonsCompletedRatio}>
+                      {completedCount}/{lessonsToRender.length} bajarilgan
+                    </Text>
+                  </View>
+                );
+              })()}
 
               {/* Stepper Timeline & Lessons List */}
               <View style={styles.lessonsTimelineContainer}>
@@ -5508,87 +5592,114 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           )}
         </ScrollView>
       ) : selectedTopicDetail ? (
-        /* ===================== TOPIC DETAIL VIEW (1:1 DESIGN) ===================== */
-        <View style={styles.detailFullWrapper}>
-          {/* Fixed Top Section: Hero + Progress Card + Sub-tabs (Kurslar, Darslar ro'yxati...) */}
-          <View style={styles.detailFixedTopSection}>
-            {/* 1. Hero: Title, Subtitle, Badges & Court Building Image */}
-            <View style={styles.detailHeroContainer}>
-              <View style={styles.detailHeroTextCol}>
-                <Text style={styles.detailTitle}>
-                  {selectedTopicDetail.title.replace('\n', ' ')}
-                </Text>
-                <Text style={styles.detailSubtitle}>
-                  {selectedTopicDetail.subtitle ||
-                    'Oila, nikoh, ota-onalik, aliment va boshqa oilaviy munosabatlar bo‘yicha huquqiy bilimlar.'}
-                </Text>
+        (() => {
+        const topicCourses = dynamicCourses.filter(
+          (c) => c.topicId === selectedTopicDetail.id || (!c.topicId && selectedTopicDetail.id === 'oila')
+        );
+        const topicCourseIds = topicCourses.map((c) => c.id);
+        const topicLessons = dynamicLessons.filter(
+          (l) => l.topicId === selectedTopicDetail.id || topicCourseIds.includes(l.courseId || '')
+        );
+        const realCoursesCount = topicCourses.length > 0 ? topicCourses.length : (selectedTopicDetail.id === 'oila' ? 4 : 0);
+        const realLessonsCount = topicLessons.length > 0 ? topicLessons.length : (selectedTopicDetail.lessonsCount || 0);
+        const completedLessonsCount = topicLessons.filter((l) => l.status === 'completed').length;
+        const topicProgress = realLessonsCount > 0
+          ? Math.round((completedLessonsCount / realLessonsCount) * 100)
+          : (topicCourses.length > 0
+            ? Math.round(topicCourses.reduce((sum, c) => sum + (c.progress || 0), 0) / topicCourses.length)
+            : 0);
 
-                {/* Meta Badges */}
-                <View style={styles.detailBadgesRow}>
-                  <View style={styles.detailBadgePill}>
-                    <Ionicons name="book-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
-                    <Text style={styles.detailBadgeText}>
-                      {selectedTopicDetail.coursesCount || 4} kurs
-                    </Text>
-                  </View>
-                  <Text style={styles.detailBadgeDivider}>|</Text>
-                  <View style={styles.detailBadgePill}>
-                    <Ionicons name="school-outline" size={14} color="#0F172A" style={{ marginRight: 4 }} />
-                    <Text style={styles.detailBadgeText}>
-                      {selectedTopicDetail.lessonsCount} dars
-                    </Text>
-                  </View>
-                </View>
-              </View>
+        const activeLesson =
+          topicLessons.find((l) => l.status === 'in_progress') ||
+          topicLessons.find((l) => l.status !== 'completed') ||
+          topicLessons[0] ||
+          null;
+        const activeCourse = activeLesson
+          ? topicCourses.find((c) => c.id === activeLesson.courseId) || topicCourses[0] || null
+          : topicCourses[0] || null;
 
-              {/* Court building columns image from second user image */}
-              <View style={styles.courtBuildingWrap}>
-                <Image
-                  source={courtBuildingImage}
-                  style={styles.courtBuildingImage}
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
-
-            {/* 2. "O‘zlashtirish darajasi" Progress Card */}
-            <LinearGradient
-              colors={['#033B6A', '#002B49']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.detailProgressCard}
-            >
-              <View style={styles.detailProgressLeftGroup}>
-                {/* Circular Progress Ring */}
-                <View style={styles.progressRingWrap}>
-                  <Text style={styles.progressRingText}>
-                    {selectedTopicDetail.progress}%
+        return (
+          /* ===================== TOPIC DETAIL VIEW (1:1 DESIGN) ===================== */
+          <View style={styles.detailFullWrapper}>
+            {/* Fixed Top Section: Hero + Progress Card + Sub-tabs (Kurslar, Darslar ro'yxati...) */}
+            <View style={styles.detailFixedTopSection}>
+              {/* 1. Hero: Title, Subtitle, Badges & Court Building Image */}
+              <View style={styles.detailHeroContainer}>
+                <View style={styles.detailHeroTextCol}>
+                  <Text style={styles.detailTitle}>
+                    {selectedTopicDetail.title.replace('\n', ' ')}
                   </Text>
+                  <Text style={styles.detailSubtitle}>
+                    {selectedTopicDetail.subtitle ||
+                      'Oila, nikoh, ota-onalik, aliment va boshqa oilaviy munosabatlar bo‘yicha huquqiy bilimlar.'}
+                  </Text>
+
+                  {/* Meta Badges */}
+                  <View style={styles.detailBadgesRow}>
+                    <View style={styles.detailBadgePill}>
+                      <Ionicons name="book-outline" size={13} color="#0F172A" style={{ marginRight: 4 }} />
+                      <Text style={styles.detailBadgeText}>
+                        {realCoursesCount} kurs
+                      </Text>
+                    </View>
+                    <Text style={styles.detailBadgeDivider}>|</Text>
+                    <View style={styles.detailBadgePill}>
+                      <Ionicons name="school-outline" size={14} color="#0F172A" style={{ marginRight: 4 }} />
+                      <Text style={styles.detailBadgeText}>
+                        {realLessonsCount} dars
+                      </Text>
+                    </View>
+                  </View>
                 </View>
 
-                <View style={styles.detailProgressTexts}>
-                  <Text style={styles.detailProgressTitle}>Özlaştiriş darajasi</Text>
-                  <Text style={styles.detailProgressSubtitle}>
-                    {selectedTopicDetail.lessonsCount} darsdan {Math.round((selectedTopicDetail.lessonsCount * selectedTopicDetail.progress) / 100)} tasi ötilgan
-                  </Text>
+                {/* Court building columns image from second user image */}
+                <View style={styles.courtBuildingWrap}>
+                  <Image
+                    source={courtBuildingImage}
+                    style={styles.courtBuildingImage}
+                    resizeMode="contain"
+                  />
                 </View>
               </View>
 
-              <TouchableOpacity
-                style={styles.detailStatsLink}
-                activeOpacity={0.75}
-                onPress={() =>
-                  Alert.alert(
-                    'Tafsilot',
-                    `O‘zlashtirish: ${selectedTopicDetail.progress}%\nJami darslar: ${selectedTopicDetail.lessonsCount} ta\nKeyingi dars: Nikoh shartnomasi (3-dars).`
-                  )
-                }
+              {/* 2. "O‘zlashtirish darajasi" Progress Card */}
+              <LinearGradient
+                colors={['#033B6A', '#002B49']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.detailProgressCard}
               >
-                <Ionicons name="stats-chart" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
-                <Text style={styles.detailStatsLinkText}>Tafsilot</Text>
-                <Ionicons name="chevron-forward" size={12} color="#FFFFFF" />
-              </TouchableOpacity>
-            </LinearGradient>
+                <View style={styles.detailProgressLeftGroup}>
+                  {/* Circular Progress Ring */}
+                  <View style={styles.progressRingWrap}>
+                    <Text style={styles.progressRingText}>
+                      {topicProgress}%
+                    </Text>
+                  </View>
+
+                  <View style={styles.detailProgressTexts}>
+                    <Text style={styles.detailProgressTitle}>Özlaştiriş darajasi</Text>
+                    <Text style={styles.detailProgressSubtitle}>
+                      {realLessonsCount} darsdan {completedLessonsCount} tasi ötilgan
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.detailStatsLink}
+                  activeOpacity={0.75}
+                  onPress={() =>
+                    Alert.alert(
+                      'Tafsilot',
+                      `O‘zlashtirish: ${topicProgress}%\nJami darslar: ${realLessonsCount} ta\nO‘tilgan darslar: ${completedLessonsCount} ta\nKeyingi dars: ${activeLesson?.title || 'Barcha darslar o‘zlashtirilgan'}`
+                    )
+                  }
+                >
+                  <Ionicons name="stats-chart" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <Text style={styles.detailStatsLinkText}>Tafsilot</Text>
+                  <Ionicons name="chevron-forward" size={12} color="#FFFFFF" />
+                </TouchableOpacity>
+              </LinearGradient>
 
             {/* 3. Sub-tabs: Kurslar | Darslar ro‘yxati | Testlar | Statistika */}
             <View style={styles.detailSubTabsRow}>
@@ -5752,70 +5863,134 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   })()}
                 </View>
 
-                {/* Bottom Mini Player: "Davom ettirish: Nikoh shartnomasi" */}
-                <TouchableOpacity
-                  style={styles.playerCardContainer}
-                  activeOpacity={0.88}
-                  onPress={() => setSelectedCourseDetail(FAMILY_LAW_COURSES[0])}
-                >
-                  <LinearGradient
-                    colors={['#032B4F', '#001A33']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.playerCardGradient}
+                {/* Bottom Mini Player: "Davom ettirish" (Real Data) */}
+                {activeLesson ? (
+                  <TouchableOpacity
+                    style={styles.playerCardContainer}
+                    activeOpacity={0.88}
+                    onPress={() => {
+                      if (activeCourse) setSelectedCourseDetail(activeCourse);
+                      setSelectedLessonVideo(activeLesson);
+                    }}
                   >
-                    <View style={styles.playerLeftBlock}>
-                      <View style={styles.playerPlayCircle}>
-                        <Ionicons name="play" size={16} color="#002B49" style={{ marginLeft: 2 }} />
+                    <LinearGradient
+                      colors={['#032B4F', '#001A33']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.playerCardGradient}
+                    >
+                      <View style={styles.playerLeftBlock}>
+                        <View style={styles.playerPlayCircle}>
+                          <Ionicons name="play" size={16} color="#002B49" style={{ marginLeft: 2 }} />
+                        </View>
+                        <View style={styles.playerTextStack}>
+                          <Text style={styles.playerTopLabel}>
+                            {activeLesson.status === 'in_progress' ? 'Davom ettiriş' : 'Navbatdagi dars'}
+                          </Text>
+                          <Text style={styles.playerLessonTitle} numberOfLines={1}>
+                            {activeLesson.title}
+                          </Text>
+                          <Text style={styles.playerLessonMeta} numberOfLines={1}>
+                            {activeCourse ? activeCourse.title : selectedTopicDetail.title.replace('\n', ' ')} · {activeLesson.duration}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.playerTextStack}>
-                        <Text style={styles.playerTopLabel}>Davom ettiriş</Text>
-                        <Text style={styles.playerLessonTitle}>Nikoh şartnomasi</Text>
-                        <Text style={styles.playerLessonMeta}>2-kurs · 3-dars</Text>
-                      </View>
-                    </View>
 
-                    <View style={styles.playerRightBlock}>
-                      <Image
-                        source={gavelImage}
-                        style={styles.playerWatermark}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.playerNextBtn}>
-                        <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                      <View style={styles.playerRightBlock}>
+                        <Image
+                          source={gavelImage}
+                          style={styles.playerWatermark}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.playerNextBtn}>
+                          <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                        </View>
                       </View>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ) : topicCourses.length > 0 ? (
+                  <TouchableOpacity
+                    style={styles.playerCardContainer}
+                    activeOpacity={0.88}
+                    onPress={() => setSelectedCourseDetail(topicCourses[0])}
+                  >
+                    <LinearGradient
+                      colors={['#032B4F', '#001A33']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.playerCardGradient}
+                    >
+                      <View style={styles.playerLeftBlock}>
+                        <View style={styles.playerPlayCircle}>
+                          <Ionicons name="play" size={16} color="#002B49" style={{ marginLeft: 2 }} />
+                        </View>
+                        <View style={styles.playerTextStack}>
+                          <Text style={styles.playerTopLabel}>Kursni boşlaş</Text>
+                          <Text style={styles.playerLessonTitle} numberOfLines={1}>
+                            {topicCourses[0].title}
+                          </Text>
+                          <Text style={styles.playerLessonMeta} numberOfLines={1}>
+                            {topicCourses[0].lessons} · {topicCourses[0].duration}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.playerRightBlock}>
+                        <View style={styles.playerNextBtn}>
+                          <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ) : null}
               </>
             )}
 
             {detailSubTab === 'lessons' && (
               <View style={styles.detailAltTabContainer}>
-                <Text style={styles.detailAltTabTitle}>Barça darslar röyxati</Text>
-                {[
-                  '1. Nikoh tuzish shartlari va tartibi',
-                  '2. Er-xotinning shaxsiy va mulkiy huquqlari',
-                  '3. Nikoh shartnomasi (Amaliy keys)',
-                  '4. Ota-onaning bolalar ta’minotidagi majburiyatlari',
-                  '5. Aliment undirish va nizolarni hal qilish',
-                  '6. Nikohni bekor qilish va mulkni taqsimlash',
-                ].map((lesson, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.lessonListItem}
-                    activeOpacity={0.75}
-                    onPress={() => Alert.alert('Dars', `${lesson} ochilmoqda.`)}
-                  >
-                    <Ionicons
-                      name={idx < 3 ? 'checkmark-circle' : 'play-circle-outline'}
-                      size={20}
-                      color={idx < 3 ? '#10B981' : '#0284C7'}
-                    />
-                    <Text style={styles.lessonListItemText}>{lesson}</Text>
-                    <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.detailAltTabTitle}>
+                  Barça darslar röyxati ({topicLessons.length} ta)
+                </Text>
+                {topicLessons.length === 0 ? (
+                  <View style={{ paddingVertical: 30, alignItems: 'center' }}>
+                    <Ionicons name="school-outline" size={32} color="#94A3B8" />
+                    <Text style={{ fontSize: 13, color: '#64748B', marginTop: 8 }}>
+                      Ushbu mavzuda darslar hozircha mavjud emas
+                    </Text>
+                  </View>
+                ) : (
+                  topicLessons.map((lesson, idx) => {
+                    const isCompleted = lesson.status === 'completed';
+                    return (
+                      <TouchableOpacity
+                        key={lesson.id || idx}
+                        style={styles.lessonListItem}
+                        activeOpacity={0.75}
+                        onPress={() => {
+                          const matchedCourse = topicCourses.find((c) => c.id === lesson.courseId) || topicCourses[0] || null;
+                          if (matchedCourse) {
+                            setSelectedCourseDetail(matchedCourse);
+                          }
+                          setSelectedLessonVideo(lesson);
+                          setCurrentLessonIndex(idx);
+                        }}
+                      >
+                        <Ionicons
+                          name={isCompleted ? 'checkmark-circle' : 'play-circle-outline'}
+                          size={20}
+                          color={isCompleted ? '#10B981' : '#0284C7'}
+                        />
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                          <Text style={styles.lessonListItemText}>{lesson.title}</Text>
+                          <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                            {lesson.duration}
+                            {lesson.youtubeUrl ? ' · Video dars' : ''}
+                          </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
               </View>
             )}
 
@@ -5825,11 +6000,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 <TouchableOpacity
                   style={styles.lessonListItem}
                   activeOpacity={0.75}
-                  onPress={() => Alert.alert('Test', 'Oila huquqi asoslari testi (10 ta savol).')}
+                  onPress={() => Alert.alert('Test', `${selectedTopicDetail.title.replace('\n', ' ')} asoslari testi (10 ta savol).`)}
                 >
                   <Ionicons name="checkbox-outline" size={20} color="#F59E0B" />
                   <View style={{ flex: 1, marginLeft: 8 }}>
-                    <Text style={styles.lessonListItemText}>Oila huquqi asoslari (Test)</Text>
+                    <Text style={styles.lessonListItemText}>{selectedTopicDetail.title.replace('\n', ' ')} asoslari (Test)</Text>
                     <Text style={{ fontSize: 11, color: '#64748B' }}>10 ta savol · +30 XP</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
@@ -5842,16 +6017,21 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 <Text style={styles.detailAltTabTitle}>Özlaştiriş statistikasi</Text>
                 <View style={styles.statsSummaryBox}>
                   <Text style={{ fontSize: 14, fontWeight: '700', color: '#0F172A', marginBottom: 4 }}>
-                    Umumiy progress: {selectedTopicDetail.progress}%
+                    Umumiy progress: {topicProgress}%
                   </Text>
                   <Text style={{ fontSize: 12, color: '#64748B' }}>
-                    Jami 14 darsdan 8 tasi özlaştirilgan. Keyingi sinovga tayyorsiz!
+                    Jami {realLessonsCount} darsdan {completedLessonsCount} tasi özlaştirilgan.
+                    {realLessonsCount > completedLessonsCount
+                      ? ` Yana ${realLessonsCount - completedLessonsCount} ta dars qoldi.`
+                      : ' Barcha darslar to‘liq o‘zlashtirildi!'}
                   </Text>
                 </View>
               </View>
             )}
           </ScrollView>
         </View>
+      );
+    })()
       ) : activeTab === 'topics' ? (
         <View style={styles.topicsTabFullWrapper}>
           {/* Fixed Sticky Header for Mavzular */}
@@ -5959,7 +6139,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.topicsGrid}>
-              {legalCategories.filter((cat) => {
+              {activeCategories.filter((cat) => {
                 const matchesLevel =
                   selectedTopicLevel === 'all' || cat.level === selectedTopicLevel;
                 const matchesSearch =
@@ -8254,54 +8434,74 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               </View>
 
               {/* ===================== 3. ACTIVE COURSE HERO CARD (DAVOM ETTIRISH) ===================== */}
-              <TouchableOpacity
-                activeOpacity={0.92}
-                style={{ marginBottom: 16 }}
-                onPress={() => {
-                  const oilaCat =
-                    legalCategories.find((c) => c.id === 'oila') || legalCategories[2] || LEGAL_CATEGORIES[2];
-                  setSelectedTopicDetail(oilaCat);
-                }}
-              >
-                <LinearGradient
-                  colors={['#07284C', '#0B427B', '#0284C7']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.activeCourseCard}
-                >
-                  {/* Header row: Tag and Subject */}
-                  <View style={styles.activeCourseHeaderRow}>
-                    <View style={styles.activeCourseStatusBadge}>
-                      <View style={styles.activeCoursePulseDot} />
-                      <Text style={styles.activeCourseStatusText}>DAVOM ETTIRIŞ</Text>
-                    </View>
-                    <Text style={styles.activeCourseCategoryTag}>Oila huquqi · 3-dars</Text>
-                  </View>
+              {(() => {
+                const homeActiveLesson =
+                  dynamicLessons.find((l) => l.status === 'in_progress') ||
+                  dynamicLessons.find((l) => l.status !== 'completed') ||
+                  dynamicLessons[0];
+                const homeActiveCourse = homeActiveLesson
+                  ? dynamicCourses.find((c) => c.id === homeActiveLesson.courseId) || dynamicCourses[0]
+                  : dynamicCourses[0];
+                const homeActiveTopic = homeActiveCourse
+                  ? activeCategories.find((cat) => cat.id === homeActiveCourse.topicId) || activeCategories[0]
+                  : activeCategories[0];
+                const homeProgress = homeActiveCourse?.progress || 60;
 
-                  {/* Lesson Title */}
-                  <Text style={styles.activeCourseTitle} numberOfLines={1}>
-                    Nikoh şartnomasi
-                  </Text>
-
-                  {/* Progress bar & CTA row */}
-                  <View style={styles.activeCourseBottomRow}>
-                    <View style={styles.activeCourseProgressCol}>
-                      <View style={styles.activeCourseProgressBarTrack}>
-                        <View style={[styles.activeCourseProgressBarFill, { width: '60%' }]} />
+                return (
+                  <TouchableOpacity
+                    activeOpacity={0.92}
+                    style={{ marginBottom: 16 }}
+                    onPress={() => {
+                      if (homeActiveTopic) setSelectedTopicDetail(homeActiveTopic);
+                      if (homeActiveCourse) setSelectedCourseDetail(homeActiveCourse);
+                      if (homeActiveLesson) setSelectedLessonVideo(homeActiveLesson);
+                    }}
+                  >
+                    <LinearGradient
+                      colors={['#07284C', '#0B427B', '#0284C7']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.activeCourseCard}
+                    >
+                      {/* Header row: Tag and Subject */}
+                      <View style={styles.activeCourseHeaderRow}>
+                        <View style={styles.activeCourseStatusBadge}>
+                          <View style={styles.activeCoursePulseDot} />
+                          <Text style={styles.activeCourseStatusText}>DAVOM ETTIRIŞ</Text>
+                        </View>
+                        <Text style={styles.activeCourseCategoryTag}>
+                          {homeActiveTopic ? homeActiveTopic.title.replace('\n', ' ') : 'Oila huquqi'} · {homeActiveLesson ? `${homeActiveLesson.order}-dars` : '1-dars'}
+                        </Text>
                       </View>
-                      <View style={styles.activeCourseMetaRow}>
-                        <Text style={styles.activeCourseMetaText}>60% tamomlandi</Text>
-                        <Text style={styles.activeCourseMetaDot}>•</Text>
-                        <Text style={styles.activeCourseMetaText}>8 daqiqa qoldi</Text>
-                      </View>
-                    </View>
 
-                    <View style={styles.activeCoursePlayBtn}>
-                      <Ionicons name="play" size={13} color="#002B49" style={{ marginLeft: 2 }} />
-                    </View>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
+                      {/* Lesson Title */}
+                      <Text style={styles.activeCourseTitle} numberOfLines={1}>
+                        {homeActiveLesson ? homeActiveLesson.title : 'Nikoh va oila munosabatlari'}
+                      </Text>
+
+                      {/* Progress bar & CTA row */}
+                      <View style={styles.activeCourseBottomRow}>
+                        <View style={styles.activeCourseProgressCol}>
+                          <View style={styles.activeCourseProgressBarTrack}>
+                            <View style={[styles.activeCourseProgressBarFill, { width: `${homeProgress}%` }]} />
+                          </View>
+                          <View style={styles.activeCourseMetaRow}>
+                            <Text style={styles.activeCourseMetaText}>{homeProgress}% tamomlandi</Text>
+                            <Text style={styles.activeCourseMetaDot}>•</Text>
+                            <Text style={styles.activeCourseMetaText}>
+                              {homeActiveLesson?.duration || '10 daqiqa'}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.activeCoursePlayBtn}>
+                          <Ionicons name="play" size={13} color="#002B49" style={{ marginLeft: 2 }} />
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                );
+              })()}
 
               {/* ===================== 4. QUICK ACTIONS (2 TA ASOSIY BO'LIM) ===================== */}
               <View style={styles.quickActionsGridTwo}>
@@ -8369,7 +8569,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
 
               {/* 4 Featured Categories in Clean 2x2 Grid */}
               <View style={styles.featuredCategoriesGrid}>
-                {legalCategories.slice(0, 4).map((cat) => (
+                {activeCategories.slice(0, 4).map((cat) => (
                   <TouchableOpacity
                     key={cat.id}
                     style={styles.featuredCategoryCard}

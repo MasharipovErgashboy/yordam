@@ -234,7 +234,6 @@ export default function App() {
               className="glass-panel"
               style={{
                 padding: '32px',
-                background: 'rgba(14, 21, 38, 0.65)',
                 borderRadius: '22px',
                 display: 'flex',
                 alignItems: 'center',
@@ -272,7 +271,6 @@ export default function App() {
               className="glass-panel"
               style={{
                 padding: '36px',
-                background: 'rgba(14, 21, 38, 0.65)',
                 borderRadius: '22px',
                 marginBottom: '20px',
               }}
@@ -312,7 +310,6 @@ export default function App() {
               className="glass-panel"
               style={{
                 padding: '36px',
-                background: 'rgba(14, 21, 38, 0.65)',
                 borderRadius: '22px',
                 marginBottom: '20px',
               }}
@@ -350,7 +347,6 @@ export default function App() {
               className="glass-panel"
               style={{
                 padding: '32px',
-                background: 'rgba(14, 21, 38, 0.65)',
                 borderRadius: '22px',
                 marginBottom: '20px',
               }}
@@ -413,7 +409,6 @@ export default function App() {
               className="glass-panel"
               style={{
                 padding: '32px',
-                background: 'rgba(14, 21, 38, 0.65)',
                 borderRadius: '22px',
                 maxWidth: '700px',
               }}

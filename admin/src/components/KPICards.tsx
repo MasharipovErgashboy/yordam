@@ -54,9 +54,6 @@ export const KPICards: React.FC = () => {
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: '128px',
-              background: 'rgba(14, 21, 38, 0.65)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '20px',
             }}
           >
             {/* Top row: Icon and Title */}

@@ -35,7 +35,6 @@ export const ChartsSection: React.FC = () => {
         className="glass-panel"
         style={{
           padding: '24px',
-          background: 'rgba(14, 21, 38, 0.65)',
           borderRadius: '22px',
           display: 'flex',
           flexDirection: 'column',
@@ -188,7 +187,6 @@ export const ChartsSection: React.FC = () => {
         className="glass-panel"
         style={{
           padding: '24px',
-          background: 'rgba(14, 21, 38, 0.65)',
           borderRadius: '22px',
           display: 'flex',
           flexDirection: 'column',

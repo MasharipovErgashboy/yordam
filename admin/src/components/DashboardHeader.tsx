@@ -59,8 +59,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               gap: '8px',
               padding: '9px 16px',
               borderRadius: '12px',
-              background: 'rgba(16, 24, 40, 0.65)',
-              backdropFilter: 'blur(20px)',
+              background: 'rgba(14, 22, 38, 0.40)',
+              backdropFilter: 'blur(24px)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               color: '#E2E8F0',
               fontSize: '13px',
@@ -69,11 +69,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(22, 33, 56, 0.85)';
+              e.currentTarget.style.background = 'rgba(22, 34, 60, 0.55)';
               e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.16)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(16, 24, 40, 0.65)';
+              e.currentTarget.style.background = 'rgba(14, 22, 38, 0.40)';
               e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
             }}
           >
@@ -169,3 +169,4 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     </header>
   );
 };
+

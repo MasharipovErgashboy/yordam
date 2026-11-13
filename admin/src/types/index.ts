@@ -36,3 +36,4 @@ export interface ApplicationItem {
   status: 'faol' | 'kutilmoqda' | 'hal_qilindi' | 'rad_etildi';
   statusLabel: string;
 }
+

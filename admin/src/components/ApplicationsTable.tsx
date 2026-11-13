@@ -98,7 +98,6 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
       className="glass-panel"
       style={{
         padding: '24px',
-        background: 'rgba(14, 21, 38, 0.65)',
         borderRadius: '22px',
       }}
     >

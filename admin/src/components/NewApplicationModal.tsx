@@ -280,3 +280,4 @@ export const NewApplicationModal: React.FC<NewApplicationModalProps> = ({
     </div>
   );
 };
+

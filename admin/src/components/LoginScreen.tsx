@@ -75,8 +75,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           padding: '40px 36px',
           borderRadius: '28px',
           border: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(13, 20, 36, 0.75)',
-          backdropFilter: 'blur(36px)',
+          background: 'rgba(13, 20, 36, 0.40)',
+          backdropFilter: 'blur(36px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(36px) saturate(180%)',
           boxShadow: '0 30px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.12)',
         }}
       >

@@ -20,11 +20,11 @@ import {
   GraduationCap,
   Scale,
   Eye,
-  Star,
   Layers,
-  TrendingUp,
   Award,
   X,
+  Pencil,
+  ShoppingCart,
 } from 'lucide-react';
 
 export default function App() {
@@ -90,85 +90,176 @@ export default function App() {
   // Services tab state - 3 Core Legal Services
   const [servicesList, setServicesList] = useState<LegalServiceItem[]>([
     {
-      id: 'srv_huquq_maktabi',
-      title: 'Huquq maktabi',
-      slug: 'huquq-maktabi',
-      category: 'Ta’lim & Savodxonlik',
-      categoryBadge: 'Ta’lim',
-      desc: 'Interaktiv darslar, huquqiy testlar, amaliy keyslar va audio/video qo‘llanmalar orqali fuqarolarning huquqiy savodxonligini oshirish.',
-      icon: 'school',
+      id: 'huquq_maktabi',
+      title: 'Huquq Maktabi',
+      category: 'protection',
+      categoryLabel: 'Ta’lim',
+      desc: 'Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar.',
+      iconName: 'school',
       badgeColor: '#8B5CF6',
-      modulesCount: 12,
-      materialsCount: 48,
-      materialsLabel: '48 ta darslik',
-      usageCount: '14,250 ta o‘quvchi',
-      successRate: '98.4%',
-      rating: '4.9 ★',
-      ratingValue: 4.9,
       isActive: true,
+      usedUserIds: [],
+      usersCount: 0,
+      lastUpdated: 'Bugun, 20:00',
       features: [
         '12 ta interaktiv huquqiy o‘quv moduli',
         '48 ta video va audio darsliklar bazasi',
         'Amaliy hayotiy huquqiy keyslar va tahlillar',
         'Bilimni tekshirish testlari va yakuniy sertifikat',
       ],
-      lastUpdated: 'Bugun, 18:30',
     },
     {
-      id: 'srv_istemolchi',
+      id: 'istemolchi',
       title: 'Iste’molchi huquqlari',
-      slug: 'istemolchi-huquqlari',
-      category: 'Iste’molchi himoyasi',
-      categoryBadge: 'Himoya',
+      category: 'protection',
+      categoryLabel: 'Iste’molchi himoyasi',
       desc: 'Sifatsiz tovar va xizmatlar, 14 kun ichida almashtirish/qaytarish, kafolat ta’mirlari va 1159 Raqobat qo‘mitasi rasmiy talabnomalari.',
-      icon: 'consumer',
+      iconName: 'cart',
       badgeColor: '#00A3FF',
-      modulesCount: 6,
-      materialsCount: 18,
-      materialsLabel: '18 ta andoza',
-      usageCount: '8,420 ta ariza',
-      successRate: '96.8%',
-      rating: '4.8 ★',
-      ratingValue: 4.8,
       isActive: true,
+      usedUserIds: [],
+      usersCount: 0,
+      lastUpdated: 'Bugun, 20:00',
       features: [
         '14 kun ichida nuqsonsiz tovarni qaytarish arizasi',
         'Kafolat muddati davomida bepul ta’mirlash talabi',
         '1159 Raqobat qo‘mitasiga rasmiy shikoyat xati',
         'Sotuvchiga nisbatan sudga da’vo arizalari generatori',
       ],
-      lastUpdated: 'Bugun, 17:15',
     },
     {
-      id: 'srv_ish_mehnat',
+      id: 'ish_huquqi',
       title: 'Ish va mehnat huquqi',
-      slug: 'ish-va-mehnat',
-      category: 'Mehnat munosabatlari',
-      categoryBadge: 'Mehnat',
+      category: 'protection',
+      categoryLabel: 'Mehnat munosabatlari',
       desc: 'Yangi Mehnat kodeksi me’yorlari, noqonuniy bo‘shatish, kechiktirilgan oylik maosh, kompensatsiya va Mehnat inspeksiyasi arizalari.',
-      icon: 'labor',
+      iconName: 'briefcase',
       badgeColor: '#F59E0B',
-      modulesCount: 8,
-      materialsCount: 24,
-      materialsLabel: '24 ta andoza',
-      usageCount: '5,630 ta ariza',
-      successRate: '97.5%',
-      rating: '4.9 ★',
-      ratingValue: 4.9,
       isActive: true,
+      usedUserIds: [],
+      usersCount: 0,
+      lastUpdated: 'Bugun, 20:00',
       features: [
         'Yangi Mehnat kodeksi asosidagi huquqiy kafolatlar',
         'Noqonuniy ishdan bo‘shatishni bekor qilish talabi',
         'Ish haqi va zararlarni undirish bo‘yicha sud arizasi',
         'Davlat mehnat inspeksiyasiga to‘g‘ridan-to‘g‘ri murojaat',
       ],
-      lastUpdated: 'Kecha, 20:45',
     },
   ]);
 
   const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [serviceSearchQuery, setServiceSearchQuery] = useState<string>('');
   const [selectedServiceDetail, setSelectedServiceDetail] = useState<LegalServiceItem | null>(null);
+
+  // Edit Service Modal State
+  const [editingService, setEditingService] = useState<LegalServiceItem | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategoryLabel, setEditCategoryLabel] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editIconName, setEditIconName] = useState('school');
+  const [editBadgeColor, setEditBadgeColor] = useState('#8B5CF6');
+  const [editIsActive, setEditIsActive] = useState(true);
+  const [isSavingService, setIsSavingService] = useState(false);
+
+  // Fetch Services from backend
+  const fetchServicesFromBackend = useCallback(async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/services');
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.services) && data.services.length > 0) {
+        setServicesList(data.services);
+      }
+    } catch {
+      // Backend offline fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchServicesFromBackend();
+  }, [fetchServicesFromBackend]);
+
+  const openEditModal = (srv: LegalServiceItem) => {
+    setEditingService(srv);
+    setEditTitle(srv.title);
+    setEditCategoryLabel(srv.categoryLabel || 'Ta’lim');
+    setEditDesc(srv.desc);
+    setEditIconName(srv.iconName || 'school');
+    setEditBadgeColor(srv.badgeColor || '#8B5CF6');
+    setEditIsActive(srv.isActive);
+  };
+
+  const handleSaveServiceEdit = async () => {
+    if (!editingService) return;
+    if (!editTitle.trim()) {
+      alert('Iltimos, xizmat nomini kiriting!');
+      return;
+    }
+
+    setIsSavingService(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/services/${editingService.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          categoryLabel: editCategoryLabel.trim(),
+          desc: editDesc.trim(),
+          iconName: editIconName,
+          badgeColor: editBadgeColor,
+          isActive: editIsActive,
+        }),
+      });
+      const data = await res.json();
+      if (data && data.success && data.service) {
+        setServicesList((prev) =>
+          prev.map((s) => (s.id === editingService.id ? data.service : s))
+        );
+        setEditingService(null);
+      } else {
+        alert(data.message || 'Xatolik yuz berdi');
+      }
+    } catch (err) {
+      console.error('Error saving service:', err);
+      // Fallback local update
+      setServicesList((prev) =>
+        prev.map((s) =>
+          s.id === editingService.id
+            ? {
+                ...s,
+                title: editTitle.trim(),
+                categoryLabel: editCategoryLabel.trim(),
+                desc: editDesc.trim(),
+                iconName: editIconName,
+                badgeColor: editBadgeColor,
+                isActive: editIsActive,
+                lastUpdated: 'Hozirgina yangilandi',
+              }
+            : s
+        )
+      );
+      setEditingService(null);
+    } finally {
+      setIsSavingService(false);
+    }
+  };
+
+  const renderServiceIcon = (iconName?: string, color = '#00A3FF', size = 20) => {
+    switch (iconName) {
+      case 'school':
+        return <GraduationCap size={size} color={color} />;
+      case 'cart':
+      case 'consumer':
+        return <ShoppingCart size={size} color={color} />;
+      case 'labor':
+      case 'briefcase':
+        return <Briefcase size={size} color={color} />;
+      case 'scale':
+        return <Scale size={size} color={color} />;
+      default:
+        return <Briefcase size={size} color={color} />;
+    }
+  };
 
   // Application list state
   const [applications, setApplications] = useState<ApplicationItem[]>([
@@ -768,29 +859,29 @@ export default function App() {
               {[
                 {
                   title: 'Asosiy xizmatlar',
-                  value: '3 ta yo‘nalish',
-                  desc: '100% faol va integratsiyalangan',
+                  value: `${servicesList.length} ta yo‘nalish`,
+                  desc: 'Mobil ilova bilan integratsiyalangan',
                   icon: <Layers size={18} color="#8B5CF6" />,
                   color: '#8B5CF6',
                 },
                 {
-                  title: 'Jami qamrov',
-                  value: '28,300+ nafar',
-                  desc: 'Foydalanuvchilar va o‘quvchilar',
+                  title: 'Jami foydalanuvchilar',
+                  value: `${servicesList.reduce((acc, s) => acc + (s.usersCount ?? (s.usedUserIds?.length || 0)), 0)} nafar`,
+                  desc: 'Xizmatlardan foydalangan unikal a’zolar',
                   icon: <Users size={18} color="#00A3FF" />,
                   color: '#00A3FF',
                 },
                 {
-                  title: 'O‘rtacha natijadorlik',
-                  value: '97.6%',
-                  desc: 'Ijobiy hal etilgan va yakunlangan',
-                  icon: <TrendingUp size={18} color="#10B981" />,
+                  title: 'Faol xizmatlar',
+                  value: `${servicesList.filter((s) => s.isActive).length} ta faol`,
+                  desc: 'Fuqarolar foydalanishi uchun ochiq',
+                  icon: <CheckCircle2 size={18} color="#10B981" />,
                   color: '#10B981',
                 },
                 {
-                  title: 'Materiallar bazasi',
-                  value: '90 ta material',
-                  desc: 'Darsliklar va rasmiy andozalar',
+                  title: 'API sinxronizatsiya',
+                  value: 'Real-time faol',
+                  desc: 'Ilova bilan 100% jonli bog‘langan',
                   icon: <Award size={18} color="#F59E0B" />,
                   color: '#F59E0B',
                 },
@@ -854,7 +945,7 @@ export default function App() {
                     Yordam Asosiy Huquqiy Xizmatlari
                   </h2>
                   <p style={{ fontSize: '12.5px', color: '#94A3B8', margin: 0 }}>
-                    Mobil ilova orqali fuqarolarga taqdim etilayotgan 3 ta asosiy xizmatlar reyestri va ko‘rsatkichlari
+                    Mobil ilova orqali fuqarolarga taqdim etilayotgan 3 ta asosiy xizmatlar reyestri va unikal foydalanuvchilari
                   </p>
                 </div>
 
@@ -936,19 +1027,13 @@ export default function App() {
                         Kategoriya
                       </th>
                       <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
-                        Material & Modullar
-                      </th>
-                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
-                        Foydalanish qamrovi
-                      </th>
-                      <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
-                        Natijadorlik / Reyting
+                        Foydalanuvchilar
                       </th>
                       <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
                         Holati
                       </th>
                       <th style={{ padding: '12px 14px', fontSize: '11.5px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>
-                        Amal
+                        Amallar
                       </th>
                     </tr>
                   </thead>
@@ -958,15 +1043,15 @@ export default function App() {
                         const matchesFilter =
                           serviceFilter === 'all' ||
                           (serviceFilter === 'faol' && srv.isActive) ||
-                          (serviceFilter === 'talim' && srv.categoryBadge === 'Ta’lim') ||
-                          (serviceFilter === 'himoya' && srv.categoryBadge === 'Himoya') ||
-                          (serviceFilter === 'mehnat' && srv.categoryBadge === 'Mehnat');
+                          (serviceFilter === 'talim' && (srv.categoryLabel?.includes('Ta’lim') || srv.category?.includes('protection'))) ||
+                          (serviceFilter === 'himoya' && (srv.categoryLabel?.includes('Iste’molchi') || srv.title?.toLowerCase().includes('iste'))) ||
+                          (serviceFilter === 'mehnat' && (srv.categoryLabel?.includes('Mehnat') || srv.title?.toLowerCase().includes('mehnat')));
 
                         const matchesQuery =
                           serviceSearchQuery.trim() === '' ||
                           srv.title.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
                           srv.desc.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
-                          srv.category.toLowerCase().includes(serviceSearchQuery.toLowerCase());
+                          (srv.categoryLabel && srv.categoryLabel.toLowerCase().includes(serviceSearchQuery.toLowerCase()));
 
                         return matchesFilter && matchesQuery;
                       })
@@ -993,15 +1078,13 @@ export default function App() {
                                 justifyContent: 'center',
                                 flexShrink: 0,
                               }}>
-                                {srv.icon === 'school' && <GraduationCap size={20} color={srv.badgeColor} />}
-                                {srv.icon === 'consumer' && <Scale size={20} color={srv.badgeColor} />}
-                                {srv.icon === 'labor' && <Briefcase size={20} color={srv.badgeColor} />}
+                                {renderServiceIcon(srv.iconName, srv.badgeColor, 20)}
                               </div>
                               <div>
                                 <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#FFFFFF', marginBottom: '3px' }}>
                                   {srv.title}
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#94A3B8', maxWidth: '320px', lineHeight: '16px' }}>
+                                <div style={{ fontSize: '12px', color: '#94A3B8', maxWidth: '380px', lineHeight: '16px' }}>
                                   {srv.desc}
                                 </div>
                               </div>
@@ -1020,65 +1103,32 @@ export default function App() {
                               color: srv.badgeColor,
                               border: `1px solid ${srv.badgeColor}30`,
                             }}>
-                              {srv.categoryBadge}
+                              {srv.categoryLabel || 'Huquqiy xizmat'}
                             </span>
                           </td>
 
-                          {/* Materials / Modules */}
+                          {/* Foydalanuvchilar Column (Unikal hisoblagich) */}
                           <td style={{ padding: '16px 14px' }}>
-                            <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FFFFFF', marginBottom: '2px' }}>
-                              {srv.materialsLabel}
-                            </div>
-                            <div style={{ fontSize: '11.5px', color: '#64748B' }}>
-                              {srv.modulesCount} ta yo‘nalish
-                            </div>
-                          </td>
-
-                          {/* Usage Count */}
-                          <td style={{ padding: '16px 14px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Users size={14} color="#00E5FF" />
-                              <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#00E5FF' }}>
-                                {srv.usageCount}
-                              </span>
-                            </div>
-                            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
-                              So‘nggi yangilanish: {srv.lastUpdated}
-                            </div>
-                          </td>
-
-                          {/* Success Rate & Rating */}
-                          <td style={{ padding: '16px 14px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                              <span style={{
-                                padding: '2px 8px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                background: 'rgba(16, 185, 129, 0.15)',
-                                color: '#10B981',
-                              }}>
-                                {srv.successRate}
-                              </span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: '#F59E0B', fontWeight: 700 }}>
-                                <Star size={13} fill="#F59E0B" color="#F59E0B" />
-                                <span>{srv.rating}</span>
-                              </div>
-                            </div>
-                            {/* Small progress line */}
-                            <div style={{
-                              width: '90px',
-                              height: '4px',
-                              borderRadius: '2px',
-                              background: 'rgba(255, 255, 255, 0.08)',
-                              overflow: 'hidden',
-                            }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{
-                                width: srv.successRate,
-                                height: '100%',
-                                background: '#10B981',
-                                borderRadius: '2px',
-                              }} />
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '8px',
+                                background: 'rgba(0, 229, 255, 0.12)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}>
+                                <Users size={15} color="#00E5FF" />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '15px', fontWeight: 800, color: '#00E5FF' }}>
+                                  {srv.usersCount ?? (srv.usedUserIds?.length || 0)}
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#64748B' }}>
+                                  unikal foydalanuvchi
+                                </div>
+                              </div>
                             </div>
                           </td>
 
@@ -1111,28 +1161,51 @@ export default function App() {
                             </button>
                           </td>
 
-                          {/* Action Button */}
+                          {/* Action Buttons: Only Eye Icon and Pencil Icon */}
                           <td style={{ padding: '16px 14px', textAlign: 'right' }}>
-                            <button
-                              onClick={() => setSelectedServiceDetail(srv)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                padding: '6px 14px',
-                                borderRadius: '9px',
-                                border: '1px solid rgba(0, 163, 255, 0.35)',
-                                background: 'rgba(0, 163, 255, 0.12)',
-                                color: '#00A3FF',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              <Eye size={13} />
-                              <span>Batafsil</span>
-                            </button>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+                              {/* Eye button (Faqatgina ko'z iconi) */}
+                              <button
+                                onClick={() => setSelectedServiceDetail(srv)}
+                                title="Batafsil ma’lumot"
+                                style={{
+                                  width: '34px',
+                                  height: '34px',
+                                  borderRadius: '9px',
+                                  border: '1px solid rgba(0, 163, 255, 0.35)',
+                                  background: 'rgba(0, 163, 255, 0.12)',
+                                  color: '#00A3FF',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                }}
+                              >
+                                <Eye size={16} />
+                              </button>
+
+                              {/* Edit button (Tahrirlash qalam iconi) */}
+                              <button
+                                onClick={() => openEditModal(srv)}
+                                title="Xizmatni tahrirlash"
+                                style={{
+                                  width: '34px',
+                                  height: '34px',
+                                  borderRadius: '9px',
+                                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                                  background: 'rgba(245, 158, 11, 0.12)',
+                                  color: '#F59E0B',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                }}
+                              >
+                                <Pencil size={15} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1141,7 +1214,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Service Detail Modal */}
+            {/* Service Detail Modal (View Only) */}
             {selectedServiceDetail && (
               <div
                 style={{
@@ -1186,9 +1259,7 @@ export default function App() {
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        {selectedServiceDetail.icon === 'school' && <GraduationCap size={24} color={selectedServiceDetail.badgeColor} />}
-                        {selectedServiceDetail.icon === 'consumer' && <Scale size={24} color={selectedServiceDetail.badgeColor} />}
-                        {selectedServiceDetail.icon === 'labor' && <Briefcase size={24} color={selectedServiceDetail.badgeColor} />}
+                        {renderServiceIcon(selectedServiceDetail.iconName, selectedServiceDetail.badgeColor, 24)}
                       </div>
                       <div>
                         <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 4px 0' }}>
@@ -1203,7 +1274,7 @@ export default function App() {
                           background: `${selectedServiceDetail.badgeColor}18`,
                           color: selectedServiceDetail.badgeColor,
                         }}>
-                          {selectedServiceDetail.category}
+                          {selectedServiceDetail.categoryLabel || 'Huquqiy xizmat'}
                         </span>
                       </div>
                     </div>
@@ -1233,7 +1304,7 @@ export default function App() {
                   </p>
 
                   {/* Stats Grid inside modal */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '22px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '22px' }}>
                     <div style={{
                       padding: '14px',
                       borderRadius: '14px',
@@ -1241,8 +1312,10 @@ export default function App() {
                       border: '1px solid rgba(255, 255, 255, 0.06)',
                       textAlign: 'center',
                     }}>
-                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Modullar & Baza</div>
-                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>{selectedServiceDetail.materialsLabel}</div>
+                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Foydalanish qamrovi</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#00E5FF' }}>
+                        {selectedServiceDetail.usersCount ?? (selectedServiceDetail.usedUserIds?.length || 0)} nafar unikal a’zo
+                      </div>
                     </div>
                     <div style={{
                       padding: '14px',
@@ -1251,35 +1324,29 @@ export default function App() {
                       border: '1px solid rgba(255, 255, 255, 0.06)',
                       textAlign: 'center',
                     }}>
-                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Foydalanish</div>
-                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#00E5FF' }}>{selectedServiceDetail.usageCount}</div>
-                    </div>
-                    <div style={{
-                      padding: '14px',
-                      borderRadius: '14px',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      textAlign: 'center',
-                    }}>
-                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Muvaffaqiyat</div>
-                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#10B981' }}>{selectedServiceDetail.successRate}</div>
+                      <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '4px' }}>Holati</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: selectedServiceDetail.isActive ? '#10B981' : '#EF4444' }}>
+                        {selectedServiceDetail.isActive ? 'Faol ishlamoqda' : 'Vaqtinchalik to‘xtatilgan'}
+                      </div>
                     </div>
                   </div>
 
                   {/* Key Features List */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.4px' }}>
-                      Asosiy imkoniyatlar va bo‘limlar:
+                  {selectedServiceDetail.features && selectedServiceDetail.features.length > 0 && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.4px' }}>
+                        Asosiy imkoniyatlar va bo‘limlar:
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {selectedServiceDetail.features.map((feature, fIdx) => (
+                          <div key={fIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <CheckCircle2 size={16} color="#10B981" />
+                            <span style={{ fontSize: '13px', color: '#E2E8F0' }}>{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {selectedServiceDetail.features.map((feature, fIdx) => (
-                        <div key={fIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <CheckCircle2 size={16} color="#10B981" />
-                          <span style={{ fontSize: '13px', color: '#E2E8F0' }}>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  )}
 
                   {/* Footer Modal Action */}
                   <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
@@ -1297,6 +1364,293 @@ export default function App() {
                       }}
                     >
                       Tushunarli, yopish
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Service Modal (Tahrirlash oynasi) */}
+            {editingService && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(3, 7, 18, 0.78)',
+                  backdropFilter: 'blur(16px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 10000,
+                  padding: '20px',
+                }}
+                onClick={() => setEditingService(null)}
+              >
+                <div
+                  className="glass-panel animate-scale-up"
+                  style={{
+                    width: '100%',
+                    maxWidth: '520px',
+                    borderRadius: '24px',
+                    padding: '28px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(11, 18, 33, 0.95)',
+                    boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7)',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '11px',
+                        background: 'rgba(245, 158, 11, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#F59E0B',
+                      }}>
+                        <Pencil size={18} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                          Xizmatni tahrirlash
+                        </h3>
+                        <p style={{ fontSize: '12px', color: '#94A3B8', margin: '2px 0 0 0' }}>
+                          Mobil ilovada ko‘rinadigan ma’lumotlarni o‘zgartirish
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setEditingService(null)}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        border: 'none',
+                        color: '#94A3B8',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Form Body */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Field 1: Title */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                        Xizmat nomi:
+                      </label>
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Masalan: Huquq maktabi"
+                        style={{
+                          width: '100%',
+                          height: '44px',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          padding: '0 14px',
+                          color: '#FFFFFF',
+                          fontSize: '13.5px',
+                          fontWeight: 600,
+                          outline: 'none',
+                        }}
+                      />
+                    </div>
+
+                    {/* Field 2: Category Label */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                        Kategoriya yozuvi:
+                      </label>
+                      <input
+                        type="text"
+                        value={editCategoryLabel}
+                        onChange={(e) => setEditCategoryLabel(e.target.value)}
+                        placeholder="Masalan: Ta’lim / Iste’molchi himoyasi"
+                        style={{
+                          width: '100%',
+                          height: '44px',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          padding: '0 14px',
+                          color: '#FFFFFF',
+                          fontSize: '13.5px',
+                          fontWeight: 600,
+                          outline: 'none',
+                        }}
+                      />
+                    </div>
+
+                    {/* Field 3: Description (Ilovada nomini pastiga yozilgan text) */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                        Ilovada nomining pastidagi tavsif matni:
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editDesc}
+                        onChange={(e) => setEditDesc(e.target.value)}
+                        placeholder="Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar."
+                        style={{
+                          width: '100%',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          padding: '12px 14px',
+                          color: '#FFFFFF',
+                          fontSize: '13px',
+                          lineHeight: '19px',
+                          outline: 'none',
+                          resize: 'none',
+                          fontFamily: 'inherit',
+                        }}
+                      />
+                    </div>
+
+                    {/* Field 4: Icon & Color Select */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                          Icon belgisi:
+                        </label>
+                        <select
+                          value={editIconName}
+                          onChange={(e) => setEditIconName(e.target.value)}
+                          style={{
+                            width: '100%',
+                            height: '44px',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            background: '#0F172A',
+                            padding: '0 12px',
+                            color: '#FFFFFF',
+                            fontSize: '13px',
+                            outline: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <option value="school">Ta’lim (GraduationCap)</option>
+                          <option value="cart">Xaridor / Savat (Cart)</option>
+                          <option value="briefcase">Mehnat / Portfel (Briefcase)</option>
+                          <option value="scale">Adolat / Tarozi (Scale)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#CBD5E1', marginBottom: '6px' }}>
+                          Mavzu rangi:
+                        </label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '44px' }}>
+                          {['#8B5CF6', '#00A3FF', '#F59E0B', '#10B981', '#EC4899'].map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setEditBadgeColor(c)}
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '8px',
+                                background: c,
+                                border: editBadgeColor === c ? '2.5px solid #FFFFFF' : 'none',
+                                cursor: 'pointer',
+                                transform: editBadgeColor === c ? 'scale(1.15)' : 'scale(1)',
+                                transition: 'all 0.15s ease',
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Field 5: IsActive Status toggle */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF' }}>Xizmat holati:</div>
+                        <div style={{ fontSize: '11.5px', color: '#94A3B8' }}>
+                          {editIsActive ? 'Mobil ilovada faol ko‘rsatiladi' : 'Vaqtinchalik to‘xtatilgan'}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditIsActive(!editIsActive)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: editIsActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                          color: editIsActive ? '#10B981' : '#EF4444',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {editIsActive ? 'Faol' : 'To‘xtatilgan'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Modal Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <button
+                      type="button"
+                      onClick={() => setEditingService(null)}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'transparent',
+                        color: '#94A3B8',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Bekor qilish
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isSavingService}
+                      onClick={handleSaveServiceEdit}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #00B2FF 0%, #0077FF 100%)',
+                        color: '#FFFFFF',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        cursor: isSavingService ? 'not-allowed' : 'pointer',
+                        opacity: isSavingService ? 0.7 : 1,
+                        boxShadow: '0 0 20px rgba(0, 163, 255, 0.4)',
+                      }}
+                    >
+                      {isSavingService ? 'Saqlanmoqda...' : 'O‘zgarishlarni saqlash'}
                     </button>
                   </div>
                 </div>

@@ -56,22 +56,16 @@ export interface RegisteredUser {
 export interface LegalServiceItem {
   id: string;
   title: string;
-  slug: string;
-  category: string;
-  categoryBadge: string;
+  category?: string;
+  categoryLabel?: string;
   desc: string;
-  icon: 'school' | 'consumer' | 'labor';
+  iconName?: string;
   badgeColor: string;
-  modulesCount: number;
-  materialsCount: number;
-  materialsLabel: string;
-  usageCount: string;
-  successRate: string;
-  rating: string;
-  ratingValue: number;
   isActive: boolean;
-  features: string[];
-  lastUpdated: string;
+  usedUserIds?: string[];
+  usersCount?: number;
+  lastUpdated?: string;
+  features?: string[];
 }
 
 

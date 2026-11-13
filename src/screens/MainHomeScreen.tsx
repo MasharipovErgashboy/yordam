@@ -27,6 +27,7 @@ import { YuristOnlineNavigator } from '../features/yurist-online/YuristOnlineNav
 import { FoydaliMalumotlarScreen } from './FoydaliMalumotlarScreen';
 import { LEGAL_ARTICLES } from '../data/legalArticles';
 import type { UserProfile } from '../services/authService';
+import { legalServicesApi, BackendServiceItem } from '../services/legalServicesApi';
 
 const { width } = Dimensions.get('window');
 
@@ -392,6 +393,22 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
 
+  // Dynamic services synchronized with Backend & Admin Panel
+  const [backendServices, setBackendServices] = useState<Record<string, BackendServiceItem>>({});
+
+  useEffect(() => {
+    legalServicesApi
+      .getServices()
+      .then((list) => {
+        const map: Record<string, BackendServiceItem> = {};
+        list.forEach((item) => {
+          map[item.id] = item;
+        });
+        setBackendServices(map);
+      })
+      .catch(() => {});
+  }, []);
+
   // Huquq Maktabi Mini App State
   const [isHuquqMaktabiOpen, setIsHuquqMaktabiOpen] = useState(false);
 
@@ -552,8 +569,12 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   const handleUseService = () => {
     if (!checkAuth()) return;
     if (!selectedService) return;
-    const sName = selectedService.name;
+    const sName = backendServices[selectedService.id]?.title || selectedService.name;
     const sId = selectedService.id;
+
+    // Record unique user usage in backend
+    legalServicesApi.recordUsage(sId, user);
+
     setSelectedService(null);
 
     if (sId === 'huquq_maktabi') {
@@ -861,12 +882,12 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
                   <View style={styles.tableDetailsCol}>
                     {/* Top: Service Name */}
                     <Text style={styles.tableServiceName} numberOfLines={1}>
-                      {service.name}
+                      {backendServices[service.id]?.title || service.name}
                     </Text>
 
                     {/* Middle: Short Description */}
                     <Text style={styles.tableServiceDesc} numberOfLines={2}>
-                      {service.description}
+                      {backendServices[service.id]?.desc || service.description}
                     </Text>
 
                     {/* Bottom Metadata Tags */}
@@ -877,7 +898,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
                       </View>
 
                       <View style={styles.metaCategoryTag}>
-                        <Text style={styles.metaCategoryText}>{service.categoryLabel}</Text>
+                        <Text style={styles.metaCategoryText}>
+                          {backendServices[service.id]?.categoryLabel || service.categoryLabel}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -1523,9 +1546,13 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
 
             {/* Service Title & Category Badge */}
             <View style={styles.modalTitleBlock}>
-              <Text style={styles.modalServiceName}>{selectedService?.name}</Text>
+              <Text style={styles.modalServiceName}>
+                {selectedService ? (backendServices[selectedService.id]?.title || selectedService.name) : ''}
+              </Text>
               <View style={styles.modalCategoryBadge}>
-                <Text style={styles.modalCategoryText}>{selectedService?.categoryLabel}</Text>
+                <Text style={styles.modalCategoryText}>
+                  {selectedService ? (backendServices[selectedService.id]?.categoryLabel || selectedService.categoryLabel) : ''}
+                </Text>
               </View>
             </View>
 
@@ -1533,6 +1560,13 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
               style={styles.modalBodyScroll}
               showsVerticalScrollIndicator={false}
             >
+              {/* Short description from backend or catalog */}
+              {selectedService && (
+                <Text style={[styles.tableServiceDesc, { marginBottom: 12, fontSize: 13, color: '#4B5563', lineHeight: 18 }]}>
+                  {backendServices[selectedService.id]?.desc || selectedService.description}
+                </Text>
+              )}
+
               {/* Special Note / Project Basis Badge */}
               {selectedService?.specialNote && (
                 <View style={styles.modalSpecialNoteBox}>

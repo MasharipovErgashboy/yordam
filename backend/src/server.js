@@ -13,6 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'yordam_super_secure_jwt_secret_202
 // Paths
 const DATA_DIR = path.join(__dirname, '../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const SERVICES_FILE = path.join(DATA_DIR, 'services.json');
 
 // Ensure data folder and files exist
 if (!fs.existsSync(DATA_DIR)) {
@@ -20,6 +21,9 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 if (!fs.existsSync(USERS_FILE)) {
   fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2), 'utf8');
+}
+if (!fs.existsSync(SERVICES_FILE)) {
+  fs.writeFileSync(SERVICES_FILE, JSON.stringify([], null, 2), 'utf8');
 }
 
 // In-memory pending OTP storage: email -> { otp, payload, expiresAt }
@@ -56,6 +60,31 @@ function saveUsers(users) {
     return true;
   } catch (err) {
     console.error('Error saving users file:', err);
+    return false;
+  }
+}
+
+// Helper: Read services
+function readServices() {
+  try {
+    if (!fs.existsSync(SERVICES_FILE)) {
+      return [];
+    }
+    const raw = fs.readFileSync(SERVICES_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('Error reading services file:', err);
+    return [];
+  }
+}
+
+// Helper: Save services
+function saveServices(services) {
+  try {
+    fs.writeFileSync(SERVICES_FILE, JSON.stringify(services, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error saving services file:', err);
     return false;
   }
 }
@@ -480,6 +509,102 @@ app.delete('/api/admin/users/:id', (req, res) => {
     return res.json({ success: true, message: 'Foydalanuvchi muvaffaqiyatli o‘chirildi' });
   } catch (err) {
     console.error('Admin delete user error:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// ============================================================================
+// SERVICES API (Admin & Mobile App Integration)
+// ============================================================================
+
+// 9. Get All Services
+app.get('/api/services', (req, res) => {
+  try {
+    const services = readServices();
+    return res.json({ success: true, services });
+  } catch (err) {
+    console.error('Error fetching services:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 10. Update Service (from Admin Panel)
+app.put('/api/services/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, categoryLabel, desc, iconName, badgeColor, isActive } = req.body;
+    let services = readServices();
+
+    const idx = services.findIndex((s) => s.id === id || s.id.replace('srv_', '') === id.replace('srv_', ''));
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Xizmat topilmadi' });
+    }
+
+    const current = services[idx];
+    const updated = {
+      ...current,
+      title: title !== undefined ? title : current.title,
+      category: category !== undefined ? category : current.category,
+      categoryLabel: categoryLabel !== undefined ? categoryLabel : current.categoryLabel,
+      desc: desc !== undefined ? desc : current.desc,
+      iconName: iconName !== undefined ? iconName : current.iconName,
+      badgeColor: badgeColor !== undefined ? badgeColor : current.badgeColor,
+      isActive: isActive !== undefined ? isActive : current.isActive,
+      lastUpdated: 'Hozirgina yangilandi',
+    };
+
+    services[idx] = updated;
+    saveServices(services);
+
+    return res.json({ success: true, service: updated, message: 'Xizmat muvaffaqiyatli yangilandi' });
+  } catch (err) {
+    console.error('Error updating service:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 11. Register Service Usage (from Mobile App - "Xizmatdan foydalanish" button)
+app.post('/api/services/:id/use', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, email } = req.body || {};
+
+    const userKey = (userId || email || '').trim();
+    if (!userKey) {
+      return res.status(400).json({ success: false, message: 'Foydalanuvchi ma’lumoti talab qilinadi' });
+    }
+
+    let services = readServices();
+    const idx = services.findIndex((s) => s.id === id || s.id.replace('srv_', '') === id.replace('srv_', ''));
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Xizmat topilmadi' });
+    }
+
+    const srv = services[idx];
+    if (!Array.isArray(srv.usedUserIds)) {
+      srv.usedUserIds = [];
+    }
+
+    const alreadyUsed = srv.usedUserIds.includes(userKey);
+    let isNew = false;
+
+    if (!alreadyUsed) {
+      srv.usedUserIds.push(userKey);
+      srv.usersCount = srv.usedUserIds.length;
+      isNew = true;
+      services[idx] = srv;
+      saveServices(services);
+    }
+
+    return res.json({
+      success: true,
+      serviceId: srv.id,
+      usersCount: srv.usedUserIds.length,
+      isNewUser: isNew,
+      message: isNew ? 'Xizmatdan foydalanish birinchi marta muvaffaqiyatli qayd etildi' : 'Foydalanuvchi avval ro‘yxatga olingan',
+    });
+  } catch (err) {
+    console.error('Error logging service usage:', err);
     return res.status(500).json({ success: false, message: 'Server xatosi' });
   }
 });

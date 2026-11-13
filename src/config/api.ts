@@ -14,3 +14,9 @@ export const getApiBaseUrl = (): string => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
+export const getWsBaseUrl = (): string => {
+  return API_BASE_URL.replace(/^http/, 'ws');
+};
+
+export const WS_BASE_URL = getWsBaseUrl();
+

@@ -393,20 +393,21 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
 
-  // Dynamic services synchronized with Backend & Admin Panel
+  // Dynamic services synchronized with Backend & Admin Panel (Real-Time)
   const [backendServices, setBackendServices] = useState<Record<string, BackendServiceItem>>({});
 
   useEffect(() => {
-    legalServicesApi
-      .getServices()
-      .then((list) => {
-        const map: Record<string, BackendServiceItem> = {};
-        list.forEach((item) => {
-          map[item.id] = item;
-        });
-        setBackendServices(map);
-      })
-      .catch(() => {});
+    const unsubscribe = legalServicesApi.subscribeToRealtime((list) => {
+      const map: Record<string, BackendServiceItem> = {};
+      list.forEach((item) => {
+        map[item.id] = item;
+      });
+      setBackendServices(map);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Huquq Maktabi Mini App State

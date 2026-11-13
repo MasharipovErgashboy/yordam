@@ -8,9 +8,11 @@
     "iconName": "school",
     "badgeColor": "#8B5CF6",
     "isActive": true,
-    "usedUserIds": [],
-    "usersCount": 0,
-    "lastUpdated": "Bugun, 20:00",
+    "usedUserIds": [
+      "u_1794578344256_724"
+    ],
+    "usersCount": 1,
+    "lastUpdated": "Hozirgina yangilandi",
     "features": [
       "12 ta interaktiv huquqiy o‘quv moduli",
       "48 ta video va audio darsliklar bazasi",

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, WS_BASE_URL } from '../config/api';
 import type { UserProfile } from './authService';
 
 export interface BackendServiceItem {
@@ -117,4 +117,74 @@ export const legalServicesApi = {
       console.warn('Error recording service usage:', err);
     }
   },
+
+  /**
+   * Real-time subscription to backend service updates (WebSocket + Fallback Polling)
+   * Ensures mobile app updates instantly without manual page refreshes!
+   */
+  subscribeToRealtime(
+    onServicesUpdate: (services: BackendServiceItem[]) => void
+  ): () => void {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: any = null;
+    let isCancelled = false;
+
+    const connect = () => {
+      if (isCancelled) return;
+      try {
+        const wsUrl = WS_BASE_URL || 'ws://localhost:5000';
+        ws = new WebSocket(wsUrl);
+
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (!msg || !msg.event) return;
+
+            if (msg.event === 'initial:sync' && msg.data?.services) {
+              onServicesUpdate(msg.data.services);
+            } else if ((msg.event === 'service:updated' || msg.event === 'service:used') && msg.data?.services) {
+              onServicesUpdate(msg.data.services);
+            }
+          } catch {}
+        };
+
+        ws.onclose = () => {
+          if (!isCancelled) {
+            reconnectTimeout = setTimeout(connect, 3000);
+          }
+        };
+
+        ws.onerror = () => {
+          ws?.close();
+        };
+      } catch {
+        if (!isCancelled) {
+          reconnectTimeout = setTimeout(connect, 3000);
+        }
+      }
+    };
+
+    connect();
+
+    // Secondary resilient sync: poll every 3 seconds so data is always synchronized
+    const pollInterval = setInterval(async () => {
+      if (isCancelled) return;
+      try {
+        const list = await legalServicesApi.getServices();
+        if (list && list.length > 0) {
+          onServicesUpdate(list);
+        }
+      } catch {}
+    }, 3000);
+
+    return () => {
+      isCancelled = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      clearInterval(pollInterval);
+      try {
+        ws?.close();
+      } catch {}
+    };
+  },
 };
+

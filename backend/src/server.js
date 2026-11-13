@@ -2,11 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const { WebSocketServer, WebSocket } = require('ws');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'yordam_super_secure_jwt_secret_2026';
 
@@ -40,6 +44,35 @@ const transporter = nodemailer.createTransport({
     user: 'oabduraximov199@gmail.com',
     pass: 'mcfuncrzttzylxxw', // sanitized app password
   },
+});
+
+// Real-time WebSocket Broadcast Helper
+function broadcast(eventType, data) {
+  const payload = JSON.stringify({ event: eventType, data, timestamp: Date.now() });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      try {
+        client.send(payload);
+      } catch (err) {
+        console.error('Error broadcasting to WS client:', err);
+      }
+    }
+  });
+}
+
+// WebSocket Connection Handler
+wss.on('connection', (ws) => {
+  try {
+    const services = readServices();
+    const users = readUsers().map(({ password: _, ...u }) => u);
+    ws.send(JSON.stringify({
+      event: 'initial:sync',
+      data: { services, users, usersCount: users.length },
+      timestamp: Date.now(),
+    }));
+  } catch (err) {
+    console.error('Error on WS client connection initial sync:', err);
+  }
 });
 
 // Helper: Read users
@@ -310,6 +343,9 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     // Strip password from response
     const { password: _, ...userSafe } = newUser;
 
+    // Real-time broadcast to Admin Panel & Mobile clients
+    broadcast('user:registered', { user: userSafe, usersCount: users.length });
+
     console.log(`[AUTH] User registered successfully: ${newUser.name} (${newUser.email})`);
 
     return res.json({
@@ -506,6 +542,7 @@ app.delete('/api/admin/users/:id', (req, res) => {
     }
 
     saveUsers(users);
+    broadcast('user:deleted', { userId: id, usersCount: users.length });
     return res.json({ success: true, message: 'Foydalanuvchi muvaffaqiyatli o‘chirildi' });
   } catch (err) {
     console.error('Admin delete user error:', err);
@@ -556,6 +593,9 @@ app.put('/api/services/:id', (req, res) => {
     services[idx] = updated;
     saveServices(services);
 
+    // Real-time broadcast to Admin Panel & Mobile clients
+    broadcast('service:updated', { service: updated, services });
+
     return res.json({ success: true, service: updated, message: 'Xizmat muvaffaqiyatli yangilandi' });
   } catch (err) {
     console.error('Error updating service:', err);
@@ -594,6 +634,9 @@ app.post('/api/services/:id/use', (req, res) => {
       isNew = true;
       services[idx] = srv;
       saveServices(services);
+
+      // Real-time broadcast to Admin Panel & Mobile clients
+      broadcast('service:used', { serviceId: srv.id, usersCount: srv.usersCount, services });
     }
 
     return res.json({
@@ -610,7 +653,7 @@ app.post('/api/services/:id/use', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Yordam Backend Server running on http://0.0.0.0:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Yordam Backend Server (with WebSocket Real-time) running on http://0.0.0.0:${PORT}`);
 });
 

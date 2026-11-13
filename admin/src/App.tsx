@@ -359,27 +359,117 @@ export default function App() {
     }
   }, []);
 
+  // Real-time synchronization manager (WebSocket + Resilient 3s Polling)
   useEffect(() => {
-    let ignore = false;
-    const load = async () => {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: any = null;
+    let isUnmounted = false;
+
+    const connectWs = () => {
+      if (isUnmounted) return;
       try {
-        const res = await fetch('http://localhost:5000/api/admin/users');
-        if (res.ok) {
-          const data = await res.json();
-          if (!ignore && data.success && Array.isArray(data.users)) {
-            setUsersList(data.users);
-            if (data.metrics) {
-              setUsersMetrics(data.metrics);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.hostname || 'localhost';
+        const wsUrl = `${protocol}//${host}:5000`;
+        ws = new WebSocket(wsUrl);
+
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (!msg || !msg.event) return;
+
+            if (msg.event === 'initial:sync') {
+              if (msg.data.services) setServicesList(msg.data.services);
+              if (msg.data.users) setUsersList(msg.data.users);
+              if (msg.data.usersCount !== undefined) {
+                setUsersMetrics((prev) => ({ ...prev, totalUsers: msg.data.usersCount }));
+              }
+            } else if (msg.event === 'service:updated' || msg.event === 'service:used') {
+              if (msg.data.services) {
+                setServicesList(msg.data.services);
+              } else if (msg.data.service) {
+                setServicesList((prev) =>
+                  prev.map((s) => (s.id === msg.data.service.id ? msg.data.service : s))
+                );
+              }
+            } else if (msg.event === 'user:registered') {
+              if (msg.data.user) {
+                setUsersList((prev) => [msg.data.user, ...prev.filter((u) => u.id !== msg.data.user.id)]);
+                setUsersMetrics((prev) => ({
+                  ...prev,
+                  totalUsers: prev.totalUsers + 1,
+                  todayCount: prev.todayCount + 1,
+                }));
+              }
+            } else if (msg.event === 'user:deleted') {
+              if (msg.data.userId) {
+                setUsersList((prev) => prev.filter((u) => u.id !== msg.data.userId));
+                setUsersMetrics((prev) => ({
+                  ...prev,
+                  totalUsers: Math.max(0, prev.totalUsers - 1),
+                }));
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing WS message:', e);
+          }
+        };
+
+        ws.onclose = () => {
+          if (!isUnmounted) {
+            reconnectTimeout = setTimeout(connectWs, 2500);
+          }
+        };
+
+        ws.onerror = () => {
+          ws?.close();
+        };
+      } catch {
+        if (!isUnmounted) {
+          reconnectTimeout = setTimeout(connectWs, 2500);
+        }
+      }
+    };
+
+    connectWs();
+
+    // Resilient background polling every 3 seconds
+    const pollInterval = setInterval(async () => {
+      if (isUnmounted) return;
+      try {
+        const [servicesRes, usersRes] = await Promise.all([
+          fetch('http://localhost:5000/api/services'),
+          fetch('http://localhost:5000/api/admin/users'),
+        ]);
+
+        if (servicesRes.ok) {
+          const sData = await servicesRes.json();
+          if (sData.success && Array.isArray(sData.services)) {
+            setServicesList(sData.services);
+          }
+        }
+
+        if (usersRes.ok) {
+          const uData = await usersRes.json();
+          if (uData.success && Array.isArray(uData.users)) {
+            setUsersList(uData.users);
+            if (uData.metrics) {
+              setUsersMetrics(uData.metrics);
             }
           }
         }
-      } catch (err) {
-        console.warn('Backend serverga ulanib bo‘lmadi:', err);
+      } catch {
+        // silent
       }
-    };
-    load();
+    }, 3000);
+
     return () => {
-      ignore = true;
+      isUnmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      clearInterval(pollInterval);
+      try {
+        ws?.close();
+      } catch {}
     };
   }, []);
 

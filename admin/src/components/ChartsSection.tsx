@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp } from 'lucide-react';
 import type { BarChartData } from '../types';
 
 export const ChartsSection: React.FC = () => {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const [isAnimated, setIsAnimated] = useState(false);
+  const [displayPercent, setDisplayPercent] = useState(0);
 
   const barData: BarChartData[] = [
     { label: 'Du', value: 52 },
@@ -17,11 +19,40 @@ export const ChartsSection: React.FC = () => {
   ];
 
   // Donut chart calculations
-  const percentage = 78;
+  const targetPercentage = 78;
   const radius = 64;
   const strokeWidth = 14;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const targetOffset = circumference - (targetPercentage / 100) * circumference;
+
+  // Mount animation trigger
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAnimated(true);
+    }, 60);
+
+    // Number counting animation (0 -> 78%)
+    let current = 0;
+    const duration = 1200;
+    const stepTime = 16;
+    const totalSteps = duration / stepTime;
+    const increment = targetPercentage / totalSteps;
+
+    const countTimer = setInterval(() => {
+      current += increment;
+      if (current >= targetPercentage) {
+        setDisplayPercent(targetPercentage);
+        clearInterval(countTimer);
+      } else {
+        setDisplayPercent(Math.floor(current));
+      }
+    }, stepTime);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(countTimer);
+    };
+  }, []);
 
   return (
     <div style={{
@@ -30,7 +61,7 @@ export const ChartsSection: React.FC = () => {
       gap: '18px',
       marginBottom: '20px',
     }}>
-      {/* Left Card: Vencimentos por semana (Glowing Bar Chart) */}
+      {/* Left Card: Haftalik arizalar oqimi (Animated Glowing Bar Chart) */}
       <div
         className="glass-panel"
         style={{
@@ -49,15 +80,20 @@ export const ChartsSection: React.FC = () => {
           justifyContent: 'space-between',
           marginBottom: '28px',
         }}>
-          <h2 style={{
-            fontSize: '17px',
-            fontWeight: 800,
-            color: '#FFFFFF',
-            margin: 0,
-            letterSpacing: '-0.2px',
-          }}>
-            Haftalik arizalar oqimi
-          </h2>
+          <div>
+            <h2 style={{
+              fontSize: '17px',
+              fontWeight: 800,
+              color: '#FFFFFF',
+              margin: '0 0 4px 0',
+              letterSpacing: '-0.2px',
+            }}>
+              Haftalik arizalar oqimi
+            </h2>
+            <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, fontWeight: 500 }}>
+              Kunlar kesimida qabul qilingan murojaatlar
+            </p>
+          </div>
 
           <div style={{
             display: 'inline-flex',
@@ -89,7 +125,8 @@ export const ChartsSection: React.FC = () => {
         }}>
           {barData.map((bar, idx) => {
             const isHovered = hoveredBar === idx;
-            const barHeightPx = Math.max((bar.value / 100) * 180, 8);
+            const targetHeightPx = Math.max((bar.value / 100) * 180, 8);
+            const currentHeightPx = isAnimated ? targetHeightPx : 0;
 
             return (
               <div
@@ -111,7 +148,7 @@ export const ChartsSection: React.FC = () => {
                 {isHovered && (
                   <div style={{
                     position: 'absolute',
-                    top: `calc(100% - ${barHeightPx + 44}px)`,
+                    top: `calc(100% - ${targetHeightPx + 44}px)`,
                     background: '#0F172A',
                     border: '1px solid rgba(0, 163, 255, 0.4)',
                     padding: '4px 8px',
@@ -123,17 +160,18 @@ export const ChartsSection: React.FC = () => {
                     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.6)',
                     pointerEvents: 'none',
                     zIndex: 20,
+                    animation: 'fadeIn 0.2s ease',
                   }}>
                     {bar.value}% ({Math.round(bar.value * 0.4)} ta)
                   </div>
                 )}
 
-                {/* Vertical Bar Capsule */}
+                {/* Vertical Bar Capsule with smooth animation */}
                 <div
                   style={{
                     width: '100%',
                     maxWidth: '44px',
-                    height: `${barHeightPx}px`,
+                    height: `${currentHeightPx}px`,
                     borderRadius: '12px 12px 6px 6px',
                     background: bar.value > 5
                       ? 'linear-gradient(180deg, #00D2FF 0%, #0070F3 100%)'
@@ -141,11 +179,12 @@ export const ChartsSection: React.FC = () => {
                     border: bar.value > 5 ? '1px solid rgba(0, 229, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
                     boxShadow: bar.value > 5
                       ? isHovered
-                        ? '0 0 24px rgba(0, 163, 255, 0.7), inset 0 2px 2px rgba(255, 255, 255, 0.4)'
+                        ? '0 0 26px rgba(0, 163, 255, 0.8), inset 0 2px 2px rgba(255, 255, 255, 0.4)'
                         : '0 0 16px rgba(0, 163, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
                       : 'none',
-                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    transform: isHovered ? 'scaleY(1.04)' : 'scaleY(1)',
+                    transition: 'height 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease, box-shadow 0.25s ease',
+                    transitionDelay: `${idx * 65}ms`,
+                    transform: isHovered ? 'scaleY(1.05)' : 'scaleY(1)',
                     transformOrigin: 'bottom',
                     position: 'relative',
                     overflow: 'hidden',
@@ -182,7 +221,7 @@ export const ChartsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Card: Meta renovação (Circular Donut Ring Chart) */}
+      {/* Right Card: Muvaffaqiyat ko'rsatkichi (Animated Circular Donut Ring Chart) */}
       <div
         className="glass-panel"
         style={{
@@ -194,16 +233,26 @@ export const ChartsSection: React.FC = () => {
           minHeight: '340px',
         }}
       >
-        {/* Card Header */}
-        <h2 style={{
-          fontSize: '17px',
-          fontWeight: 800,
-          color: '#FFFFFF',
-          margin: 0,
-          letterSpacing: '-0.2px',
-        }}>
-          Muvaffaqiyat kõrsatkichi
-        </h2>
+        {/* Card Header with Subtitle outside the circle */}
+        <div>
+          <h2 style={{
+            fontSize: '17px',
+            fontWeight: 800,
+            color: '#FFFFFF',
+            margin: 0,
+            letterSpacing: '-0.2px',
+          }}>
+            Muvaffaqiyat kõrsatkichi
+          </h2>
+          <p style={{
+            fontSize: '12px',
+            color: '#94A3B8',
+            margin: '4px 0 0 0',
+            fontWeight: 500,
+          }}>
+            642 ta arizadan 501 tasi
+          </p>
+        </div>
 
         {/* Circular Donut Ring Graphic */}
         <div style={{
@@ -212,6 +261,7 @@ export const ChartsSection: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
+          padding: '10px 0',
         }}>
           <svg width="180" height="180" viewBox="0 0 180 180" style={{ transform: 'rotate(-90deg)' }}>
             <defs>
@@ -235,7 +285,7 @@ export const ChartsSection: React.FC = () => {
               fill="transparent"
             />
 
-            {/* Glowing active progress arc */}
+            {/* Glowing active animated progress arc */}
             <circle
               cx="90"
               cy="90"
@@ -243,17 +293,18 @@ export const ChartsSection: React.FC = () => {
               stroke="url(#donutGlow)"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
+              strokeDashoffset={isAnimated ? targetOffset : circumference}
               strokeLinecap="round"
               fill="transparent"
               filter="url(#ringGlow)"
               style={{
-                transition: 'stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)',
+                transition: 'stroke-dashoffset 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '150ms',
               }}
             />
           </svg>
 
-          {/* Centered Numbers */}
+          {/* Centered Number only (clean, large, animated count) */}
           <div style={{
             position: 'absolute',
             textAlign: 'center',
@@ -263,21 +314,14 @@ export const ChartsSection: React.FC = () => {
             justifyContent: 'center',
           }}>
             <span style={{
-              fontSize: '36px',
+              fontSize: '40px',
               fontWeight: 800,
               color: '#FFFFFF',
               lineHeight: 1,
               letterSpacing: '-1px',
+              textShadow: '0 0 20px rgba(0, 163, 255, 0.5)',
             }}>
-              78%
-            </span>
-            <span style={{
-              fontSize: '11.5px',
-              color: '#94A3B8',
-              marginTop: '6px',
-              fontWeight: 500,
-            }}>
-              642 ta arizadan 501 tasi
+              {displayPercent}%
             </span>
           </div>
         </div>

@@ -63,33 +63,14 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const [selectedCat, setSelectedCat] = useState('1');
   const [search, setSearch] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
 
   return (
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={[styles.header, isScrolled && styles.headerScrolled]}>
-        <View style={styles.headerLeft}>
-          <View style={styles.logoBox}>
-            <Text style={styles.logoIcon}>💼</Text>
-          </View>
-          <View>
-            <Text style={styles.appName}>Bosh sahifa</Text>
-            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-          </View>
-        </View>
-      </View>
-
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        onScroll={(e) => {
-          const offsetY = e.nativeEvent.contentOffset.y;
-          setIsScrolled(offsetY > 10);
-        }}
-        scrollEventThrottle={16}
       >
         {/* ── SEARCH ── */}
         <View style={styles.searchBox}>
@@ -260,38 +241,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   scroll: { flex: 1, paddingHorizontal: 16 },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: C.bg,
-    zIndex: 10,
-  },
-  headerScrolled: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  logoBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.primary + '22', alignItems: 'center', justifyContent: 'center' },
-  logoIcon: { fontSize: 18 },
-  appName: { fontSize: 14, fontWeight: '700', color: C.textDark },
-  appSub: { fontSize: 11, color: C.textGrey },
-
-  // Date
-  dateRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 4 },
-  dateIcon: { fontSize: 13 },
-  dateText: { fontSize: 13, color: C.textGrey },
   // Search
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 6, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: C.textDark },
   micIcon: { fontSize: 18 },

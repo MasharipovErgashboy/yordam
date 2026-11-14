@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { legalServicesApi } from '../services/legalServicesApi';
+import { WebView } from 'react-native-webview';
 
 const { width } = Dimensions.get('window');
 const SLIDE_WIDTH = width - 32;
@@ -1866,6 +1867,24 @@ const mapBackendTopicsToCategories = (backendTopics: any[]): LegalCategory[] => 
   });
 };
 
+const extractYouTubeVideoId = (urlOrEmbed?: string): string | null => {
+  if (!urlOrEmbed) return null;
+  const str = urlOrEmbed.trim();
+  const iframeMatch = str.match(/src=["'](?:https?:)?\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{11})/i);
+  if (iframeMatch && iframeMatch[1]) {
+    return iframeMatch[1];
+  }
+  const regExp = /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([a-zA-Z0-9_-]{11})/i;
+  const match = str.match(regExp);
+  if (match && match[1]) {
+    return match[1];
+  }
+  if (/^[a-zA-Z0-9_-]{11}$/.test(str)) {
+    return str;
+  }
+  return null;
+};
+
 export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<SchoolTab>('home');
@@ -1956,6 +1975,17 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   const [isLessonDownloaded, setIsLessonDownloaded] = useState(false);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [userNotes, setUserNotes] = useState('');
+
+  // Real lessons belonging to the currently selected course or lesson
+  const currentCourseLessons = useMemo(() => {
+    if (selectedCourseDetail) {
+      return dynamicLessons.filter((l) => l.courseId === selectedCourseDetail.id);
+    }
+    if (selectedLessonVideo?.courseId) {
+      return dynamicLessons.filter((l) => l.courseId === selectedLessonVideo.courseId);
+    }
+    return [];
+  }, [selectedCourseDetail, selectedLessonVideo, dynamicLessons]);
 
   // Course Final Test Screen state (1:1 design matching user upload)
   const [isTakingCourseFinalTest, setIsTakingCourseFinalTest] = useState(false);
@@ -4767,133 +4797,106 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             ]}
             showsVerticalScrollIndicator={false}
           >
-            {/* 1. Video Player Container with Video Frame Image & Overlays */}
-            <View style={styles.videoPlayerContainer}>
-              <Image
-                source={
-                  selectedLessonVideo.imageUrl
-                    ? { uri: selectedLessonVideo.imageUrl }
-                    : selectedLessonVideo.image || videoLessonInstructorImage
-                }
-                style={styles.videoPlayerImage}
-                resizeMode="cover"
-              />
-
-              {/* YouTube Video Direct Link Badge */}
-              {selectedLessonVideo.youtubeUrl ? (
-                <TouchableOpacity
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    backgroundColor: 'rgba(239, 68, 68, 0.95)',
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                    borderRadius: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 5,
-                    zIndex: 10,
-                  }}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    Linking.openURL(selectedLessonVideo.youtubeUrl!).catch(() => {
-                      Alert.alert('Xatolik', 'YouTube havolasi ochilmadi.');
-                    });
-                  }}
-                >
-                  <Ionicons name="logo-youtube" size={14} color="#FFFFFF" />
-                  <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>YouTube</Text>
-                </TouchableOpacity>
-              ) : null}
-
-              {/* Video Overlay Tap to Play/Pause */}
-              <TouchableOpacity
-                style={styles.videoTouchOverlay}
-                activeOpacity={1}
-                onPress={() => {
-                  if (selectedLessonVideo.youtubeUrl) {
-                    Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {
-                      setIsVideoPlaying(!isVideoPlaying);
-                    });
-                  } else {
-                    setIsVideoPlaying(!isVideoPlaying);
-                  }
-                }}
-              >
-                {!isVideoPlaying && (
-                  <View style={styles.videoBigPlayBtn}>
-                    <Ionicons name="play" size={28} color="#002B49" style={{ marginLeft: 3 }} />
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              {/* Bottom Video Controls Overlay */}
-              <View style={styles.videoControlsOverlay}>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (selectedLessonVideo.youtubeUrl) {
-                      Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {
-                        setIsVideoPlaying(!isVideoPlaying);
-                      });
-                    } else {
-                      setIsVideoPlaying(!isVideoPlaying);
-                    }
-                  }}
-                  style={styles.videoControlPlayBtn}
-                >
-                  <Ionicons
-                    name={isVideoPlaying ? 'pause' : 'play'}
-                    size={16}
-                    color="#FFFFFF"
-                  />
-                </TouchableOpacity>
-
-                <Text style={styles.videoTimeText}>04:21 / 10:00</Text>
-
-                {/* Progress bar with scrubber knob */}
-                <View style={styles.videoProgressTrack}>
-                  <View style={[styles.videoProgressFill, { width: '43%' }]} />
-                  <View style={[styles.videoProgressKnob, { left: '42%' }]} />
+            {/* 1. Video Player Container with Real YouTube Player */}
+            {(() => {
+              const ytVideoId = extractYouTubeVideoId(selectedLessonVideo.youtubeUrl);
+              return (
+                <View style={styles.videoPlayerContainer}>
+                  {ytVideoId ? (
+                    <View style={{ width: '100%', height: '100%', backgroundColor: '#000000', borderRadius: 18, overflow: 'hidden' }}>
+                      <WebView
+                        style={{ width: '100%', height: '100%', backgroundColor: '#000000' }}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        allowsFullscreenVideo={true}
+                        allowsInlineMediaPlayback={true}
+                        mediaPlaybackRequiresUserAction={false}
+                        scalesPageToFit={true}
+                        scrollEnabled={false}
+                        originWhitelist={['*']}
+                        source={{
+                          html: `
+                            <!DOCTYPE html>
+                            <html>
+                              <head>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                                <style>
+                                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                                  html, body { width: 100%; height: 100%; background-color: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+                                  iframe { width: 100%; height: 100%; border: none; }
+                                </style>
+                              </head>
+                              <body>
+                                <iframe
+                                  src="https://www.youtube.com/embed/${ytVideoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
+                                  frameborder="0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                  allowfullscreen
+                                ></iframe>
+                              </body>
+                            </html>
+                          `,
+                          baseUrl: 'https://www.youtube.com',
+                        }}
+                      />
+                      {/* YouTube direct link button */}
+                      <TouchableOpacity
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 4,
+                          zIndex: 30,
+                        }}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          if (selectedLessonVideo.youtubeUrl) {
+                            Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {});
+                          }
+                        }}
+                      >
+                        <Ionicons name="logo-youtube" size={13} color="#EF4444" />
+                        <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '700' }}>YouTube</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <View style={{ width: '100%', height: '100%', position: 'relative' }}>
+                      <Image
+                        source={
+                          selectedLessonVideo.imageUrl
+                            ? { uri: selectedLessonVideo.imageUrl }
+                            : selectedLessonVideo.image || videoLessonInstructorImage
+                        }
+                        style={styles.videoPlayerImage}
+                        resizeMode="cover"
+                      />
+                      <View style={[styles.videoTouchOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
+                        <View style={{
+                          backgroundColor: 'rgba(15, 23, 42, 0.82)',
+                          paddingHorizontal: 16,
+                          paddingVertical: 10,
+                          borderRadius: 20,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}>
+                          <Ionicons name="videocam-off-outline" size={18} color="#94A3B8" />
+                          <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>
+                            Video havola kiritilmagan
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </View>
-
-                {/* Speed selector */}
-                <TouchableOpacity
-                  style={styles.videoSpeedBtn}
-                  onPress={() => {
-                    const speeds: ('1.0x' | '1.25x' | '1.5x' | '2.0x')[] = ['1.0x', '1.25x', '1.5x', '2.0x'];
-                    const nextSpeed = speeds[(speeds.indexOf(videoSpeed) + 1) % speeds.length];
-                    setVideoSpeed(nextSpeed);
-                  }}
-                >
-                  <Text style={styles.videoSpeedText}>{videoSpeed}</Text>
-                </TouchableOpacity>
-
-                {/* CC Button */}
-                <TouchableOpacity
-                  style={styles.videoCcBtn}
-                  onPress={() => Alert.alert('Subtitrlar', 'Özbekça subtitrlar faollaştirildi.')}
-                >
-                  <Text style={styles.videoCcText}>CC</Text>
-                </TouchableOpacity>
-
-                {/* PiP Button */}
-                <TouchableOpacity
-                  style={styles.videoSmallControlBtn}
-                  onPress={() => Alert.alert('Mini-pleer', 'Picture-in-Picture rejimi yoqildi.')}
-                >
-                  <Ionicons name="tablet-landscape-outline" size={14} color="#FFFFFF" />
-                </TouchableOpacity>
-
-                {/* Fullscreen Button */}
-                <TouchableOpacity
-                  style={styles.videoSmallControlBtn}
-                  onPress={() => Alert.alert('Töliq ekran', 'Video töliq ekranga kengaytirildi.')}
-                >
-                  <Ionicons name="scan-outline" size={15} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
+              );
+            })()}
 
             {/* 2. Lesson Title, Course Subtitle & "✓ Bajarilgan" Badge */}
             <View style={styles.videoMetaHeaderRow}>
@@ -4967,7 +4970,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   </View>
                   <Text style={styles.lessonAboutBodyText}>
                     {selectedLessonVideo?.description ||
-                      'Ushbu darsda nikoh tushunchasi, uning yuridik mohiyati, nikohning jamiyat va oila hayotidagi o‘rni, shuningdek, O‘zbekiston qonunchiligida nikoh bilan bog‘liq asosiy normalar ko‘rib chiqiladi.'}
+                      'Ushbu dars bo‘yicha qo‘shimcha ma’lumot kiritilmagan.'}
                   </Text>
                 </View>
 
@@ -4988,55 +4991,60 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
 
                   {/* Chapters List */}
                   <View style={styles.chaptersListWrap}>
-                    {(selectedLessonVideo?.plan && selectedLessonVideo.plan.length > 0
-                      ? selectedLessonVideo.plan
-                      : LESSON_CHAPTERS
-                    ).map((chap, idx) => {
-                      const isActiveChap = activeChapterIndex === idx;
+                    {selectedLessonVideo?.plan && selectedLessonVideo.plan.length > 0 ? (
+                      selectedLessonVideo.plan.map((chap, idx) => {
+                        const isActiveChap = activeChapterIndex === idx;
 
-                      return (
-                        <TouchableOpacity
-                          key={chap.id || idx}
-                          style={[
-                            styles.chapterItemRow,
-                            isActiveChap && styles.chapterItemRowActive,
-                          ]}
-                          activeOpacity={0.75}
-                          onPress={() => {
-                            setActiveChapterIndex(idx);
-                            Alert.alert('Reja', `${chap.title} qismiga o‘tildi (${chap.timeRange}).`);
-                          }}
-                        >
-                          <View
+                        return (
+                          <TouchableOpacity
+                            key={chap.id || idx}
                             style={[
-                              styles.chapterPlayCircle,
-                              isActiveChap ? styles.chapterPlayCircleActive : styles.chapterPlayCircleInactive,
+                              styles.chapterItemRow,
+                              isActiveChap && styles.chapterItemRowActive,
                             ]}
+                            activeOpacity={0.75}
+                            onPress={() => {
+                              setActiveChapterIndex(idx);
+                              Alert.alert('Reja', `${chap.title} qismiga o‘tildi (${chap.timeRange}).`);
+                            }}
                           >
-                            <Ionicons
-                              name="play"
-                              size={10}
-                              color={isActiveChap ? '#FFFFFF' : '#64748B'}
-                              style={{ marginLeft: 2 }}
-                            />
-                          </View>
+                            <View
+                              style={[
+                                styles.chapterPlayCircle,
+                                isActiveChap ? styles.chapterPlayCircleActive : styles.chapterPlayCircleInactive,
+                              ]}
+                            >
+                              <Ionicons
+                                name="play"
+                                size={10}
+                                color={isActiveChap ? '#FFFFFF' : '#64748B'}
+                                style={{ marginLeft: 2 }}
+                              />
+                            </View>
 
-                          <Text
-                            style={[
-                              styles.chapterTitleText,
-                              isActiveChap && styles.chapterTitleTextActive,
-                            ]}
-                            numberOfLines={1}
-                          >
-                            {chap.title}
-                          </Text>
+                            <Text
+                              style={[
+                                styles.chapterTitleText,
+                                isActiveChap && styles.chapterTitleTextActive,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {chap.title}
+                            </Text>
 
-                          <Text style={styles.chapterTimeRangeText}>
-                            {chap.timeRange}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                            <Text style={styles.chapterTimeRangeText}>
+                              {chap.timeRange}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })
+                    ) : (
+                      <View style={{ paddingVertical: 14, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, color: '#64748B' }}>
+                          Dars rejasi biriktirilmagan
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </>
@@ -5047,11 +5055,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               <View style={styles.lessonAboutCard}>
                 <View style={styles.cardHeaderWithIconRow}>
                   <Ionicons name="pencil-outline" size={17} color="#0F172A" style={{ marginRight: 6 }} />
-                  <Text style={styles.cardHeaderTitleText}>Mening şaxsiy qaydlarim</Text>
+                  <Text style={styles.cardHeaderTitleText}>Mening shaxsiy qaydlarim</Text>
                 </View>
                 <TextInput
                   style={styles.notesTextInput}
-                  placeholder="Dars böyiça muhim eslatmalaringizni yozing..."
+                  placeholder="Dars bo‘yicha muhim eslatmalaringizni yozing..."
                   placeholderTextColor="#94A3B8"
                   multiline
                   numberOfLines={4}
@@ -5061,9 +5069,9 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 <TouchableOpacity
                   style={styles.saveNotesBtn}
                   activeOpacity={0.8}
-                  onPress={() => Alert.alert('Qayd saqlandi', 'Eslatmalaringiz uşbu darsga biriktirildi.')}
+                  onPress={() => Alert.alert('Qayd saqlandi', 'Eslatmalaringiz ushbu darsga biriktirildi.')}
                 >
-                  <Text style={styles.saveNotesBtnText}>Qaydni saqlaş</Text>
+                  <Text style={styles.saveNotesBtnText}>Qaydni saqlash</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -5073,35 +5081,53 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               <View style={styles.lessonAboutCard}>
                 <View style={styles.cardHeaderWithIconRow}>
                   <Ionicons name="attach-outline" size={17} color="#0F172A" style={{ marginRight: 6 }} />
-                  <Text style={styles.cardHeaderTitleText}>Qöşimça materiallar</Text>
+                  <Text style={styles.cardHeaderTitleText}>Qo‘shimcha materiallar</Text>
                 </View>
-                {(selectedLessonVideo?.materials && selectedLessonVideo.materials.length > 0
-                  ? selectedLessonVideo.materials
-                  : [
-                      { name: 'Oila kodeksi 13-18 moddalari (PDF)', size: '2.4 MB' },
-                      { name: 'Nikoh tushunchasi taqdimot slaydlari (PDF)', size: '5.1 MB' },
-                      { name: 'Amaliy keyslar va savol-javoblar (PDF)', size: '1.8 MB' },
-                    ]
-                ).map((mat: any, idx: number) => (
-                  <TouchableOpacity
-                    key={mat.id || idx}
-                    style={styles.materialItemRow}
-                    activeOpacity={0.75}
-                    onPress={() => Alert.alert('Yuklab oliş', `${mat.name} qurilmangizga yuklanmoqda.`)}
-                  >
-                    <Ionicons name="document-attach-outline" size={20} color="#0284C7" />
-                    <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text style={styles.materialItemName}>{mat.name}</Text>
-                      <Text style={styles.materialItemSize}>{mat.size || '1.2 MB'}</Text>
-                    </View>
-                    <Ionicons name="download-outline" size={18} color="#0F172A" />
-                  </TouchableOpacity>
-                ))}
+                {selectedLessonVideo?.materials && selectedLessonVideo.materials.length > 0 ? (
+                  selectedLessonVideo.materials.map((mat: any, idx: number) => {
+                    const isPdf = mat.type === 'pdf' || mat.name?.toLowerCase().endsWith('.pdf');
+                    const isXls = mat.type === 'xlsx' || mat.type === 'xls' || mat.name?.toLowerCase().endsWith('.xls') || mat.name?.toLowerCase().endsWith('.xlsx');
+                    const isDoc = mat.type === 'docx' || mat.type === 'doc' || mat.name?.toLowerCase().endsWith('.doc') || mat.name?.toLowerCase().endsWith('.docx');
+                    const iconName = isPdf ? 'document-text' : isXls ? 'grid' : isDoc ? 'document' : 'document-attach';
+                    const iconColor = isPdf ? '#EF4444' : isXls ? '#10B981' : isDoc ? '#2563EB' : '#0284C7';
+
+                    return (
+                      <TouchableOpacity
+                        key={mat.id || idx}
+                        style={styles.materialItemRow}
+                        activeOpacity={0.75}
+                        onPress={() => {
+                          if (mat.fileUrl && mat.fileUrl.startsWith('http')) {
+                            Linking.openURL(mat.fileUrl).catch(() => {
+                              Alert.alert('Xatolik', 'Fayl havolasini ochishda xatolik yuz berdi.');
+                            });
+                          } else {
+                            Alert.alert('Fayl', `${mat.name}\nHajmi: ${mat.size || 'Noma‘lum'}`);
+                          }
+                        }}
+                      >
+                        <Ionicons name={iconName as any} size={22} color={iconColor} />
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                          <Text style={styles.materialItemName} numberOfLines={1}>{mat.name}</Text>
+                          <Text style={styles.materialItemSize}>{mat.size || 'Fayl'}</Text>
+                        </View>
+                        <Ionicons name="download-outline" size={18} color="#0F172A" />
+                      </TouchableOpacity>
+                    );
+                  })
+                ) : (
+                  <View style={{ paddingVertical: 24, alignItems: 'center' }}>
+                    <Ionicons name="folder-open-outline" size={32} color="#94A3B8" style={{ marginBottom: 6 }} />
+                    <Text style={{ fontSize: 13, color: '#64748B', textAlign: 'center' }}>
+                      Ushbu dars uchun qo‘shimcha materiallar biriktirilmagan
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </ScrollView>
 
-          {/* 5. Fixed Bottom Navigation Bar (Oldingi dars / 1/4 dars / Keyingi dars) */}
+          {/* 5. Fixed Bottom Navigation Bar (Oldingi dars / Stepper / Keyingi dars) */}
           <View style={[styles.videoBottomNavRow, { paddingBottom: Math.max(insets.bottom, 10) + 4 }]}>
             {/* Oldingi dars */}
             <TouchableOpacity
@@ -5113,7 +5139,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               disabled={currentLessonIndex === 0}
               onPress={() => {
                 if (currentLessonIndex > 0) {
-                  setCurrentLessonIndex(currentLessonIndex - 1);
+                  const prevIdx = currentLessonIndex - 1;
+                  setCurrentLessonIndex(prevIdx);
+                  if (currentCourseLessons[prevIdx]) {
+                    setSelectedLessonVideo(currentCourseLessons[prevIdx]);
+                  }
                 }
               }}
             >
@@ -5133,13 +5163,15 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               </Text>
             </TouchableOpacity>
 
-            {/* Stepper indicator: 1 / 4 dars + dashes */}
+            {/* Stepper indicator */}
             <View style={styles.videoStepperCol}>
               <Text style={styles.videoStepperText}>
-                {currentLessonIndex + 1} / 4 dars
+                {currentCourseLessons.length > 0
+                  ? `${currentLessonIndex + 1} / ${currentCourseLessons.length} dars`
+                  : `${currentLessonIndex + 1}-dars`}
               </Text>
               <View style={styles.videoStepperDashesRow}>
-                {[0, 1, 2, 3].map((stepIdx) => (
+                {(currentCourseLessons.length > 0 ? currentCourseLessons : [1]).slice(0, 8).map((_, stepIdx) => (
                   <View
                     key={stepIdx}
                     style={[
@@ -5158,23 +5190,17 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               style={styles.videoNavNextBtn}
               activeOpacity={0.8}
               onPress={() => {
-                if (currentLessonIndex < 3) {
-                  setCurrentLessonIndex(currentLessonIndex + 1);
+                if (currentLessonIndex < currentCourseLessons.length - 1) {
+                  const nextIdx = currentLessonIndex + 1;
+                  setCurrentLessonIndex(nextIdx);
+                  if (currentCourseLessons[nextIdx]) {
+                    setSelectedLessonVideo(currentCourseLessons[nextIdx]);
+                  }
                 } else {
                   Alert.alert(
-                    'Tabriklaymiz! 🎉',
-                    'Barça 4 ta dars muvaffaqiyatli yakunlandi. Endi Yakuniy testni topşirib sertifikat olişingiz mumkin.',
-                    [
-                      { text: 'Keyinroq', style: 'cancel' },
-                      {
-                        text: 'Testni boşlaş',
-                        onPress: () => {
-                          setSelectedLessonVideo(null);
-                          setIsTakingCourseFinalTest(true);
-                          setCurrentTestQuestionIndex(6);
-                        },
-                      },
-                    ]
+                    'Darslar yakunlandi! 🎉',
+                    'Ushbu kursning barcha darslarini ko‘rib chiqdingiz.',
+                    [{ text: 'Tushunarli' }]
                   );
                 }
               }}

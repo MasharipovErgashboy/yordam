@@ -31,12 +31,19 @@ if (!fs.existsSync(SERVICES_FILE)) {
   fs.writeFileSync(SERVICES_FILE, JSON.stringify([], null, 2), 'utf8');
 }
 
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
 // In-memory pending OTP storage: email -> { otp, payload, expiresAt }
 const pendingOtps = new Map();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Nodemailer Transporter
 const transporter = nodemailer.createTransport({
@@ -1074,6 +1081,51 @@ app.delete('/api/huquq-maktabi/lessons/:id', (req, res) => {
   } catch (err) {
     console.error('Error deleting lesson:', err);
     return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 21. File Upload endpoint (for PDF, DOCX, XLSX lesson materials and covers)
+app.post('/api/upload', (req, res) => {
+  try {
+    const { name, data, type } = req.body;
+    if (!data || !name) {
+      return res.status(400).json({ success: false, message: 'Fayl nomi va ma’lumoti talab qilinadi' });
+    }
+
+    const matches = data.match(/^data:([A-Za-z0-9\-\+\/\.]+);base64,(.+)$/);
+    let buffer;
+    if (matches && matches.length === 3) {
+      buffer = Buffer.from(matches[2], 'base64');
+    } else {
+      buffer = Buffer.from(data, 'base64');
+    }
+
+    const ext = path.extname(name) || (type ? `.${type}` : '.bin');
+    const safeBase = path.basename(name, ext).replace(/[^a-zA-Z0-9_\-\.]/g, '_').substring(0, 50);
+    const safeName = `${Date.now()}_${safeBase}${ext}`;
+    const filePath = path.join(UPLOADS_DIR, safeName);
+    fs.writeFileSync(filePath, buffer);
+
+    const host = req.get('host') || 'localhost:5000';
+    const protocol = req.protocol || 'http';
+    const fileUrl = `${protocol}://${host}/uploads/${safeName}`;
+
+    let formattedSize = `${(buffer.length / (1024 * 1024)).toFixed(1)} MB`;
+    if (buffer.length < 1024 * 1024) {
+      formattedSize = `${Math.max(1, Math.round(buffer.length / 1024))} KB`;
+    }
+
+    return res.json({
+      success: true,
+      fileUrl,
+      fileName: safeName,
+      originalName: name,
+      size: formattedSize,
+      bytes: buffer.length,
+    });
+  } catch (err) {
+    console.error('File upload error:', err);
+    return res.status(500).json({ success: false, message: 'Faylni yuklashda xatolik yuz berdi' });
   }
 });
 

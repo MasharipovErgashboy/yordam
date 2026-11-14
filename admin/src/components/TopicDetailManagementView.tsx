@@ -177,9 +177,72 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
     { id: 'ch2', title: 'Qonuniy asoslar va moddalar', timeRange: '02:30 – 06:15' },
     { id: 'ch3', title: 'Amaliy tahlil va xulosa', timeRange: '06:15 – 10:00' },
   ]);
-  const [lessonMaterials, setLessonMaterials] = useState<LessonMaterial[]>([
-    { id: 'm1', name: 'Mavzu bo‘yicha qo‘llanma (PDF)', size: '2.4 MB', type: 'pdf' },
-  ]);
+  const [lessonMaterials, setLessonMaterials] = useState<LessonMaterial[]>([]);
+  const [isUploadingMaterial, setIsUploadingMaterial] = useState(false);
+  const materialFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadMaterials = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingMaterial(true);
+
+    const newItems: LessonMaterial[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      let fileType = 'pdf';
+      if (ext === 'docx' || ext === 'doc') fileType = 'docx';
+      else if (ext === 'xlsx' || ext === 'xls') fileType = 'xlsx';
+      else if (ext === 'pdf') fileType = 'pdf';
+      else fileType = ext;
+
+      let formattedSize = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+      if (file.size < 1024 * 1024) {
+        formattedSize = `${Math.max(1, Math.round(file.size / 1024))} KB`;
+      }
+
+      try {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        let uploadedUrl = base64;
+        try {
+          const uploadRes = await fetch(`${apiBaseUrl}/api/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: file.name,
+              data: base64,
+              type: fileType,
+            }),
+          });
+          const uploadJson = await uploadRes.json();
+          if (uploadJson.success && uploadJson.fileUrl) {
+            uploadedUrl = uploadJson.fileUrl;
+          }
+        } catch (uploadErr) {
+          console.warn('Backend upload failed, fallback to base64 data URL:', uploadErr);
+        }
+
+        newItems.push({
+          id: `mat_${Date.now()}_${i}_${Math.floor(Math.random() * 1000)}`,
+          name: file.name,
+          size: formattedSize,
+          type: fileType,
+          fileUrl: uploadedUrl,
+        });
+      } catch (err) {
+        console.error('File reading error:', err);
+      }
+    }
+
+    setLessonMaterials((prev) => [...prev, ...newItems]);
+    setIsUploadingMaterial(false);
+  };
   const [isSubmittingLesson, setIsSubmittingLesson] = useState(false);
 
   // Modal 3: Create Certificate
@@ -938,6 +1001,7 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                   setLessonCoverImage('');
                   setLessonYoutubeUrl('');
                   setLessonDescription('');
+                  setLessonMaterials([]);
                   setShowLessonModal(true);
                 }}
                 disabled={topicCourses.length === 0}
@@ -2666,96 +2730,248 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                 </div>
               </div>
 
-              {/* Dynamic Materials (PDF, DOCX, XLSX) */}
+              {/* Dynamic Materials (PDF, DOCX, XLSX) with Real File Upload */}
               <div
                 style={{
                   background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: '14px',
-                  padding: '14px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '16px',
+                  padding: '16px',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#CBD5E1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Paperclip size={14} color="#34D399" />
-                    Qo‘shimcha materiallar (PDF, DOCX, XLSX)
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '8px',
+                        background: 'rgba(52, 211, 153, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#34D399',
+                      }}
+                    >
+                      <Paperclip size={15} />
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#F1F5F9', display: 'block' }}>
+                        Qo‘shimcha materiallar (PDF, DOCX, XLSX)
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#94A3B8' }}>
+                        Darsga biriktiriladigan hujjatlar ({lessonMaterials.length} ta)
+                      </span>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() =>
-                      setLessonMaterials([
-                        ...lessonMaterials,
-                        { id: `mat_${Date.now()}`, name: '', size: '1.5 MB', type: 'pdf' },
-                      ])
-                    }
+                    onClick={() => materialFileInputRef.current?.click()}
+                    disabled={isUploadingMaterial}
                     style={{
-                      background: 'rgba(52, 211, 153, 0.1)',
-                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.3) 100%)',
+                      border: '1px solid rgba(52, 211, 153, 0.4)',
                       color: '#34D399',
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
+                      fontSize: '12px',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      cursor: isUploadingMaterial ? 'wait' : 'pointer',
                       fontWeight: 600,
+                      transition: 'all 0.2s',
                     }}
                   >
-                    + Fayl qo‘shish
+                    <Upload size={13} />
+                    {isUploadingMaterial ? 'Yuklanmoqda...' : '+ Fayl yuklash'}
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {lessonMaterials.map((mat, idx) => (
-                    <div key={mat.id || idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        placeholder="Fayl nomi (Masalan: Qonun moddalari.pdf)"
-                        value={mat.name}
-                        onChange={(e) => {
-                          const updated = [...lessonMaterials];
-                          updated[idx].name = e.target.value;
-                          setLessonMaterials(updated);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '7px 10px',
-                          borderRadius: '8px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#FFFFFF',
-                          fontSize: '12px',
-                          outline: 'none',
-                        }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Hajmi (2.1 MB)"
-                        value={mat.size || ''}
-                        onChange={(e) => {
-                          const updated = [...lessonMaterials];
-                          updated[idx].size = e.target.value;
-                          setLessonMaterials(updated);
-                        }}
-                        style={{
-                          width: '100px',
-                          padding: '7px 10px',
-                          borderRadius: '8px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#94A3B8',
-                          fontSize: '12px',
-                          outline: 'none',
-                        }}
-                      />
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={materialFileInputRef}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files) handleUploadMaterials(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+
+                {/* Drag and Drop Zone if empty */}
+                {lessonMaterials.length === 0 ? (
+                  <div
+                    onClick={() => materialFileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = '#34D399';
+                      e.currentTarget.style.background = 'rgba(52, 211, 153, 0.08)';
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                      if (e.dataTransfer.files) handleUploadMaterials(e.dataTransfer.files);
+                    }}
+                    style={{
+                      border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      padding: '24px 16px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <FileUp size={28} color="#34D399" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>
+                      Fayllarni bu yerga tashlang yoki tanlash uchun bosing
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>
+                      Qo‘llab-quvvatlanadi: .PDF, .DOCX, .XLSX, .DOC, .XLS (avtomatik o‘lcham va format aniqlanadi)
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {lessonMaterials.map((mat, idx) => {
+                      const isPdf = mat.type === 'pdf' || mat.name?.toLowerCase().endsWith('.pdf');
+                      const isDoc = mat.type === 'docx' || mat.type === 'doc' || mat.name?.toLowerCase().endsWith('.doc') || mat.name?.toLowerCase().endsWith('.docx');
+                      const isXls = mat.type === 'xlsx' || mat.type === 'xls' || mat.name?.toLowerCase().endsWith('.xls') || mat.name?.toLowerCase().endsWith('.xlsx');
+                      const badgeBg = isPdf ? 'rgba(239, 68, 68, 0.18)' : isXls ? 'rgba(16, 185, 129, 0.18)' : isDoc ? 'rgba(59, 130, 246, 0.18)' : 'rgba(148, 163, 184, 0.18)';
+                      const badgeColor = isPdf ? '#EF4444' : isXls ? '#10B981' : isDoc ? '#3B82F6' : '#94A3B8';
+                      const badgeLabel = isPdf ? 'PDF' : isXls ? 'XLSX' : isDoc ? 'DOCX' : 'FAYL';
+
+                      return (
+                        <div
+                          key={mat.id || idx}
+                          style={{
+                            display: 'flex',
+                            gap: '10px',
+                            alignItems: 'center',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '10px',
+                            padding: '8px 12px',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              color: badgeColor,
+                              background: badgeBg,
+                              padding: '3px 7px',
+                              borderRadius: '6px',
+                              letterSpacing: '0.5px',
+                            }}
+                          >
+                            {badgeLabel}
+                          </span>
+
+                          <input
+                            type="text"
+                            placeholder="Fayl nomi"
+                            value={mat.name}
+                            onChange={(e) => {
+                              const updated = [...lessonMaterials];
+                              updated[idx].name = e.target.value;
+                              setLessonMaterials(updated);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: '#FFFFFF',
+                              fontSize: '12px',
+                              outline: 'none',
+                            }}
+                          />
+
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: '#94A3B8',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {mat.size || '1.0 MB'}
+                          </span>
+
+                          {mat.fileUrl && (
+                            <a
+                              href={mat.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Faylni ko‘rish"
+                              style={{
+                                color: '#00E5FF',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px',
+                                textDecoration: 'none',
+                              }}
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+
+                          <button
+                            type="button"
+                            title="O‘chirish"
+                            onClick={() => setLessonMaterials(lessonMaterials.filter((_, i) => i !== idx))}
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              border: 'none',
+                              color: '#EF4444',
+                              borderRadius: '6px',
+                              padding: '5px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
                       <button
                         type="button"
-                        onClick={() => setLessonMaterials(lessonMaterials.filter((_, i) => i !== idx))}
-                        style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                        onClick={() => materialFileInputRef.current?.click()}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#34D399',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
                       >
-                        <Trash2 size={13} />
+                        <Plus size={12} /> Yana fayl yuklash
                       </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

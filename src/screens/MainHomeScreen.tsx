@@ -2483,11 +2483,11 @@ const styles = StyleSheet.create({
   },
   modalDialogCard: {
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 390,
     maxHeight: '84%',
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
     shadowColor: '#000',

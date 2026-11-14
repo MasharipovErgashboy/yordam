@@ -118,9 +118,122 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           0%, 100% { transform: translate(0px, 0px) rotate(30deg); opacity: 0.4; }
           50% { transform: translate(-25px, 25px) rotate(15deg); opacity: 0.8; }
         }
+
+        /* Enforce Modal dialogs and alerts to stay strictly inside the 430x932 iPhone chassis */
+        #yordam-phone-screen {
+          contain: paint layout;
+        }
+        #yordam-phone-screen [aria-modal="true"],
+        #yordam-phone-screen [role="dialog"] {
+          position: absolute !important;
+          top: 0px !important;
+          left: 0px !important;
+          right: 0px !important;
+          bottom: 0px !important;
+          width: 100% !important;
+          height: 100% !important;
+          max-width: 430px !important;
+          max-height: 932px !important;
+          border-radius: 44px !important;
+          overflow: hidden !important;
+        }
       `;
       document.head.appendChild(styleEl);
     }
+  }, []);
+
+  // Reparent all React Native Web Modals/Portals inside the iPhone chassis so they never spill outside
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+
+    // Safely wrap document.body.removeChild so removing reparented modal portal nodes never throws
+    const originalRemoveChild = document.body.removeChild.bind(document.body);
+    document.body.removeChild = function <T extends Node>(child: T): T {
+      if (child.parentNode === document.body) {
+        return originalRemoveChild(child);
+      } else if (child.parentNode) {
+        return child.parentNode.removeChild(child) as T;
+      }
+      return child;
+    };
+
+    const captureModalNode = (node: Node) => {
+      if (!(node instanceof HTMLElement)) return;
+      const phoneScreen = document.getElementById('yordam-phone-screen');
+      if (!phoneScreen) return;
+
+      // Check if this node is a modal portal or contains a modal
+      const isModal =
+        node.getAttribute('aria-modal') === 'true' ||
+        node.getAttribute('role') === 'dialog' ||
+        node.querySelector('[aria-modal="true"]') ||
+        node.querySelector('[role="dialog"]');
+
+      if (isModal) {
+        if (node.parentNode !== phoneScreen) {
+          node.style.position = 'absolute';
+          node.style.top = '0px';
+          node.style.left = '0px';
+          node.style.right = '0px';
+          node.style.bottom = '0px';
+          node.style.width = '100%';
+          node.style.height = '100%';
+          node.style.zIndex = '9999';
+          node.style.pointerEvents = 'auto';
+          phoneScreen.appendChild(node);
+        }
+      } else {
+        // Child content might be portaled asynchronously by React
+        const childObserver = new MutationObserver(() => {
+          if (
+            node.getAttribute('aria-modal') === 'true' ||
+            node.getAttribute('role') === 'dialog' ||
+            node.querySelector('[aria-modal="true"]') ||
+            node.querySelector('[role="dialog"]')
+          ) {
+            if (node.parentNode !== phoneScreen) {
+              node.style.position = 'absolute';
+              node.style.top = '0px';
+              node.style.left = '0px';
+              node.style.right = '0px';
+              node.style.bottom = '0px';
+              node.style.width = '100%';
+              node.style.height = '100%';
+              node.style.zIndex = '9999';
+              node.style.pointerEvents = 'auto';
+              phoneScreen.appendChild(node);
+            }
+            childObserver.disconnect();
+          }
+        });
+        childObserver.observe(node, { childList: true, subtree: true });
+        setTimeout(() => childObserver.disconnect(), 2000);
+      }
+    };
+
+    const bodyObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const addedNode of mutation.addedNodes) {
+          if (addedNode.parentNode === document.body) {
+            captureModalNode(addedNode);
+          }
+        }
+      }
+    });
+
+    bodyObserver.observe(document.body, { childList: true });
+
+    // Check any existing modals on mount
+    Array.from(document.body.children).forEach((child) => {
+      if (child.id !== 'root' && child.tagName === 'DIV') {
+        captureModalNode(child);
+      }
+    });
+
+    return () => {
+      bodyObserver.disconnect();
+      document.body.removeChild = originalRemoveChild;
+    };
   }, []);
 
   // Calculate auto-fit scale so the whole iPhone fits on the user's screen without scrolling
@@ -539,7 +652,7 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           />
 
           {/* Inner Display Screen with 44px border radius */}
-          <View style={styles.phoneScreen}>
+          <View style={styles.phoneScreen} nativeID="yordam-phone-screen">
             {/* Native App Viewport (430 x 932) - mounted only when power is ON for fresh boot */}
             {isPowerOn ? (
               <View style={styles.appViewport}>{children}</View>

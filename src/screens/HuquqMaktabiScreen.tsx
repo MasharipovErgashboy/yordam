@@ -10933,7 +10933,7 @@ const styles = StyleSheet.create({
   },
   quizModalCard: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 390,
     backgroundColor: '#FFFFFF',
     borderRadius: 22,
     padding: 20,

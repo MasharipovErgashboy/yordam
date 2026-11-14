@@ -56,14 +56,28 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     [screenWidth]
   );
 
+  // Handle scroll offset update
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetX = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offsetX / screenWidth);
+      if (index >= 0 && index < ONBOARDING_SLIDES.length && index !== currentIndex) {
+        setCurrentIndex(index);
+      }
+    },
+    [screenWidth, currentIndex]
+  );
+
   // Navigate to specific index
   const scrollToIndex = (index: number) => {
     if (index >= 0 && index < ONBOARDING_SLIDES.length) {
-      flatListRef.current?.scrollToIndex({
-        index,
-        animated: true,
-      });
       setCurrentIndex(index);
+      if (flatListRef.current) {
+        flatListRef.current.scrollToOffset({
+          offset: index * screenWidth,
+          animated: true,
+        });
+      }
     }
   };
 
@@ -72,7 +86,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     if (isLastSlide) {
       onNavigateToMain();
     } else {
-      scrollToIndex(currentIndex + 1);
+      const nextIndex = currentIndex + 1;
+      scrollToIndex(nextIndex);
     }
   };
 
@@ -123,8 +138,17 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
+        onScroll={handleScroll}
         onMomentumScrollEnd={onMomentumScrollEnd}
         scrollEventThrottle={16}
+        getItemLayout={(_, index) => ({
+          length: screenWidth,
+          offset: screenWidth * index,
+          index,
+        })}
+        initialNumToRender={4}
+        maxToRenderPerBatch={4}
+        windowSize={5}
         style={styles.flatList}
       />
 
@@ -149,7 +173,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           ]}
         >
           <Text style={styles.mainActionText}>
-            {isLastSlide ? 'Boşlaş' : 'Keyingi'}
+            {isLastSlide ? 'Boshlash' : 'Keyingi'}
           </Text>
           <Ionicons name="arrow-forward" size={19} color="#FFFFFF" style={styles.arrowIcon} />
         </TouchableOpacity>

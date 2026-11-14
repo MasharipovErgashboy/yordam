@@ -165,17 +165,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           <Text style={styles.unmuteText}>Ovozni yoqish</Text>
         </TouchableOpacity>
       )}
-
-      {/* Optional Skip button on web */}
-      {Platform.OS === 'web' && (
-        <TouchableOpacity
-          style={styles.skipButton}
-          onPress={handleFinish}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.skipText}>O‘tkazib yuborish</Text>
-        </TouchableOpacity>
-      )}
     </Pressable>
   );
 };
@@ -214,23 +203,6 @@ const styles = StyleSheet.create({
   unmuteText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
-  },
-  skipButton: {
-    position: 'absolute',
-    top: 65,
-    right: 20,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    zIndex: 100,
-  },
-  skipText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 12,
     fontWeight: '600',
   },
 });

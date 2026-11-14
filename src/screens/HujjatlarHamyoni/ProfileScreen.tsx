@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Switch, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -60,19 +62,16 @@ export default function ProfileScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>‹</Text>
+      {/* ── TOP BAR WITH BACK BUTTON ── */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
         </TouchableOpacity>
-        <View style={styles.headerTitleCol}>
-          <View style={styles.headerTitleRow}>
-            <View style={styles.logoBox}><Text style={{ fontSize: 14 }}>💼</Text></View>
-            <Text style={styles.appName}>Profil va xavfsizlik</Text>
-            <Text style={styles.checkBadge}>✓</Text>
-          </View>
-          <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-        </View>
+        <Text style={styles.topBarTitle}>Profil</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -82,17 +81,17 @@ export default function ProfileScreen() {
           <View style={styles.userTop}>
             <View style={styles.userAvatarWrapper}>
               <View style={styles.userAvatar}>
-                <Text style={{ fontSize: 28 }}>👨‍💼</Text>
+                <Ionicons name="person" size={26} color={C.primary} />
               </View>
               <View style={styles.verifiedDot}>
-                <Text style={styles.verifiedDotText}>✓</Text>
+                <Ionicons name="checkmark" size={10} color={C.white} />
               </View>
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>Sardorbek Karimov</Text>
               <Text style={styles.userId}>ID: HH-8842-UZB</Text>
               <View style={styles.oneIdBadge}>
-                <Text style={styles.oneIdShield}>🛡️</Text>
+                <Ionicons name="shield-checkmark" size={12} color={C.blueText} />
                 <Text style={styles.oneIdText}>Super App Tasdiqlangan (OneID)</Text>
               </View>
             </View>
@@ -101,14 +100,14 @@ export default function ProfileScreen() {
 
         {/* ── SECTION 2: ILOVA SOZLAMALARI ── */}
         <View style={styles.sectionHeaderSimple}>
-          <Text style={styles.sectionIcon}>⚙️</Text>
+          <Ionicons name="settings-outline" size={16} color={C.primary} style={{ marginRight: 6 }} />
           <Text style={styles.sectionTitle}>Ilova sozlamalari</Text>
         </View>
         <View style={styles.cardGroup}>
           {/* Til */}
           <TouchableOpacity style={styles.cardItem}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>文A</Text>
+              <Ionicons name="language-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>Tilni tanlash</Text>
@@ -121,7 +120,7 @@ export default function ProfileScreen() {
           {/* AI Ruxsatlari */}
           <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('AI')}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>✦</Text>
+              <Ionicons name="sparkles-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>AI yordamchi ruxsatlari</Text>
@@ -134,7 +133,7 @@ export default function ProfileScreen() {
           {/* Push-ogohlantirishlar */}
           <View style={styles.cardItem}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>🔔</Text>
+              <Ionicons name="notifications-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>Push-ogohlantirishlar</Text>
@@ -151,27 +150,27 @@ export default function ProfileScreen() {
 
         {/* ── SECTION 3: MA'LUMOTLAR VA MAXFIYLIK ── */}
         <View style={styles.sectionHeaderSimple}>
-          <Text style={styles.sectionIcon}>🛡️</Text>
+          <Ionicons name="shield-checkmark-outline" size={16} color={C.primary} style={{ marginRight: 6 }} />
           <Text style={styles.sectionTitle}>Ma'lumotlar va Maxfiylik</Text>
         </View>
         <View style={styles.cardGroup}>
           {/* Arxivlash */}
           <TouchableOpacity style={styles.cardItem}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>📦</Text>
+              <Ionicons name="archive-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>Hujjatlarni arxivlash</Text>
               <Text style={styles.itemSub}>ZIP va PDF shaklida yuklab olish</Text>
             </View>
-            <Text style={styles.trailingIcon}>📥</Text>
+            <Ionicons name="download-outline" size={18} color={C.textGrey} />
           </TouchableOpacity>
           <View style={styles.divider} />
 
           {/* Kesh tozalash */}
           <TouchableOpacity style={styles.cardItem} onPress={handleClearCache}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>🧹</Text>
+              <Ionicons name="trash-bin-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>Kesh xotirasini tozalash</Text>
@@ -184,65 +183,41 @@ export default function ProfileScreen() {
           {/* Maxfiylik */}
           <TouchableOpacity style={styles.cardItem}>
             <View style={[styles.itemIconBox, { backgroundColor: C.blueLight }]}>
-              <Text style={styles.itemIcon}>🛡️</Text>
+              <Ionicons name="lock-closed-outline" size={20} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>Maxfiylik siyosati</Text>
               <Text style={styles.itemSub}>Litsenziya va huquqiy kafolatlar</Text>
             </View>
-            <Text style={styles.trailingIcon}>↗</Text>
+            <Ionicons name="open-outline" size={16} color={C.textGrey} />
           </TouchableOpacity>
         </View>
 
         {/* ── DANGER / ACTION BUTTONS ── */}
         <TouchableOpacity style={styles.clearWalletBtn} onPress={handleClearWallet}>
-          <Text style={styles.clearWalletIcon}>🗑️</Text>
+          <Ionicons name="trash-outline" size={18} color={C.red} style={{ marginRight: 8 }} />
           <Text style={styles.clearWalletText}>Hamyon ma'lumotlarini tozalash</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutIcon}>🚪</Text>
+          <Ionicons name="log-out-outline" size={18} color={C.red} style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Mini-ilovadan chiqish</Text>
         </TouchableOpacity>
 
         {/* ── FOOTER CERTIFICATE ── */}
         <View style={styles.certBox}>
-          <Text style={styles.certTop}>🛡️ Davlat xizmatlari shifrlangan standarti</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <Ionicons name="shield-checkmark-outline" size={14} color={C.textGrey} />
+            <Text style={styles.certTop}>Davlat xizmatlari shifrlangan standarti</Text>
+          </View>
           <Text style={styles.certBottom}>Hujjatlar Hamyoni v1.4.2 • Super App Ekotizimi</Text>
         </View>
 
-        <View style={{ height: 110 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map(item => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={[styles.navLabel, item.screen === 'Profile' && styles.navLabelActive]}>
-                  {item.label}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
+      <BottomNav activeScreen="Profile" />
     </ScreenContainer>
   );
 }
@@ -250,19 +225,26 @@ export default function ProfileScreen() {
 // ─── STYLES ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: 16, paddingTop: 6 },
 
-  // Header
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 10 },
-  backBtn: { padding: 4 },
-  backArrow: { fontSize: 26, color: C.textDark, fontWeight: '300' },
-  headerTitleCol: { justifyContent: 'center' },
-  headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  logoBox: { width: 22, height: 22, borderRadius: 6, backgroundColor: C.blueBadge, alignItems: 'center', justifyContent: 'center' },
-  appName: { fontSize: 14, fontWeight: '700', color: C.textDark },
-  checkBadge: { fontSize: 12, color: C.primary, fontWeight: '800' },
-  appSub: { fontSize: 11, color: C.textGrey, marginTop: 1 },
-  avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
+  // Top bar
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 6,
+    gap: 8,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  topBarTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: C.textDark,
+  },
+
+  scroll: { paddingHorizontal: 16, paddingTop: 10 },
 
   // User card
   userCard: { backgroundColor: C.white, borderRadius: 18, padding: 14, marginBottom: 14, elevation: 1 },
@@ -340,15 +322,6 @@ const styles = StyleSheet.create({
 
   // Certificate / Footer note
   certBox: { alignItems: 'center', paddingVertical: 6, gap: 4 },
-  certTop: { fontSize: 11, color: C.primary, fontWeight: '600' },
+  certTop: { fontSize: 11, color: C.textGrey, fontWeight: '600' },
   certBottom: { fontSize: 10, color: C.textGrey },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
-  navLabelActive: { color: C.primary, fontWeight: '700' },
 });

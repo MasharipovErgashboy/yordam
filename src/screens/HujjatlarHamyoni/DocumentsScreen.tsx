@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, FlatList, StatusBar, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -41,7 +43,7 @@ const DOCS = [
     uploadDate: '21-may, 2025',
     deadline: 'Muddat: 2028-yilgacha',
     deadlineColor: C.textGrey,
-    icon: '📄',
+    icon: 'document-text-outline',
   },
   {
     id: '2',
@@ -56,7 +58,7 @@ const DOCS = [
     uploadDate: '18-may, 2025',
     deadline: 'Kafolat yakuni: 25-may',
     deadlineColor: C.red,
-    icon: '🧾',
+    icon: 'receipt-outline',
   },
   {
     id: '3',
@@ -71,7 +73,7 @@ const DOCS = [
     uploadDate: '10-aprel, 2025',
     deadline: 'Amal qiladi: 2027-yilgacha',
     deadlineColor: C.textGrey,
-    icon: '🛡️',
+    icon: 'shield-checkmark-outline',
   },
   {
     id: '4',
@@ -86,7 +88,7 @@ const DOCS = [
     uploadDate: '02-yanvar, 2025',
     deadline: 'QR-kod bilan tekshiriladi',
     deadlineColor: C.blue,
-    icon: '🪪',
+    icon: 'card-outline',
   },
   {
     id: '5',
@@ -101,7 +103,7 @@ const DOCS = [
     uploadDate: '12-fevral, 2025',
     deadline: 'Uzaytirish talab etiladi',
     deadlineColor: C.red,
-    icon: '🚗',
+    icon: 'car-outline',
   },
 ];
 
@@ -144,24 +146,15 @@ export default function DocumentsScreen() {
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>‹</Text>
-        </TouchableOpacity>
-        <View style={styles.headerMid}>
-          <View style={styles.logoBox}>
-            <Text>💼</Text>
-          </View>
-          <View>
-            <Text style={styles.appName}>Hujjatlarim</Text>
-            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-          </View>
-        </View>
-      </View>
-
       {/* ── TITLE ── */}
       <View style={styles.titleRow}>
+        <TouchableOpacity
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={24} color={C.textDark} />
+        </TouchableOpacity>
         <Text style={styles.pageTitle}>Hujjatlarim</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>24 ta</Text>
@@ -170,7 +163,7 @@ export default function DocumentsScreen() {
 
       {/* ── SEARCH ── */}
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Ionicons name="search-outline" size={18} color={C.textGrey} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Nomi, sana yoki so'z bo'yicha..."
@@ -185,20 +178,28 @@ export default function DocumentsScreen() {
       <View style={styles.sortRow}>
         <TouchableOpacity style={styles.sortBtn} onPress={handleSortToggle}>
           <Text style={styles.sortText}>{getSortLabel()}</Text>
-          <Text style={styles.sortArrow}> ▾</Text>
+          <Ionicons name="chevron-down" size={13} color={C.primary} style={{ marginLeft: 4 }} />
         </TouchableOpacity>
         <View style={styles.viewToggle}>
           <TouchableOpacity
             style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
             onPress={() => setViewMode('list')}
           >
-            <Text style={[styles.toggleIcon, viewMode === 'list' && styles.toggleIconActive]}>☰</Text>
+            <Ionicons
+              name="list"
+              size={17}
+              color={viewMode === 'list' ? C.white : C.textGrey}
+            />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.toggleBtn, viewMode === 'grid' && styles.toggleBtnActive]}
             onPress={() => setViewMode('grid')}
           >
-            <Text style={[styles.toggleIcon, viewMode === 'grid' && styles.toggleIconActive]}>⊞</Text>
+            <Ionicons
+              name="grid"
+              size={15}
+              color={viewMode === 'grid' ? C.white : C.textGrey}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -219,7 +220,7 @@ export default function DocumentsScreen() {
               onPress={() => navigation.navigate('Details', { docId: item.id })}
             >
               <View style={[styles.docIconBoxGrid, { backgroundColor: item.typeBg }]}>
-                <Text style={styles.docIconText}>{item.icon}</Text>
+                <Ionicons name={item.icon as any} size={22} color={item.typeColor} />
               </View>
               <View style={[styles.typeBadge, { backgroundColor: item.typeBg, alignSelf: 'flex-start', marginTop: 8 }]}>
                 <Text style={[styles.typeBadgeText, { color: item.typeColor }]}>{item.type}</Text>
@@ -234,7 +235,7 @@ export default function DocumentsScreen() {
             >
               {/* Icon + badge */}
               <View style={[styles.docIconBox, { backgroundColor: item.typeBg }]}>
-                <Text style={styles.docIconText}>{item.icon}</Text>
+                <Ionicons name={item.icon as any} size={24} color={item.typeColor} />
               </View>
 
               <View style={styles.docBody}>
@@ -244,12 +245,17 @@ export default function DocumentsScreen() {
                     <Text style={[styles.typeBadgeText, { color: item.typeColor }]}>{item.type}</Text>
                   </View>
                   <View style={[styles.statusBadge, { backgroundColor: item.badgeBg }]}>
-                    <Text style={[styles.statusBadgeText, { color: item.badgeColor }]}>
-                      {item.badgeColor === C.red ? '⏰ ' : ''}{item.badge}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                      {item.badgeColor === C.red && (
+                        <Ionicons name="time-outline" size={11} color={C.red} />
+                      )}
+                      <Text style={[styles.statusBadgeText, { color: item.badgeColor }]}>
+                        {item.badge}
+                      </Text>
+                    </View>
                   </View>
                   <TouchableOpacity style={styles.moreBtn}>
-                    <Text style={styles.moreIcon}>⋮</Text>
+                    <Ionicons name="ellipsis-vertical" size={16} color={C.textGrey} />
                   </TouchableOpacity>
                 </View>
 
@@ -259,10 +265,20 @@ export default function DocumentsScreen() {
 
                 {/* Meta */}
                 <View style={styles.docMetaRow}>
-                  <Text style={styles.docMeta}>⬆️ Yuklangan: {item.uploadDate}</Text>
-                  <Text style={[styles.docDeadline, { color: item.deadlineColor }]}>
-                    {item.deadlineColor === C.red ? '⏰ ' : '📅 '}{item.deadline}
-                  </Text>
+                  <View style={styles.docMetaItem}>
+                    <Ionicons name="arrow-up-circle-outline" size={13} color={C.textGrey} />
+                    <Text style={styles.docMeta}>Yuklangan: {item.uploadDate}</Text>
+                  </View>
+                  <View style={styles.docMetaItem}>
+                    <Ionicons
+                      name={item.deadlineColor === C.red ? "alert-circle-outline" : "calendar-outline"}
+                      size={13}
+                      color={item.deadlineColor}
+                    />
+                    <Text style={[styles.docDeadline, { color: item.deadlineColor }]}>
+                      {item.deadline}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>
@@ -270,7 +286,9 @@ export default function DocumentsScreen() {
         }
         ListFooterComponent={() => (
           <View style={styles.storageCard}>
-            <Text style={styles.storageIcon}>🔒</Text>
+            <View style={styles.storageIconWrapper}>
+              <Ionicons name="cloud-outline" size={24} color={C.primary} />
+            </View>
             <View style={styles.storageInfo}>
               <Text style={styles.storageTitle}>Xavfsiz bulutli xotira</Text>
               <View style={styles.storageBarBg}>
@@ -284,34 +302,7 @@ export default function DocumentsScreen() {
       />
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map(item => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={[styles.navLabel, item.screen === 'Documents' && styles.navLabelActive]}>
-                  {item.label}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
+      <BottomNav activeScreen="Documents" />
     </ScreenContainer>
   );
 }
@@ -320,17 +311,9 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
 
-  // Header
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6 },
-  backBtn: { marginRight: 8 },
-  backArrow: { fontSize: 28, color: C.textDark, fontWeight: '300' },
-  headerMid: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 8 },
-  logoBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
-  appName: { fontSize: 13, fontWeight: '700', color: C.textDark },
-  appSub: { fontSize: 11, color: C.textGrey },
-
   // Title
-  titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, gap: 10 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginTop: 14, marginBottom: 12, gap: 10 },
+  backBtn: { padding: 4, marginRight: 2 },
   pageTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
   countBadge: { backgroundColor: C.blueLight, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
   countText: { fontSize: 13, color: C.primary, fontWeight: '700' },
@@ -388,13 +371,14 @@ const styles = StyleSheet.create({
   moreIcon: { fontSize: 18, color: C.textGrey },
   docName: { fontSize: 14, fontWeight: '700', color: C.textDark },
   docSub: { fontSize: 12, color: C.textGrey, marginTop: 2 },
-  docMetaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
+  docMetaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 6 },
+  docMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   docMeta: { fontSize: 11, color: C.textGrey },
   docDeadline: { fontSize: 11, fontWeight: '600' },
 
   // Storage
   storageCard: { flexDirection: 'row', backgroundColor: '#E0F2FE', borderRadius: 14, padding: 12, alignItems: 'center', marginTop: 4, gap: 10 },
-  storageIcon: { fontSize: 22 },
+  storageIconWrapper: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#BAE6FD', alignItems: 'center', justifyContent: 'center' },
   storageInfo: { flex: 1 },
   storageTitle: { fontSize: 13, fontWeight: '700', color: C.secondary },
   storageBarBg: { height: 6, backgroundColor: '#BAE6FD', borderRadius: 4, marginVertical: 4 },
@@ -402,13 +386,4 @@ const styles = StyleSheet.create({
   storageText: { fontSize: 11, color: C.textGrey },
   storageSize: { fontSize: 15, fontWeight: '800', color: C.secondary, textAlign: 'right' },
   storageSub: { fontSize: 11, fontWeight: '400', color: C.textGrey },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
-  navLabelActive: { color: C.primary, fontWeight: '700' },
 });

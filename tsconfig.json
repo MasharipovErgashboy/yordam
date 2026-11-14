@@ -7,5 +7,5 @@
       "@/assets/*": ["./assets/*"]
     }
   },
-  "exclude": ["node_modules", "admin"]
+  "exclude": ["node_modules", "admin", "yurist-online"]
 }

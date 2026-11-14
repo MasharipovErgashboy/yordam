@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Alert, Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -22,10 +24,10 @@ const C = {
 
 // ─── UPLOAD METHODS ──────────────────────────────────────────
 const METHODS = [
-  { id: '1', icon: '📷', label: 'Kamera orqali', sub: 'Avto-chegara aniqlash', badge: '✦ AI auto', badgeColor: C.primary, badgeBg: C.blueLight },
-  { id: '2', icon: '🖼️', label: 'Galereyadan', sub: 'JPG, PNG, HEIC', badge: 'Formatlar', badgeColor: '#7C3AED', badgeBg: '#EDE9FE' },
-  { id: '3', icon: '📄', label: 'PDF hujjat', sub: "Ko'p sahifali shartnoma", badge: 'Multi-page', badgeColor: '#0369A1', badgeBg: '#E0F2FE' },
-  { id: '4', icon: '☁️', label: 'Fayllar tizimi', sub: 'iCloud, Google Drive', badge: 'Bulut', badgeColor: '#0369A1', badgeBg: '#E0F2FE' },
+  { id: '1', icon: 'camera-outline', label: 'Kamera orqali', sub: 'Avto-chegara aniqlash', badge: 'AI auto', badgeColor: C.primary, badgeBg: C.blueLight },
+  { id: '2', icon: 'images-outline', label: 'Galereyadan', sub: 'JPG, PNG, HEIC', badge: 'Formatlar', badgeColor: '#7C3AED', badgeBg: '#EDE9FE' },
+  { id: '3', icon: 'document-text-outline', label: 'PDF hujjat', sub: "Ko'p sahifali shartnoma", badge: 'Multi-page', badgeColor: '#0369A1', badgeBg: '#E0F2FE' },
+  { id: '4', icon: 'cloud-outline', label: 'Fayllar tizimi', sub: 'iCloud, Google Drive', badge: 'Bulut', badgeColor: '#0369A1', badgeBg: '#E0F2FE' },
 ];
 
 // ─── DOC TYPES ───────────────────────────────────────────────
@@ -80,23 +82,26 @@ export default function UploadScreen() {
 
         {/* ── HEADER ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backArrow}>‹</Text>
+          <TouchableOpacity
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={C.textDark} />
           </TouchableOpacity>
           <View style={styles.headerMid}>
             <View style={styles.logoBox}>
-              <Text>💼</Text>
+              <Ionicons name="cloud-upload-outline" size={16} color={C.primary} />
             </View>
             <View>
               <Text style={styles.appName}>Hujjat yuklash</Text>
               <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.headerBtn}>
+          <TouchableOpacity style={styles.headerBtn} onPress={pickFile}>
             <Text style={styles.headerBtnText}>Fayl tanlash</Text>
           </TouchableOpacity>
           <View style={styles.avatar}>
-            <Text style={{ fontSize: 16 }}>👤</Text>
+            <Ionicons name="person" size={16} color={C.primary} />
           </View>
         </View>
 
@@ -109,7 +114,10 @@ export default function UploadScreen() {
             style={styles.aiBtn}
             onPress={() => navigation.navigate('AI')}
           >
-            <Text style={styles.aiBtnText}>✦ AI Yordamchi</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Ionicons name="sparkles" size={13} color={C.primary} />
+              <Text style={styles.aiBtnText}>AI Yordamchi</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -122,7 +130,7 @@ export default function UploadScreen() {
           {METHODS.map(m => (
             <TouchableOpacity key={m.id} style={styles.methodCard} onPress={pickFile}>
               <View style={styles.methodTop}>
-                <Text style={styles.methodIcon}>{m.icon}</Text>
+                <Ionicons name={m.icon as any} size={22} color={C.primary} />
                 <View style={[styles.methodBadge, { backgroundColor: m.badgeBg }]}>
                   <Text style={[styles.methodBadgeText, { color: m.badgeColor }]}>{m.badge}</Text>
                 </View>
@@ -136,16 +144,18 @@ export default function UploadScreen() {
         {/* ── DROP ZONE ── */}
         <TouchableOpacity style={styles.dropZone} onPress={pickFile}>
           <View style={styles.dropIconBox}>
-            <Text style={styles.dropIcon}>📂</Text>
+            <Ionicons name="folder-open-outline" size={32} color={C.primary} />
           </View>
           <Text style={styles.dropTitle}>Faylni shu yerga tashlang yoki tanlang</Text>
           <Text style={styles.dropSub}>Maksimal hajm: 25 MB • PDF, DOCX, JPG, PNG</Text>
           <View style={styles.dropBadges}>
             <View style={styles.dropBadge}>
-              <Text style={styles.dropBadgeText}>🔍 OCR tayyor</Text>
+              <Ionicons name="scan-outline" size={12} color={C.textGrey} style={{ marginRight: 4 }} />
+              <Text style={styles.dropBadgeText}>OCR tayyor</Text>
             </View>
             <View style={styles.dropBadge}>
-              <Text style={styles.dropBadgeText}>🔒 256-bit shifrlash</Text>
+              <Ionicons name="shield-checkmark-outline" size={12} color={C.textGrey} style={{ marginRight: 4 }} />
+              <Text style={styles.dropBadgeText}>256-bit shifrlash</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -155,7 +165,7 @@ export default function UploadScreen() {
           <View style={styles.fileCard}>
             <View style={styles.fileLeft}>
               <View style={styles.fileIconBox}>
-                <Text style={styles.fileIcon}>📄</Text>
+                <Ionicons name="document-text-outline" size={22} color={C.primary} />
               </View>
               <View style={styles.fileInfo}>
                 <View style={styles.fileNameRow}>
@@ -163,20 +173,25 @@ export default function UploadScreen() {
                     {file ? file.name : 'ijara_shartnomasi_2025.pdf'}
                   </Text>
                   <TouchableOpacity>
-                    <Text style={styles.fileClose}>✕</Text>
+                    <Ionicons name="close" size={16} color={C.textGrey} />
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.fileSize}>3.4 MB dan 2.6 MB • {progress}%</Text>
                 <View style={styles.progressBar}>
                   <View style={[styles.progressFill, { width: `${progress}%` }]} />
                 </View>
-                <Text style={styles.fileStatus}>⚡ AI matnni tahlil qilmoqda va OCR ishlam</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 4 }}>
+                  <Ionicons name="sparkles" size={12} color={C.primary} />
+                  <Text style={styles.fileStatus}>AI matnni tahlil qilmoqda va OCR ishlamoqda</Text>
+                </View>
                 <View style={styles.fileTagRow}>
                   <View style={styles.fileTag}>
-                    <Text style={styles.fileTagText}>🔒 AES-256 shifrlangan</Text>
+                    <Ionicons name="lock-closed-outline" size={11} color={C.textGrey} style={{ marginRight: 4 }} />
+                    <Text style={styles.fileTagText}>AES-256 shifrlangan</Text>
                   </View>
                   <View style={[styles.fileTag, { backgroundColor: C.greenLight }]}>
-                    <Text style={[styles.fileTagText, { color: C.green }]}>✅ Virusdan sof (toza)</Text>
+                    <Ionicons name="checkmark-circle-outline" size={12} color={C.green} style={{ marginRight: 4 }} />
+                    <Text style={[styles.fileTagText, { color: C.green }]}>Virusdan xoli</Text>
                   </View>
                 </View>
               </View>
@@ -199,7 +214,9 @@ export default function UploadScreen() {
                 style={[styles.typeChip, selectedType === t.id && styles.typeChipActive]}
                 onPress={() => setSelectedType(t.id)}
               >
-                {selectedType === t.id && <Text style={styles.checkIcon}>✓ </Text>}
+                {selectedType === t.id && (
+                  <Ionicons name="checkmark" size={13} color={C.white} style={{ marginRight: 4 }} />
+                )}
                 <Text style={[styles.typeChipText, selectedType === t.id && styles.typeChipTextActive]}>
                   {t.label}
                 </Text>
@@ -210,7 +227,7 @@ export default function UploadScreen() {
 
         {/* ── AI INFO ── */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoIcon}>💡</Text>
+          <Ionicons name="information-circle-outline" size={18} color={C.primary} style={{ marginRight: 8, marginTop: 2 }} />
           <Text style={styles.infoText}>
             Yuklangandan so'ng, AI avtomatik tarzda shartnomaning asosiy shartlari, tomonlari va muddatlarini ko'rsatib beradi.
           </Text>
@@ -218,44 +235,22 @@ export default function UploadScreen() {
 
         {/* ── CONTINUE BUTTON ── */}
         <TouchableOpacity style={styles.continueBtn} onPress={handleContinue}>
-          <Text style={styles.continueBtnText}>Davom etish va AI tahlili qilish →</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Text style={styles.continueBtnText}>Davom etish va AI tahlil qilish</Text>
+            <Ionicons name="arrow-forward" size={16} color={C.white} />
+          </View>
         </TouchableOpacity>
 
         {/* ── FOOTER ── */}
         <Text style={styles.footerText}>
-          Hujjatlar O'zbekiston Respublikasi kibexavfsizlik talablariga muvofiq saqlanadi
+          Hujjatlar O'zbekiston Respublikasi kiberxavfsizlik talablariga muvofiq saqlanadi
         </Text>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map(item => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={styles.navLabel}>{item.label}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
+      <BottomNav activeScreen="" />
     </ScreenContainer>
   );
 }
@@ -348,12 +343,4 @@ const styles = StyleSheet.create({
 
   // Footer
   footerText: { fontSize: 11, color: C.textGrey, textAlign: 'center', lineHeight: 16 },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
 });

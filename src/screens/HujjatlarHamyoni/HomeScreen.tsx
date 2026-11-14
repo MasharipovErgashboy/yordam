@@ -7,11 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   StatusBar,
-  Image,
-  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 
 // ─── COLORS ────────────────────────────────────────────────
 const C = {
@@ -46,16 +46,16 @@ const STATS = [
 ];
 
 const QUICK_ACTIONS = [
-  { id: '1', icon: '➕', title: "Hujjat qo'shish", sub: 'Kamera / PDF yuklash', color: C.primary, screen: 'Upload' },
-  { id: '2', icon: '🤖', title: 'Al tahlil', sub: 'Aqlli skanerl ash', color: '#1E3A8A', screen: 'AI' },
-  { id: '3', icon: '📁', title: "Dalillar to'plar", sub: 'Sud va organlar uchun', color: C.white, screen: 'Legal', dark: false },
-  { id: '4', icon: '🛡️', title: 'Kafolat tekshi', sub: 'Muddat monitoringi', color: C.white, screen: 'Reminders', dark: false },
+  { id: '1', icon: 'add-circle-outline', title: "Hujjat qo'shish", sub: 'Kamera / PDF yuklash', color: C.primary, screen: 'Upload' },
+  { id: '2', icon: 'sparkles-outline', title: 'AI tahlil', sub: 'Aqlli skanerlash', color: '#1E3A8A', screen: 'AI' },
+  { id: '3', icon: 'briefcase-outline', title: "Dalillar to'plami", sub: 'Sud va organlar uchun', color: C.white, screen: 'Legal', dark: false },
+  { id: '4', icon: 'shield-checkmark-outline', title: 'Kafolat tekshiruvi', sub: 'Muddat monitoringi', color: C.white, screen: 'Reminders', dark: false },
 ];
 
 const RECENT_DOCS = [
-  { id: '1', name: 'Kvartira ijara shartnomasi (Yunu', tag: 'Faol', tagColor: C.primary, type: 'Shartnoma', format: 'PDF', date: '18-may, 2025', icon: '📄' },
-  { id: '2', name: 'MacBook Pro M3 xarid che', tag: 'Kafolat faol', tagColor: C.green, type: 'Chek', format: 'JPG', date: '12-may, 2025', icon: '🖼️' },
-  { id: '3', name: 'Artel muzlatgich kafol', tag: 'Muddati oz qoldi', tagColor: C.orange, type: 'Kafolat', format: 'PDF', date: '04-may, 2025', icon: '📄' },
+  { id: '1', name: 'Kvartira ijara shartnomasi (Yunu', tag: 'Faol', tagColor: C.primary, type: 'Shartnoma', format: 'PDF', date: '18-may, 2025', icon: 'document-text-outline' },
+  { id: '2', name: 'MacBook Pro M3 xarid che', tag: 'Kafolat faol', tagColor: C.green, type: 'Chek', format: 'JPG', date: '12-may, 2025', icon: 'receipt-outline' },
+  { id: '3', name: 'Artel muzlatgich kafol', tag: 'Muddati oz qoldi', tagColor: C.orange, type: 'Kafolat', format: 'PDF', date: '04-may, 2025', icon: 'shield-checkmark-outline' },
 ];
 
 // ─── COMPONENT ──────────────────────────────────────────────
@@ -63,37 +63,18 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const [selectedCat, setSelectedCat] = useState('1');
   const [search, setSearch] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
 
   return (
     <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
 
-      {/* ── HEADER ── */}
-      <View style={[styles.header, isScrolled && styles.headerScrolled]}>
-        <View style={styles.headerLeft}>
-          <View style={styles.logoBox}>
-            <Text style={styles.logoIcon}>💼</Text>
-          </View>
-          <View>
-            <Text style={styles.appName}>Bosh sahifa</Text>
-            <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
-          </View>
-        </View>
-      </View>
-
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        onScroll={(e) => {
-          const offsetY = e.nativeEvent.contentOffset.y;
-          setIsScrolled(offsetY > 10);
-        }}
-        scrollEventThrottle={16}
       >
         {/* ── SEARCH ── */}
         <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={18} color={C.textGrey} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Hujjatlardan qidiring..."
@@ -102,7 +83,7 @@ export default function HomeScreen() {
             onChangeText={setSearch}
           />
           <TouchableOpacity onPress={() => navigation.navigate('AI')}>
-            <Text style={styles.micIcon}>🎙️</Text>
+            <Ionicons name="mic-outline" size={20} color={C.primary} />
           </TouchableOpacity>
         </View>
 
@@ -124,8 +105,14 @@ export default function HomeScreen() {
         {/* ── STATS CARD ── */}
         <View style={styles.statsCard}>
           <View style={styles.statsTop}>
-            <Text style={styles.statsSync}>☁️ Bulutda sinxronlangan 100%</Text>
-            <Text style={styles.statsEnc}>🔒 AES-256</Text>
+            <View style={styles.statsBadgeRow}>
+              <Ionicons name="cloud-done-outline" size={14} color="#BFDBFE" />
+              <Text style={styles.statsSync}>Bulutda sinxronlangan 100%</Text>
+            </View>
+            <View style={styles.statsBadgeRow}>
+              <Ionicons name="shield-checkmark-outline" size={13} color="#BFDBFE" />
+              <Text style={styles.statsEnc}>AES-256</Text>
+            </View>
           </View>
           <Text style={styles.statsLabel}>Hamyondagi jami aktivlar</Text>
           <Text style={styles.statsBig}>24 ta rasmiy hujjat</Text>
@@ -154,7 +141,13 @@ export default function HomeScreen() {
               ]}
               onPress={() => navigation.navigate(a.screen)}
             >
-              <Text style={styles.actionIcon}>{a.icon}</Text>
+              <View style={styles.actionIconBox}>
+                <Ionicons
+                  name={a.icon as any}
+                  size={24}
+                  color={a.color === C.white ? C.primary : C.white}
+                />
+              </View>
               <Text style={[styles.actionTitle, { color: a.color === C.white ? C.textDark : C.white }]}>
                 {a.title}
               </Text>
@@ -168,7 +161,8 @@ export default function HomeScreen() {
         {/* ── WARNING CARD ── */}
         <View style={styles.warningCard}>
           <View style={styles.warningTop}>
-            <Text style={styles.warningTag}>⚠️ KAFOLAT MUDDATI OGOHLANTIRISHI</Text>
+            <Ionicons name="warning-outline" size={15} color={C.red} />
+            <Text style={styles.warningTag}>KAFOLAT MUDDATI OGOHLANTIRISHI</Text>
           </View>
           <Text style={styles.warningTitle}>Samsung S24 Ultra kafolati tugashiga 5 kun qoldi</Text>
           <Text style={styles.warningBody}>Rasmiy servis markaziga bepul murojaat qilish imkoniyati</Text>
@@ -196,7 +190,7 @@ export default function HomeScreen() {
             onPress={() => navigation.navigate('Details', { docId: doc.id })}
           >
             <View style={styles.docIcon}>
-              <Text style={{ fontSize: 24 }}>{doc.icon}</Text>
+              <Ionicons name={doc.icon as any} size={22} color={C.primary} />
             </View>
             <View style={styles.docInfo}>
               <View style={styles.docNameRow}>
@@ -205,9 +199,12 @@ export default function HomeScreen() {
                   <Text style={[styles.docTagText, { color: doc.tagColor }]}>{doc.tag}</Text>
                 </View>
               </View>
-              <Text style={styles.docMeta}>
-                {doc.icon === '📄' ? '📄' : '🖼️'} {doc.type} • {doc.format} • {doc.date}
-              </Text>
+              <View style={styles.docMetaRow}>
+                <Ionicons name="document-text-outline" size={12} color={C.textGrey} />
+                <Text style={styles.docMeta}>
+                  {doc.type} • {doc.format} • {doc.date}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -215,43 +212,21 @@ export default function HomeScreen() {
         {/* ── AI BANNER ── */}
         <TouchableOpacity style={styles.aiBanner} onPress={() => navigation.navigate('AI')}>
           <View style={styles.aiLeft}>
-            <Text style={styles.aiTag}>YURIDIK TAHLIL XABARNOMASI</Text>
-            <Text style={styles.aiBody}>Al 3 ta hujjatda muddati yaqinlashayotgan bandlarni aniqladi</Text>
+            <View style={styles.aiTagRow}>
+              <Ionicons name="sparkles" size={12} color="#93C5FD" />
+              <Text style={styles.aiTag}>YURIDIK TAHLIL XABARNOMASI</Text>
+            </View>
+            <Text style={styles.aiBody}>AI 3 ta hujjatda muddati yaqinlashayotgan bandlarni aniqladi</Text>
           </View>
-          <Text style={styles.aiArrow}>→</Text>
+          <Ionicons name="arrow-forward" size={18} color={C.white} />
         </TouchableOpacity>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map((item) => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 24 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={styles.navLabel}>{item.label}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-      </ScreenContainer>
+      <BottomNav activeScreen="Home" />
+    </ScreenContainer>
   );
 }
 
@@ -260,38 +235,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   scroll: { flex: 1, paddingHorizontal: 16 },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: C.bg,
-    zIndex: 10,
-  },
-  headerScrolled: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  logoBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.primary + '22', alignItems: 'center', justifyContent: 'center' },
-  logoIcon: { fontSize: 18 },
-  appName: { fontSize: 14, fontWeight: '700', color: C.textDark },
-  appSub: { fontSize: 11, color: C.textGrey },
-
-  // Date
-  dateRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 4 },
-  dateIcon: { fontSize: 13 },
-  dateText: { fontSize: 13, color: C.textGrey },
   // Search
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 6, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: C.textDark },
   micIcon: { fontSize: 18 },
@@ -305,7 +250,8 @@ const styles = StyleSheet.create({
 
   // Stats card
   statsCard: { backgroundColor: C.primary, borderRadius: 20, padding: 18, marginTop: 16, position: 'relative' },
-  statsTop: { flexDirection: 'row', justifyContent: 'space-between' },
+  statsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statsBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   statsSync: { fontSize: 12, color: '#BFDBFE' },
   statsEnc: { fontSize: 12, color: '#BFDBFE' },
   statsIconBtn: { position: 'absolute', top: 14, right: 14, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, padding: 6 },
@@ -323,13 +269,13 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 13, color: C.primary, fontWeight: '600' },
   actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   actionCard: { width: '47%', borderRadius: 16, padding: 14, elevation: 2, shadowColor: '#000', shadowOpacity: 0.07, shadowRadius: 4 },
-  actionIcon: { fontSize: 24, marginBottom: 8 },
+  actionIconBox: { marginBottom: 10 },
   actionTitle: { fontSize: 14, fontWeight: '700' },
   actionSub: { fontSize: 11, marginTop: 2 },
 
   // Warning
   warningCard: { backgroundColor: C.redLight, borderRadius: 16, padding: 14, marginTop: 16, borderLeftWidth: 4, borderLeftColor: C.red },
-  warningTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  warningTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, gap: 6 },
   warningTag: { fontSize: 11, fontWeight: '700', color: C.red },
   warningTitle: { fontSize: 15, fontWeight: '700', color: C.textDark },
   warningBody: { fontSize: 12, color: C.textGrey, marginTop: 4 },
@@ -347,20 +293,13 @@ const styles = StyleSheet.create({
   docName: { fontSize: 14, fontWeight: '600', color: C.textDark, flex: 1, marginRight: 6 },
   docTag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   docTagText: { fontSize: 11, fontWeight: '600' },
-  docMeta: { fontSize: 12, color: C.textGrey, marginTop: 4 },
+  docMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  docMeta: { fontSize: 12, color: C.textGrey },
 
   // AI Banner
   aiBanner: { backgroundColor: C.tertiary, borderRadius: 16, padding: 14, marginTop: 18, marginBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   aiLeft: { flex: 1 },
+  aiTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 2 },
   aiTag: { fontSize: 10, fontWeight: '700', color: '#93C5FD', letterSpacing: 0.5 },
-  aiBody: { fontSize: 13, color: C.white, marginTop: 4, lineHeight: 18 },
-  aiArrow: { fontSize: 22, color: C.white, marginLeft: 10 },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
+  aiBody: { fontSize: 13, color: C.white, lineHeight: 18 },
 });

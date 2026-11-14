@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   onNavigateToMain,
 }) => {
   const { width, height } = useWindowDimensions();
+  const screenWidth = Platform.OS === 'web' && width > 500 ? 430 : width;
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList<OnboardingSlideData>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,12 +38,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const onMomentumScrollEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
-      const index = Math.round(offsetX / width);
+      const index = Math.round(offsetX / screenWidth);
       if (index >= 0 && index < ONBOARDING_SLIDES.length) {
         setCurrentIndex(index);
       }
     },
-    [width]
+    [screenWidth]
   );
 
   // Navigate to specific index
@@ -74,7 +76,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     const Visual = item.VisualComponent;
 
     return (
-      <View style={[styles.slideContainer, { width }]}>
+      <View style={[styles.slideContainer, { width: screenWidth }]}>
         {/* Visual Graphic */}
         <View style={styles.visualWrapper}>
           <Visual />
@@ -145,15 +147,15 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
       {/* Bottom Decorative Wave (Navy left curve, Gold right curve matching screenshot) */}
       <View style={styles.waveContainer}>
-        <Svg width={width} height={38} viewBox={`0 0 ${width} 38`}>
+        <Svg width={screenWidth} height={38} viewBox={`0 0 ${screenWidth} 38`}>
           {/* Left Navy Wave */}
           <Path
-            d={`M 0 10 Q ${width * 0.22} 24 ${width * 0.52} 38 L 0 38 Z`}
+            d={`M 0 10 Q ${screenWidth * 0.22} 24 ${screenWidth * 0.52} 38 L 0 38 Z`}
             fill="#034687"
           />
           {/* Right Gold Wave */}
           <Path
-            d={`M ${width * 0.44} 38 Q ${width * 0.74} 24 ${width} 8 L ${width} 38 Z`}
+            d={`M ${screenWidth * 0.44} 38 Q ${screenWidth * 0.74} 24 ${screenWidth} 8 L ${screenWidth} 38 Z`}
             fill="#F59E0B"
           />
         </Svg>

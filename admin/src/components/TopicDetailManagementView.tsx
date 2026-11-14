@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowLeft,
   BookOpen,
@@ -15,6 +15,9 @@ import {
   FileUp,
   ListOrdered,
   Paperclip,
+  ChevronDown,
+  Check,
+  Search,
 } from 'lucide-react';
 import type { TopicItem } from './HuquqMaktabiDetailView';
 
@@ -114,6 +117,23 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
   const [courseDuration, setCourseDuration] = useState('45 daqiqa');
   const [courseImage, setCourseImage] = useState('');
   const [isSubmittingCourse, setIsSubmittingCourse] = useState(false);
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
+  const [topicSearchTerm, setTopicSearchTerm] = useState('');
+  const topicDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (topicDropdownRef.current && !topicDropdownRef.current.contains(e.target as Node)) {
+        setIsTopicDropdownOpen(false);
+      }
+    };
+    if (isTopicDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTopicDropdownOpen]);
 
   // Modal 2: Create Lesson
   const [showLessonModal, setShowLessonModal] = useState(false);
@@ -1261,32 +1281,312 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
             </div>
 
             <form onSubmit={handleCreateCourse} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Select Topic */}
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
-                  Mavjud mavzu
-                </label>
-                <select
-                  value={courseTopicId}
-                  onChange={(e) => setCourseTopicId(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 14px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: '14px',
-                    outline: 'none',
-                  }}
-                >
-                  {allTopics.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title} (#{t.order})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Select Topic (Custom Premium Dropdown) */}
+              {(() => {
+                const selectedTopicObj = allTopics.find((t) => t.id === courseTopicId) || topic;
+                const filteredTopics = allTopics.filter((t) => {
+                  if (!topicSearchTerm.trim()) return true;
+                  const term = topicSearchTerm.toLowerCase();
+                  return (
+                    t.title.toLowerCase().includes(term) ||
+                    (t.subtitle && t.subtitle.toLowerCase().includes(term)) ||
+                    String(t.order).includes(term)
+                  );
+                });
+
+                return (
+                  <div style={{ position: 'relative' }} ref={topicDropdownRef}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#CBD5E1' }}>
+                        Mavjud mavzu *
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#00E5FF', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00E5FF', display: 'inline-block' }}></span>
+                        {allTopics.length} ta yo‘nalish
+                      </span>
+                    </div>
+
+                    {/* Trigger Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsTopicDropdownOpen((prev) => !prev)}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '14px',
+                        background: isTopicDropdownOpen
+                          ? 'rgba(0, 229, 255, 0.08)'
+                          : 'rgba(255, 255, 255, 0.05)',
+                        border: isTopicDropdownOpen
+                          ? '1px solid #00E5FF'
+                          : '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: isTopicDropdownOpen
+                          ? '0 0 0 3px rgba(0, 229, 255, 0.18), 0 8px 24px rgba(0, 0, 0, 0.5)'
+                          : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxSizing: 'border-box',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                        <div
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '10px',
+                            background: selectedTopicObj.color
+                              ? `${selectedTopicObj.color}22`
+                              : 'rgba(0, 229, 255, 0.15)',
+                            border: `1px solid ${selectedTopicObj.color || '#00E5FF'}44`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Layers size={18} color={selectedTopicObj.color || '#00E5FF'} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {selectedTopicObj.title}
+                            </span>
+                            <span
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: '6px',
+                                background: 'rgba(0, 229, 255, 0.15)',
+                                color: '#00E5FF',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                              }}
+                            >
+                              #{selectedTopicObj.order}
+                            </span>
+                          </div>
+                          <span style={{ display: 'block', fontSize: '11.5px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {selectedTopicObj.subtitle || 'Belgilangan o‘quv mavzusi'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '8px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          marginLeft: '8px',
+                        }}
+                      >
+                        <ChevronDown
+                          size={16}
+                          color={isTopicDropdownOpen ? '#00E5FF' : '#94A3B8'}
+                          style={{
+                            transform: isTopicDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.25s ease',
+                          }}
+                        />
+                      </div>
+                    </button>
+
+                    {/* Dropdown Menu Popup (Bosilganda ochiladigan qism) */}
+                    {isTopicDropdownOpen && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 8px)',
+                          left: 0,
+                          right: 0,
+                          zIndex: 1000,
+                          background: '#0B132B',
+                          border: '1px solid rgba(0, 229, 255, 0.35)',
+                          borderRadius: '16px',
+                          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 229, 255, 0.15)',
+                          padding: '10px',
+                          boxSizing: 'border-box',
+                          backdropFilter: 'blur(20px)',
+                        }}
+                      >
+                        {/* Search Input inside Dropdown */}
+                        <div
+                          style={{
+                            position: 'relative',
+                            marginBottom: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Search
+                            size={14}
+                            color="#64748B"
+                            style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Mavzularni qidirish..."
+                            value={topicSearchTerm}
+                            onChange={(e) => setTopicSearchTerm(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            autoFocus
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px 8px 34px',
+                              borderRadius: '10px',
+                              background: 'rgba(255, 255, 255, 0.06)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              color: '#FFFFFF',
+                              fontSize: '12.5px',
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                          {topicSearchTerm && (
+                            <button
+                              type="button"
+                              onClick={() => setTopicSearchTerm('')}
+                              style={{
+                                position: 'absolute',
+                                right: '10px',
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#94A3B8',
+                                cursor: 'pointer',
+                                padding: '2px',
+                              }}
+                            >
+                              <X size={13} />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Scrollable Topics List */}
+                        <div
+                          style={{
+                            maxHeight: '230px',
+                            overflowY: 'auto',
+                            paddingRight: '4px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px',
+                          }}
+                        >
+                          {filteredTopics.length === 0 ? (
+                            <div style={{ padding: '20px', textAlign: 'center', color: '#64748B', fontSize: '12px' }}>
+                              Mavzu topilmadi
+                            </div>
+                          ) : (
+                            filteredTopics.map((t) => {
+                              const isSelected = t.id === courseTopicId;
+                              return (
+                                <div
+                                  key={t.id}
+                                  onClick={() => {
+                                    setCourseTopicId(t.id);
+                                    setIsTopicDropdownOpen(false);
+                                    setTopicSearchTerm('');
+                                  }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '10px 12px',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    background: isSelected
+                                      ? 'linear-gradient(90deg, rgba(0, 229, 255, 0.16) 0%, rgba(0, 229, 255, 0.04) 100%)'
+                                      : 'transparent',
+                                    border: isSelected
+                                      ? '1px solid rgba(0, 229, 255, 0.35)'
+                                      : '1px solid transparent',
+                                    transition: 'all 0.15s ease',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.background = 'transparent';
+                                      e.currentTarget.style.borderColor = 'transparent';
+                                    }
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                                    <span
+                                      style={{
+                                        width: '26px',
+                                        height: '26px',
+                                        borderRadius: '8px',
+                                        background: isSelected ? 'rgba(0, 229, 255, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+                                        color: isSelected ? '#00E5FF' : '#94A3B8',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {t.order}
+                                    </span>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ fontSize: '13.5px', fontWeight: 600, color: isSelected ? '#00E5FF' : '#FFFFFF' }}>
+                                        {t.title}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontSize: '11px',
+                                          color: '#64748B',
+                                          marginTop: '1px',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          maxWidth: '310px',
+                                        }}
+                                      >
+                                        {t.subtitle || 'Huquq maktabi o‘quv mavzusi'}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {isSelected && (
+                                    <div
+                                      style={{
+                                        width: '24px',
+                                        height: '24px',
+                                        borderRadius: '50%',
+                                        background: 'rgba(0, 229, 255, 0.15)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                        marginLeft: '8px',
+                                      }}
+                                    >
+                                      <Check size={14} color="#00E5FF" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Course Title */}
               <div>

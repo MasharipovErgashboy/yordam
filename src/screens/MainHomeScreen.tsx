@@ -14,7 +14,7 @@ import {
   Platform,
   BackHandler,
   Keyboard,
-} from 'react-native'; from 'react-native';
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -584,7 +584,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   }, []);
 
   const hideNavbar = activeTab === 'ai_assistant' && keyboardVisible;
->>>>>>> origin/Samandar
 
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (!checkAuth()) return;
@@ -985,76 +984,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
             </View>
           </ScrollView>
         </View>
-      ) : activeTab === 'ai_assistant' ? (
-        /* ===================== AI YORDAMCHI TAB (standalone with KeyboardAvoidingView) ===================== */
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
-        >
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: 16 }]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* AI Header Card */}
-            <View style={styles.aiTabHeaderCard}>
-              <Image source={robotImage} style={{ width: 64, height: 64 }} resizeMode="contain" />
-              <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={styles.aiTabTitle}>HAQIM AI Yordamchi</Text>
-                <Text style={styles.aiTabDesc}>
-                  O'zbekiston Respublikasi qonunchiligi bo'yicha istalgan huquqiy savolingizni bering.
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.sectionTitle, { marginTop: 8, marginBottom: 10 }]}>
-              Tezkor huquqiy savollar:
-            </Text>
-
-            <TouchableOpacity
-              style={styles.quickPromptCard}
-              onPress={() => Alert.alert('HAQIM AI', 'Ijara shartnomasi bo\u2018yicha maslahat tahlili boshlanmoqda...')}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-              <Text style={styles.quickPromptText}>Kvartira ijarasi shartnomasi qanday bekor qilinadi?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickPromptCard}
-              onPress={() => Alert.alert('HAQIM AI', 'Mehnat nizosi bo\u2018yicha tahlil boshlanmoqda...')}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-              <Text style={styles.quickPromptText}>Ish beruvchi ogohlantirishsiz ishdan bo\u2018shatishi mumkinmi?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickPromptCard}
-              onPress={() => Alert.alert('HAQIM AI', 'Iste\u2018molchi huquqlari bo\u2018yicha tahlil boshlanmoqda...')}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
-              <Text style={styles.quickPromptText}>Nuqsonli tovarni qancha muddatda qaytarish mumkin?</Text>
-            </TouchableOpacity>
-          </ScrollView>
-
-          {/* Chat input pinned above keyboard */}
-          <View style={[styles.chatInputBar, { marginBottom: Math.max(insets.bottom + 60, 70) }]}>
-            <TextInput
-              style={styles.chatInput}
-              placeholder="Savolingizni bu yerga yozing..."
-              placeholderTextColor="#9CA3AF"
-              returnKeyType="send"
-              onSubmitEditing={() => Alert.alert('HAQIM AI', 'Savolingiz qabul qilindi, tahlil qilinmoqda...')}
-            />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={() => Alert.alert('HAQIM AI', 'Savolingiz qabul qilindi, tahlil qilinmoqda...')}
-            >
-              <Ionicons name="arrow-up" size={18} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
       ) : (
         /* ===================== OTHER TABS (HOME, PROFILE) ===================== */
         <ScrollView

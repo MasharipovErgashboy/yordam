@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { legalServicesApi } from '../services/legalServicesApi';
-import { WebView } from 'react-native-webview';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 const { width } = Dimensions.get('window');

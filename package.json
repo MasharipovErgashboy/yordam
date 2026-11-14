@@ -43,5 +43,8 @@
     "admin:build": "npm --prefix admin run build",
     "backend": "node backend/src/server.js"
   },
+  "overrides": {
+    "react-native-webview": "14.0.1"
+  },
   "private": true
 }

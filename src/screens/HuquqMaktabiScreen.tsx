@@ -1861,15 +1861,13 @@ const computeCategoryStats = (
   allCourses: TopicCourseItem[],
   allLessons: CourseLesson[]
 ): LegalCategory => {
-  const topicCourses = allCourses.filter(
-    (c) => c.topicId === cat.id || (!c.topicId && cat.id === 'oila')
-  );
+  const topicCourses = allCourses.filter((c) => c.topicId === cat.id);
   const topicCourseIds = topicCourses.map((c) => c.id);
   const topicLessons = allLessons.filter(
     (l) => l.topicId === cat.id || topicCourseIds.includes(l.courseId || '')
   );
 
-  const realCoursesCount = topicCourses.length > 0 ? topicCourses.length : (cat.id === 'oila' ? 4 : 0);
+  const realCoursesCount = topicCourses.length;
   const realLessonsCount =
     topicLessons.length > 0
       ? topicLessons.length
@@ -1966,6 +1964,13 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
     return legalCategories.map((cat) => computeCategoryStats(cat, dynamicCourses, dynamicLessons));
   }, [legalCategories, dynamicCourses, dynamicLessons]);
 
+  // Overall progress percentage across all categories (dynamically computed from real data)
+  const overallProgressPercent = useMemo(() => {
+    if (activeCategories.length === 0) return 0;
+    const sum = activeCategories.reduce((acc, cat) => acc + (cat.progress || 0), 0);
+    return Math.round(sum / activeCategories.length);
+  }, [activeCategories]);
+
   // Topics tab search & level filter state
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
   const [selectedTopicLevel, setSelectedTopicLevel] = useState<'all' | 'boshlangich' | 'orta' | 'ilgor'>('all');
@@ -1992,7 +1997,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           const active = data.banners.filter((b: any) => !b.expiresAt || b.expiresAt > now);
           setHomeBanners(active);
         }
-        if (Array.isArray(data.courses) && data.courses.length > 0) {
+        if (Array.isArray(data.courses)) {
           setDynamicCourses(data.courses);
           setSelectedCourseDetail((prev) => {
             if (!prev) return null;
@@ -2000,7 +2005,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             return updated ? { ...prev, ...updated } : prev;
           });
         }
-        if (Array.isArray(data.lessons) && data.lessons.length > 0) {
+        if (Array.isArray(data.lessons)) {
           setDynamicLessons(data.lessons);
           setSelectedLessonVideo((prev) => {
             if (!prev) return null;
@@ -4974,16 +4979,16 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             <View style={styles.videoMetaHeaderRow}>
               <View style={styles.videoMetaLeftCol}>
                 <Text style={styles.videoLessonTitle}>
-                  {selectedLessonVideo?.title || COURSE_LESSONS[currentLessonIndex]?.title || '1. Nikoh tushunchasi va ahamiyati'}
+                  {selectedLessonVideo?.title || 'Dars'}
                 </Text>
                 <View style={styles.videoLessonSubtitleRow}>
                   <Text style={styles.videoCourseNameText}>
-                    {selectedCourseDetail?.title || 'Nikoh va oila munosabatlari'}
+                    {selectedCourseDetail?.title || 'Kurs'}
                   </Text>
                   <Text style={styles.videoDotDivider}>·</Text>
                   <Ionicons name="time-outline" size={12} color="#64748B" style={{ marginRight: 3 }} />
                   <Text style={styles.videoDurationText}>
-                    {selectedLessonVideo?.duration || COURSE_LESSONS[currentLessonIndex]?.duration || '10 daqiqa'}
+                    {selectedLessonVideo?.duration || '10 daqiqa'}
                   </Text>
                 </View>
               </View>
@@ -5410,9 +5415,9 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               {/* Header: Darslar ro'yxati | X/Y bajarilgan */}
               {(() => {
                 const matchedLessons = dynamicLessons.filter(
-                  (l) => l.courseId === selectedCourseDetail?.id || (!l.courseId && selectedCourseDetail?.id === 'marriage')
+                  (l) => l.courseId === selectedCourseDetail?.id
                 );
-                const lessonsToRender = matchedLessons.length > 0 ? matchedLessons : COURSE_LESSONS;
+                const lessonsToRender = matchedLessons;
                 const completedCount = lessonsToRender.filter((l) => l.status === 'completed').length;
                 return (
                   <View style={styles.lessonsSectionHeader}>
@@ -5426,101 +5431,116 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
 
               {/* Stepper Timeline & Lessons List */}
               <View style={styles.lessonsTimelineContainer}>
-                {/* Vertical Timeline connecting line */}
-                <View style={styles.timelineVerticalLine} />
-
                 {(() => {
                   const matchedLessons = dynamicLessons.filter(
-                    (l) => l.courseId === selectedCourseDetail?.id || (!l.courseId && selectedCourseDetail?.id === 'marriage')
+                    (l) => l.courseId === selectedCourseDetail?.id
                   );
-                  const lessonsToRender = matchedLessons.length > 0 ? matchedLessons : COURSE_LESSONS;
+                  const lessonsToRender = matchedLessons;
 
-                  return lessonsToRender.map((lesson, index) => {
-                    const isCompleted = lesson.status === 'completed';
-                    const isInProgress = lesson.status === 'in_progress';
-
+                  if (lessonsToRender.length === 0) {
                     return (
-                      <View key={lesson.id} style={styles.lessonRowWrapper}>
-                        {/* Timeline Node Icon on the left */}
-                        <View style={styles.timelineNodeWrap}>
-                          {isCompleted ? (
-                            <View style={styles.completedCheckCircle}>
-                              <Ionicons name="checkmark" size={13} color="#FFFFFF" />
-                            </View>
-                          ) : isInProgress ? (
-                            <View style={styles.inProgressPlayCircle}>
-                              <Ionicons name="play" size={10} color="#FFFFFF" style={{ marginLeft: 2 }} />
-                            </View>
-                          ) : (
-                            <View style={styles.lockedNodeCircle}>
-                              <Ionicons name="lock-closed" size={10} color="#94A3B8" />
-                            </View>
-                          )}
-                        </View>
+                      <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+                        <Ionicons name="videocam-outline" size={36} color="#94A3B8" />
+                        <Text style={{ marginTop: 8, fontSize: 13, color: '#64748B', fontWeight: '500' }}>
+                          Ushbu kursda hozircha darslar mavjud emas
+                        </Text>
+                      </View>
+                    );
+                  }
 
-                        {/* Lesson Card */}
-                        <TouchableOpacity
-                          style={[
-                            styles.lessonCardItem,
-                            isInProgress && styles.lessonCardItemActive,
-                          ]}
-                          activeOpacity={0.8}
-                          onPress={() => {
-                            setSelectedLessonVideo(lesson);
-                            setCurrentLessonIndex(index);
-                          }}
-                        >
-                          {/* Thumbnail Image */}
-                          <Image
-                            source={
-                              lesson.imageUrl
-                                ? { uri: lesson.imageUrl }
-                                : lesson.image || lessonThumb1
-                            }
-                            style={styles.lessonThumbImage}
-                            resizeMode="cover"
-                          />
+                  return (
+                    <>
+                      {/* Vertical Timeline connecting line */}
+                      <View style={styles.timelineVerticalLine} />
 
-                        {/* Title & Duration */}
-                        <View style={styles.lessonDetailsCol}>
-                          <Text style={styles.lessonTitleText} numberOfLines={2}>
-                            {lesson.title}
-                          </Text>
-                          <View style={styles.lessonDurationRow}>
-                            <Ionicons
-                              name="ellipse-outline"
-                              size={8}
-                              color="#64748B"
-                              style={{ marginRight: 4 }}
-                            />
-                            <Text style={styles.lessonDurationNum}>{lesson.duration}</Text>
+                      {lessonsToRender.map((lesson, index) => {
+                        const isCompleted = lesson.status === 'completed';
+                        const isInProgress = lesson.status === 'in_progress';
+
+                        return (
+                          <View key={lesson.id} style={styles.lessonRowWrapper}>
+                            {/* Timeline Node Icon on the left */}
+                            <View style={styles.timelineNodeWrap}>
+                              {isCompleted ? (
+                                <View style={styles.completedCheckCircle}>
+                                  <Ionicons name="checkmark" size={13} color="#FFFFFF" />
+                                </View>
+                              ) : isInProgress ? (
+                                <View style={styles.inProgressPlayCircle}>
+                                  <Ionicons name="play" size={10} color="#FFFFFF" style={{ marginLeft: 2 }} />
+                                </View>
+                              ) : (
+                                <View style={styles.lockedNodeCircle}>
+                                  <Ionicons name="lock-closed" size={10} color="#94A3B8" />
+                                </View>
+                              )}
+                            </View>
+
+                            {/* Lesson Card */}
+                            <TouchableOpacity
+                              style={[
+                                styles.lessonCardItem,
+                                isInProgress && styles.lessonCardItemActive,
+                              ]}
+                              activeOpacity={0.8}
+                              onPress={() => {
+                                setSelectedLessonVideo(lesson);
+                                setCurrentLessonIndex(index);
+                              }}
+                            >
+                              {/* Thumbnail Image */}
+                              <Image
+                                source={
+                                  lesson.imageUrl
+                                    ? { uri: lesson.imageUrl }
+                                    : lesson.image || lessonThumb1
+                                }
+                                style={styles.lessonThumbImage}
+                                resizeMode="cover"
+                              />
+
+                              {/* Title & Duration */}
+                              <View style={styles.lessonDetailsCol}>
+                                <Text style={styles.lessonTitleText} numberOfLines={2}>
+                                  {lesson.title}
+                                </Text>
+                                <View style={styles.lessonDurationRow}>
+                                  <Ionicons
+                                    name="ellipse-outline"
+                                    size={8}
+                                    color="#64748B"
+                                    style={{ marginRight: 4 }}
+                                  />
+                                  <Text style={styles.lessonDurationNum}>{lesson.duration}</Text>
+                                </View>
+                              </View>
+
+                              {/* Status badge / Action button on right */}
+                              {isCompleted ? (
+                                <View style={styles.completedStatusPill}>
+                                  <Ionicons name="checkmark" size={12} color="#10B981" style={{ marginRight: 2 }} />
+                                  <Text style={styles.completedStatusText}>Bajarilgan</Text>
+                                </View>
+                              ) : (
+                                <TouchableOpacity
+                                  style={styles.continueActionBtn}
+                                  activeOpacity={0.7}
+                                  onPress={() => {
+                                    setSelectedLessonVideo(lesson);
+                                    setCurrentLessonIndex(index);
+                                  }}
+                                >
+                                  <Ionicons name="play" size={10} color="#B45309" style={{ marginRight: 3 }} />
+                                  <Text style={styles.continueActionText}>Davom etiş</Text>
+                                </TouchableOpacity>
+                              )}
+                            </TouchableOpacity>
                           </View>
-                        </View>
-
-                        {/* Status badge / Action button on right */}
-                        {isCompleted ? (
-                          <View style={styles.completedStatusPill}>
-                            <Ionicons name="checkmark" size={12} color="#10B981" style={{ marginRight: 2 }} />
-                            <Text style={styles.completedStatusText}>Bajarilgan</Text>
-                          </View>
-                        ) : (
-                          <TouchableOpacity
-                            style={styles.continueActionBtn}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              setSelectedLessonVideo(lesson);
-                              setCurrentLessonIndex(index);
-                            }}
-                          >
-                            <Ionicons name="play" size={10} color="#B45309" style={{ marginRight: 3 }} />
-                            <Text style={styles.continueActionText}>Davom etiş</Text>
-                          </TouchableOpacity>
-                        )}
-                      </TouchableOpacity>
-                    </View>
+                        );
+                      })}
+                    </>
                   );
-                });
-              })()}
+                })()}
               </View>
 
               {/* 7. Bottom Card: Yakuniy test */}
@@ -5594,14 +5614,14 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
       ) : selectedTopicDetail ? (
         (() => {
         const topicCourses = dynamicCourses.filter(
-          (c) => c.topicId === selectedTopicDetail.id || (!c.topicId && selectedTopicDetail.id === 'oila')
+          (c) => c.topicId === selectedTopicDetail.id
         );
         const topicCourseIds = topicCourses.map((c) => c.id);
         const topicLessons = dynamicLessons.filter(
           (l) => l.topicId === selectedTopicDetail.id || topicCourseIds.includes(l.courseId || '')
         );
-        const realCoursesCount = topicCourses.length > 0 ? topicCourses.length : (selectedTopicDetail.id === 'oila' ? 4 : 0);
-        const realLessonsCount = topicLessons.length > 0 ? topicLessons.length : (selectedTopicDetail.lessonsCount || 0);
+        const realCoursesCount = topicCourses.length;
+        const realLessonsCount = topicLessons.length > 0 ? topicLessons.length : (Number(selectedTopicDetail.lessonsCount) || 0);
         const completedLessonsCount = topicLessons.filter((l) => l.status === 'completed').length;
         const topicProgress = realLessonsCount > 0
           ? Math.round((completedLessonsCount / realLessonsCount) * 100)
@@ -5631,7 +5651,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   </Text>
                   <Text style={styles.detailSubtitle}>
                     {selectedTopicDetail.subtitle ||
-                      'Oila, nikoh, ota-onalik, aliment va boshqa oilaviy munosabatlar bo‘yicha huquqiy bilimlar.'}
+                      'Fuqarolar uchun huquqiy bilimlar, amaliy keyslar va darsliklar.'}
                   </Text>
 
                   {/* Meta Badges */}
@@ -5764,10 +5784,9 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 <View style={styles.coursesList}>
                   {(() => {
                     const matchedCourses = dynamicCourses.filter(
-                      (c) => c.topicId === selectedTopicDetail?.id || (!c.topicId && selectedTopicDetail?.id === 'oila')
+                      (c) => c.topicId === selectedTopicDetail?.id
                     );
-                    const coursesToRender =
-                      matchedCourses.length > 0 ? matchedCourses : (selectedTopicDetail?.id === 'oila' ? FAMILY_LAW_COURSES : []);
+                    const coursesToRender = matchedCourses;
 
                     if (coursesToRender.length === 0) {
                       return (
@@ -6068,33 +6087,46 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               </TouchableOpacity>
             </View>
 
-            {/* 2. "Umumiy o‘zlashtirish" Progress Banner */}
-            <LinearGradient
-              colors={['#033B6A', '#002B49']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.overallBanner}
+            {/* 2. "Umumiy o‘zlashtirish" Progress Banner (Real Data) */}
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => {
+                const totalCompleted = dynamicLessons.filter((l) => l.status === 'completed').length;
+                Alert.alert(
+                  'Umumiy o‘zlashtirish',
+                  `O‘rtacha ko‘rsatkich: ${overallProgressPercent}%\nJami yo‘nalishlar: ${activeCategories.length} ta\nBajarilgan darslar: ${totalCompleted} ta.`
+                );
+              }}
             >
-              <View style={styles.overallBannerLeft}>
-                <View style={styles.overallStarBadge}>
-                  <Ionicons name="star" size={17} color="#FFFFFF" />
+              <LinearGradient
+                colors={['#033B6A', '#002B49']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.overallBanner}
+              >
+                <View style={styles.overallBannerLeft}>
+                  <View style={styles.overallStarBadge}>
+                    <Ionicons name="star" size={17} color="#FFFFFF" />
+                  </View>
+                  <View style={styles.overallTextsCol}>
+                    <Text style={styles.overallTitle}>Umumiy özlaştiriş</Text>
+                    <Text style={styles.overallSubtitle}>
+                      {activeCategories.length} ta yönaliş böyiça progress
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.overallTextsCol}>
-                  <Text style={styles.overallTitle}>Umumiy özlaştiriş</Text>
-                  <Text style={styles.overallSubtitle}>10 ta yönaliş böyiça progress</Text>
-                </View>
-              </View>
 
-              <View style={styles.overallBannerRight}>
-                <View style={styles.overallPercentRow}>
-                  <Text style={styles.overallPercentText}>36%</Text>
-                  <Ionicons name="chevron-forward" size={14} color="#CBD5E1" />
+                <View style={styles.overallBannerRight}>
+                  <View style={styles.overallPercentRow}>
+                    <Text style={styles.overallPercentText}>{overallProgressPercent}%</Text>
+                    <Ionicons name="chevron-forward" size={14} color="#CBD5E1" />
+                  </View>
+                  <View style={styles.overallBarTrack}>
+                    <View style={[styles.overallBarFill, { width: `${overallProgressPercent}%` }]} />
+                  </View>
                 </View>
-                <View style={styles.overallBarTrack}>
-                  <View style={[styles.overallBarFill, { width: '36%' }]} />
-                </View>
-              </View>
-            </LinearGradient>
+              </LinearGradient>
+            </TouchableOpacity>
 
             {/* 3. Level Filter Pills: Barchasi | Boshlang'ich | O'rta | Ilg'or (Oldida iconlarsiz) */}
             <View style={styles.levelPillsRow}>

@@ -40,6 +40,7 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
 
   // Phone starts in OFF state by default on web desktop as requested by user
   const [isPowerOn, setIsPowerOn] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
 
   // Clock updates every minute
   useEffect(() => {
@@ -84,8 +85,33 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
     return Math.max(0.55, Math.min(1, scale));
   }, [windowDimensions, zoomLevel]);
 
+  // Prime Web Audio and Unmute on direct user gesture
+  const triggerAudioActivation = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === 'suspended') {
+            ctx.resume();
+          }
+        }
+      } catch (_) {}
+
+      if (typeof document !== 'undefined') {
+        document.querySelectorAll('video, audio').forEach((el) => {
+          const media = el as HTMLMediaElement;
+          media.muted = false;
+          media.volume = 1.0;
+          media.removeAttribute('muted');
+        });
+      }
+    }
+  };
+
   // Turn on handler: powers on and immediately restarts app from splash video
   const handleTurnOn = () => {
+    triggerAudioActivation();
     setIsPowerOn(true);
     if (onRestartApp) {
       onRestartApp();
@@ -99,6 +125,24 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
     } else {
       setIsPowerOn(false);
     }
+  };
+
+  // Toggle audio mute/unmute
+  const handleToggleSound = () => {
+    setIsAudioMuted((prev) => {
+      const next = !prev;
+      if (typeof document !== 'undefined') {
+        document.querySelectorAll('video, audio').forEach((el) => {
+          const media = el as HTMLMediaElement;
+          media.muted = next;
+          if (!next) {
+            media.volume = 1.0;
+            media.removeAttribute('muted');
+          }
+        });
+      }
+      return next;
+    });
   };
 
   // Dark or light status bar based on screen
@@ -157,6 +201,24 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
             <Ionicons name="reload" size={17} color="#38BDF8" />
           </TouchableOpacity>
         )}
+
+        {/* Audio Mute / Unmute Button */}
+        <TouchableOpacity
+          style={[
+            styles.dockBtn,
+            styles.dockSoundBtn,
+            isAudioMuted ? styles.dockSoundBtnMuted : styles.dockSoundBtnActive,
+          ]}
+          onPress={handleToggleSound}
+          activeOpacity={0.75}
+          accessibilityLabel={isAudioMuted ? "Ovozni yoqish" : "Ovozni o‘chirish"}
+        >
+          <Ionicons
+            name={isAudioMuted ? "volume-mute" : "volume-high"}
+            size={18}
+            color={isAudioMuted ? "#EF4444" : "#10B981"}
+          />
+        </TouchableOpacity>
 
         {/* Divider */}
         <View style={styles.dockDivider} />
@@ -406,6 +468,17 @@ const styles: any = StyleSheet.create({
     backgroundColor: 'rgba(56, 189, 248, 0.12)',
     borderWidth: 1,
     borderColor: 'rgba(56, 189, 248, 0.28)',
+  },
+  dockSoundBtn: {
+    borderWidth: 1,
+  },
+  dockSoundBtnActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  dockSoundBtnMuted: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   dockZoomBtn: {
     backgroundColor: 'rgba(255, 255, 255, 0.06)',

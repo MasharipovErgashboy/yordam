@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Platform, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Platform, Pressable, Text, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEventListener } from 'expo';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -12,6 +13,7 @@ const introVideoSource = require('../../assets/videos/intro.mp4');
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const hasFinishedRef = useRef(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
 
   const handleFinish = () => {
     if (!hasFinishedRef.current) {
@@ -20,12 +22,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     }
   };
 
-  // Initialize video player with auto-play and no looping
+  // Initialize video player with auto-play and full audio enabled
   const player = useVideoPlayer(introVideoSource, (p) => {
     p.loop = false;
-    if (Platform.OS === 'web') {
-      p.muted = true;
-    }
+    p.muted = false;
+    p.volume = 1.0;
     p.play();
   });
 
@@ -34,7 +35,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     handleFinish();
   });
 
-  // Dedicated Web HTML5 Video Autoplay & End Handler
+  // Dedicated Web HTML5 Video Autoplay, Unmuted Audio & End Handler
   useEffect(() => {
     if (Platform.OS !== 'web') return;
 
@@ -44,12 +45,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       if (typeof document !== 'undefined') {
         const video = document.querySelector('video');
         if (video) {
-          video.muted = true;
-          video.defaultMuted = true;
           video.playsInline = true;
           video.setAttribute('playsinline', '');
           video.setAttribute('webkit-playsinline', '');
-          video.setAttribute('muted', '');
           video.setAttribute('autoplay', '');
           video.style.objectFit = 'cover';
           video.style.width = '100%';
@@ -59,14 +57,41 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             handleFinish();
           };
 
+          // Configure unmuted audio playback
+          video.muted = false;
+          video.defaultMuted = false;
+          video.volume = 1.0;
+          video.removeAttribute('muted');
+
           const promise = video.play();
           if (promise !== undefined) {
             promise
               .then(() => {
+                video.muted = false;
+                video.volume = 1.0;
+                video.removeAttribute('muted');
+                setIsAudioMuted(false);
                 clearInterval(interval);
               })
               .catch((err) => {
-                console.log('Video autoplay waiting for interaction or readyState:', err);
+                console.log('Browser blocked initial unmuted autoplay, starting muted with click-to-unmute:', err);
+                video.muted = true;
+                video.play().catch(() => {});
+                setIsAudioMuted(true);
+
+                // Unmute immediately on the first user interaction anywhere
+                const enableSound = () => {
+                  video.muted = false;
+                  video.volume = 1.0;
+                  video.removeAttribute('muted');
+                  setIsAudioMuted(false);
+                  window.removeEventListener('pointerdown', enableSound);
+                  window.removeEventListener('click', enableSound);
+                  window.removeEventListener('keydown', enableSound);
+                };
+                window.addEventListener('pointerdown', enableSound, { once: true });
+                window.addEventListener('click', enableSound, { once: true });
+                window.addEventListener('keydown', enableSound, { once: true });
               });
           }
         }
@@ -88,10 +113,36 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     };
   }, []);
 
+  const handleContainerPress = () => {
+    if (Platform.OS === 'web') {
+      if (typeof document !== 'undefined') {
+        const video = document.querySelector('video');
+        if (video && video.muted) {
+          video.muted = false;
+          video.volume = 1.0;
+          video.removeAttribute('muted');
+          setIsAudioMuted(false);
+        }
+      }
+    }
+  };
+
+  const handleUnmuteBadgePress = () => {
+    if (typeof document !== 'undefined') {
+      const video = document.querySelector('video');
+      if (video) {
+        video.muted = false;
+        video.volume = 1.0;
+        video.removeAttribute('muted');
+        setIsAudioMuted(false);
+      }
+    }
+  };
+
   return (
     <Pressable
       style={styles.container}
-      onPress={Platform.OS === 'web' ? handleFinish : undefined}
+      onPress={handleContainerPress}
     >
       <StatusBar style="light" />
 
@@ -102,6 +153,29 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         contentFit="cover"
         nativeControls={false}
       />
+
+      {/* Unmute floating pill on web if browser restricted audio */}
+      {Platform.OS === 'web' && isAudioMuted && (
+        <TouchableOpacity
+          style={styles.unmuteBadge}
+          onPress={handleUnmuteBadgePress}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="volume-mute" size={16} color="#FFFFFF" />
+          <Text style={styles.unmuteText}>Ovozni yoqish</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Optional Skip button on web */}
+      {Platform.OS === 'web' && (
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={handleFinish}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.skipText}>O‘tkazib yuborish</Text>
+        </TouchableOpacity>
+      )}
     </Pressable>
   );
 };
@@ -121,5 +195,42 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     height: '100%',
+  },
+  unmuteBadge: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+    zIndex: 100,
+  },
+  unmuteText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  skipButton: {
+    position: 'absolute',
+    top: 65,
+    right: 20,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    zIndex: 100,
+  },
+  skipText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

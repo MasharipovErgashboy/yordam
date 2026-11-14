@@ -26,6 +26,8 @@ import {
   X,
   Pencil,
   ShoppingCart,
+  FileText,
+  Landmark,
 } from 'lucide-react';
 
 export default function App() {
@@ -145,6 +147,44 @@ export default function App() {
         'Noqonuniy ishdan bo‘shatishni bekor qilish talabi',
         'Ish haqi va zararlarni undirish bo‘yicha sud arizasi',
         'Davlat mehnat inspeksiyasiga to‘g‘ridan-to‘g‘ri murojaat',
+      ],
+    },
+    {
+      id: 'murojaat',
+      title: 'Murojaat va arizalar',
+      category: 'protection',
+      categoryLabel: 'Arizalar va murojaatlar',
+      desc: 'Davlat organlari, prokuratura, sud va tashkilotlarga rasmiy shikoyat, ariza va talabnomalar generatori.',
+      iconName: 'file-text',
+      badgeColor: '#0284C7',
+      isActive: true,
+      usedUserIds: [],
+      usersCount: 0,
+      lastUpdated: 'Bugun, 21:00',
+      features: [
+        'Davlat organlari va vazirliklarga rasmiy ariza va shikoyatlar',
+        'Prokuratura va IIB organlariga huquqbuzarlik bo‘yicha murojaat',
+        'Sud va adliya idoralariga da’vo hamda iltimosnomalar',
+        'Rasmiy blank asosida avtomatik shakllantirish va chop etish',
+      ],
+    },
+    {
+      id: 'bank_kredit_himoyasi',
+      title: 'Bank kreditlari himoyasi',
+      category: 'finance',
+      categoryLabel: 'Bank va kredit himoyasi',
+      desc: 'Kredit shartnomalari tahlili, asossiz yechilgan pullar, yashirin foizlar, garov va firibgarlik kreditlaridan himoya.',
+      iconName: 'landmark',
+      badgeColor: '#10B981',
+      isActive: true,
+      usedUserIds: [],
+      usersCount: 0,
+      lastUpdated: 'Bugun, 21:00',
+      features: [
+        'Kredit shartnomalaridagi noqonuniy foiz va ortiqcha to‘lovlar tahlili',
+        'Bank kartasidan asossiz yechilgan mablag‘larni qaytarish talabnomasi',
+        'Fuqaro xabarisiz (firibgarlik) rasmiylashtirilgan kredit shikoyati',
+        'Markaziy bank (3030-son Nizom) va sud organlariga rasmiy arizalar',
       ],
     },
   ]);
@@ -278,6 +318,13 @@ export default function App() {
         return <Briefcase size={size} color={color} />;
       case 'scale':
         return <Scale size={size} color={color} />;
+      case 'file-text':
+      case 'murojaat':
+        return <FileText size={size} color={color} />;
+      case 'landmark':
+      case 'bank':
+      case 'bank_kredit_himoyasi':
+        return <Landmark size={size} color={color} />;
       default:
         return <Briefcase size={size} color={color} />;
     }
@@ -1070,7 +1117,7 @@ export default function App() {
                     Yordam Asosiy Huquqiy Xizmatlari
                   </h2>
                   <p style={{ fontSize: '12.5px', color: '#94A3B8', margin: 0 }}>
-                    Mobil ilova orqali fuqarolarga taqdim etilayotgan 3 ta asosiy xizmatlar reyestri va unikal foydalanuvchilari
+                    Mobil ilova orqali fuqarolarga taqdim etilayotgan huquqiy xizmatlar reyestri va unikal foydalanuvchilari
                   </p>
                 </div>
 
@@ -1090,6 +1137,8 @@ export default function App() {
                       { key: 'talim', label: 'Ta’lim' },
                       { key: 'himoya', label: 'Iste’molchi' },
                       { key: 'mehnat', label: 'Mehnat' },
+                      { key: 'murojaat', label: 'Murojaat va arizalar' },
+                      { key: 'bank', label: 'Bank kreditlari' },
                     ].map((tab) => (
                       <button
                         key={tab.key}
@@ -1170,7 +1219,9 @@ export default function App() {
                           (serviceFilter === 'faol' && srv.isActive) ||
                           (serviceFilter === 'talim' && (srv.categoryLabel?.includes('Ta’lim') || srv.category?.includes('protection'))) ||
                           (serviceFilter === 'himoya' && (srv.categoryLabel?.includes('Iste’molchi') || srv.title?.toLowerCase().includes('iste'))) ||
-                          (serviceFilter === 'mehnat' && (srv.categoryLabel?.includes('Mehnat') || srv.title?.toLowerCase().includes('mehnat')));
+                          (serviceFilter === 'mehnat' && (srv.categoryLabel?.includes('Mehnat') || srv.title?.toLowerCase().includes('mehnat'))) ||
+                          (serviceFilter === 'murojaat' && (srv.id === 'murojaat' || srv.title?.toLowerCase().includes('murojaat') || srv.categoryLabel?.toLowerCase().includes('ariza'))) ||
+                          (serviceFilter === 'bank' && (srv.id === 'bank_kredit_himoyasi' || srv.title?.toLowerCase().includes('kredit') || srv.categoryLabel?.toLowerCase().includes('bank')));
 
                         const matchesQuery =
                           serviceSearchQuery.trim() === '' ||

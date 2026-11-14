@@ -49,6 +49,28 @@ const FALLBACK_SERVICES: BackendServiceItem[] = [
     isActive: true,
     usersCount: 0,
   },
+  {
+    id: 'murojaat',
+    title: 'Murojaat va arizalar',
+    category: 'protection',
+    categoryLabel: 'Arizalar va murojaatlar',
+    desc: 'Davlat organlari, prokuratura, sud va tashkilotlarga rasmiy shikoyat, ariza va talabnomalar generatori.',
+    iconName: 'file-text',
+    badgeColor: '#0284C7',
+    isActive: true,
+    usersCount: 0,
+  },
+  {
+    id: 'bank_kredit_himoyasi',
+    title: 'Bank kreditlari himoyasi',
+    category: 'finance',
+    categoryLabel: 'Bank va kredit himoyasi',
+    desc: 'Kredit shartnomalari tahlili, asossiz yechilgan pullar, yashirin foizlar, garov va firibgarlik kreditlaridan himoya.',
+    iconName: 'landmark',
+    badgeColor: '#10B981',
+    isActive: true,
+    usersCount: 0,
+  },
 ];
 
 async function apiFetch(endpoint: string, options: RequestInit): Promise<Response> {

@@ -26,6 +26,12 @@ interface Props {
   onBack: () => void;
   topInset: number;
   bottomInset: number;
+  /**
+   * false — "AI yordamchi · Onlayn" header (orqaga tugmasi bilan) ko‘rsatilmaydi;
+   * bosh sahifa ichida ishlatilganda tepada faqat Yordam header turadi.
+   * Bu holda suhbatlar tarixi tugmasi sahifa ichida chiqadi.
+   */
+  showHeader?: boolean;
 }
 
 export const AiWelcomeView: React.FC<Props> = ({
@@ -37,6 +43,7 @@ export const AiWelcomeView: React.FC<Props> = ({
   onBack,
   topInset,
   bottomInset,
+  showHeader = true,
 }) => {
   const { width } = useWindowDimensions();
   const cardWidth = (width - 32 - 12) / 2;
@@ -52,31 +59,44 @@ export const AiWelcomeView: React.FC<Props> = ({
 
   return (
     <View style={styles.root}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <HeaderIconButton onPress={onBack} accessibilityLabel="Orqaga">
-          <Ionicons name="chevron-back" size={20} color={AI_COLORS.text} />
-        </HeaderIconButton>
+      {showHeader && (
+        <View style={[styles.header, { paddingTop: topInset + 8 }]}>
+          <HeaderIconButton onPress={onBack} accessibilityLabel="Orqaga">
+            <Ionicons name="chevron-back" size={20} color={AI_COLORS.text} />
+          </HeaderIconButton>
 
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>AI yordamchi</Text>
-          <View style={styles.onlineRow}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.onlineText}>Onlayn</Text>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>AI yordamchi</Text>
+            <View style={styles.onlineRow}>
+              <View style={styles.onlineDot} />
+              <Text style={styles.onlineText}>Onlayn</Text>
+            </View>
           </View>
-        </View>
 
-        <HeaderIconButton onPress={onOpenHistory} accessibilityLabel="Suhbatlar tarixi">
-          <MaterialCommunityIcons name="history" size={21} color={AI_COLORS.text} />
-        </HeaderIconButton>
-      </View>
+          <HeaderIconButton onPress={onOpenHistory} accessibilityLabel="Suhbatlar tarixi">
+            <MaterialCommunityIcons name="history" size={21} color={AI_COLORS.text} />
+          </HeaderIconButton>
+        </View>
+      )}
 
       <ScrollView
         style={styles.body}
-        contentContainerStyle={styles.bodyContent}
+        contentContainerStyle={[styles.bodyContent, !showHeader && styles.bodyContentNoHeader]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {!showHeader && (
+          <TouchableOpacity
+            style={styles.historyLink}
+            onPress={onOpenHistory}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons name="history" size={17} color={AI_COLORS.primary} />
+            <Text style={styles.historyLinkText}>Suhbatlar tarixi</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Greeting */}
         <View style={styles.greeting}>
           <LinearGradient
@@ -206,6 +226,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 20,
+  },
+  bodyContentNoHeader: {
+    paddingTop: 12,
+  },
+  historyLink: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    backgroundColor: AI_COLORS.surface,
+    borderWidth: 1,
+    borderColor: AI_COLORS.border,
+    marginBottom: 8,
+  },
+  historyLinkText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: AI_COLORS.primary,
   },
   greeting: {
     alignItems: 'center',

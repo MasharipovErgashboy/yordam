@@ -174,6 +174,7 @@ export const AiChatScreen: React.FC<Props> = ({ onBack, embedded = false, bottom
           onBack={goBack}
           topInset={insets.top}
           bottomInset={insets.bottom}
+          showHeader={!embedded}
         />
       )}
 

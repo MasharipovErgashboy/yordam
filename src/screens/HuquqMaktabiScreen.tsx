@@ -1017,8 +1017,8 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
     title: 'Nikoh va oila munosabatlari',
     lessons: '4 dars',
     duration: '45 daqiqa',
-    progress: 75,
-    progressColor: '#10B981',
+    progress: 0,
+    progressColor: '#94A3B8',
     iconBg: '#FEF9C3',
     iconType: 'rings',
   },
@@ -1028,8 +1028,8 @@ const FAMILY_LAW_COURSES: TopicCourseItem[] = [
     title: 'Ota-onalik huquq va majburiyatlari',
     lessons: '3 dars',
     duration: '38 daqiqa',
-    progress: 33,
-    progressColor: '#F59E0B',
+    progress: 0,
+    progressColor: '#94A3B8',
     iconBg: '#EFF6FF',
     iconType: 'people',
   },
@@ -1082,7 +1082,7 @@ const COURSE_LESSONS: CourseLesson[] = [
     title: '1. Nikoh tuşunçasi va ahamiyati',
     duration: '10 daqiqa',
     image: lessonThumb1,
-    status: 'completed',
+    status: 'locked',
   },
   {
     id: 'l2',
@@ -1092,7 +1092,7 @@ const COURSE_LESSONS: CourseLesson[] = [
     title: '2. Nikoh tuziş tartibi',
     duration: '12 daqiqa',
     image: lessonThumb2,
-    status: 'completed',
+    status: 'locked',
   },
   {
     id: 'l3',
@@ -1102,7 +1102,7 @@ const COURSE_LESSONS: CourseLesson[] = [
     title: '3. Er-xotin huquq va majburiyatlari',
     duration: '11 daqiqa',
     image: lessonThumb3,
-    status: 'completed',
+    status: 'locked',
   },
   {
     id: 'l4',
@@ -1112,7 +1112,7 @@ const COURSE_LESSONS: CourseLesson[] = [
     title: '4. Oilaning moddiy ta’minoti',
     duration: '12 daqiqa',
     image: lessonThumb4,
-    status: 'in_progress',
+    status: 'locked',
   },
 ];
 
@@ -1743,10 +1743,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'scale-outline',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
-    lessonsCount: 12,
-    coursesCount: 3,
-    progress: 75,
-    progressColor: '#10B981',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'boshlangich',
   },
   {
@@ -1756,10 +1756,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'people',
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
-    lessonsCount: 18,
-    coursesCount: 5,
-    progress: 42,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'orta',
   },
   {
@@ -1769,10 +1769,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'people',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
-    lessonsCount: 14,
-    coursesCount: 4,
-    progress: 60,
-    progressColor: '#10B981',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'boshlangich',
   },
   {
@@ -1782,10 +1782,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'hard-hat',
     iconFamily: 'FontAwesome5',
     iconColor: '#F59E0B',
-    lessonsCount: 10,
-    coursesCount: 3,
-    progress: 28,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'boshlangich',
   },
   {
@@ -1794,9 +1794,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'cart',
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
-    lessonsCount: 8,
-    progress: 20,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'boshlangich',
   },
   {
@@ -1805,9 +1806,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'shield-checkmark',
     iconFamily: 'Ionicons',
     iconColor: '#F59E0B',
-    lessonsCount: 11,
-    progress: 56,
-    progressColor: '#10B981',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'orta',
   },
   {
@@ -1816,9 +1818,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'gavel',
     iconFamily: 'FontAwesome5',
     iconColor: '#B45309',
-    lessonsCount: 16,
-    progress: 40,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'ilgor',
   },
   {
@@ -1827,9 +1830,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'home',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
-    lessonsCount: 9,
-    progress: 67,
-    progressColor: '#10B981',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'orta',
   },
   {
@@ -1838,9 +1842,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'laptop',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
-    lessonsCount: 12,
-    progress: 33,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'ilgor',
   },
   {
@@ -1849,9 +1854,10 @@ const LEGAL_CATEGORIES: LegalCategory[] = [
     iconName: 'coins',
     iconFamily: 'FontAwesome5',
     iconColor: '#F59E0B',
-    lessonsCount: 10,
-    progress: 45,
-    progressColor: '#F59E0B',
+    lessonsCount: 0,
+    coursesCount: 0,
+    progress: 0,
+    progressColor: '#94A3B8',
     level: 'ilgor',
   },
 ];
@@ -1868,19 +1874,19 @@ const computeCategoryStats = (
   );
 
   const realCoursesCount = topicCourses.length;
-  const realLessonsCount =
-    topicLessons.length > 0
-      ? topicLessons.length
-      : (Number(cat.lessonsCount) || 0);
+  const realLessonsCount = topicLessons.length;
 
   let realProgress = 0;
   if (topicLessons.length > 0) {
     const completed = topicLessons.filter((l) => l.status === 'completed').length;
     realProgress = Math.round((completed / topicLessons.length) * 100);
   } else if (topicCourses.length > 0) {
-    realProgress = Math.round(
-      topicCourses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0) / topicCourses.length
-    );
+    const validCourses = topicCourses.filter((c) => (c.progress || 0) > 0);
+    realProgress = validCourses.length > 0
+      ? Math.round(
+          validCourses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0) / topicCourses.length
+        )
+      : 0;
   }
 
   const realProgressColor =
@@ -1937,10 +1943,10 @@ const mapBackendTopicsToCategories = (backendTopics: any[]): LegalCategory[] => 
       iconName: bt.iconName || fallback?.iconName || 'book-outline',
       iconFamily,
       iconColor: bt.color || fallback?.iconColor || '#0284C7',
-      lessonsCount: Number(bt.lessonsCount) || fallback?.lessonsCount || 10,
-      coursesCount: fallback?.coursesCount || 3,
-      progress: fallback?.progress ?? 50,
-      progressColor: fallback?.progressColor,
+      lessonsCount: Number(bt.lessonsCount) || 0,
+      coursesCount: 0,
+      progress: 0,
+      progressColor: '#94A3B8',
       level: mappedLevel,
     };
   });
@@ -5621,13 +5627,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           (l) => l.topicId === selectedTopicDetail.id || topicCourseIds.includes(l.courseId || '')
         );
         const realCoursesCount = topicCourses.length;
-        const realLessonsCount = topicLessons.length > 0 ? topicLessons.length : (Number(selectedTopicDetail.lessonsCount) || 0);
+        const realLessonsCount = topicLessons.length;
         const completedLessonsCount = topicLessons.filter((l) => l.status === 'completed').length;
         const topicProgress = realLessonsCount > 0
           ? Math.round((completedLessonsCount / realLessonsCount) * 100)
-          : (topicCourses.length > 0
-            ? Math.round(topicCourses.reduce((sum, c) => sum + (c.progress || 0), 0) / topicCourses.length)
-            : 0);
+          : 0;
 
         const activeLesson =
           topicLessons.find((l) => l.status === 'in_progress') ||
@@ -5700,7 +5704,9 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                   <View style={styles.detailProgressTexts}>
                     <Text style={styles.detailProgressTitle}>Özlaştiriş darajasi</Text>
                     <Text style={styles.detailProgressSubtitle}>
-                      {realLessonsCount} darsdan {completedLessonsCount} tasi ötilgan
+                      {realLessonsCount > 0
+                        ? `${realLessonsCount} darsdan ${completedLessonsCount} tasi ötilgan`
+                        : 'Darslar hali mavjud emas'}
                     </Text>
                   </View>
                 </View>

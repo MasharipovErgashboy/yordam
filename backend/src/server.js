@@ -709,6 +709,22 @@ function readHuquqMaktabi() {
     if (!Array.isArray(data.lessons)) data.lessons = [];
     if (!Array.isArray(data.certificates)) data.certificates = [];
 
+    // Sync each topic's lessonsCount with real lessons in data.lessons
+    if (Array.isArray(data.topics)) {
+      data.topics.forEach((t) => {
+        const topicCourseIds = data.courses
+          .filter((c) => c.topicId === t.id)
+          .map((c) => c.id);
+        const count = data.lessons.filter(
+          (l) => l.topicId === t.id || topicCourseIds.includes(l.courseId)
+        ).length;
+        if (t.lessonsCount !== count) {
+          t.lessonsCount = count;
+          changed = true;
+        }
+      });
+    }
+
     if (changed) {
       fs.writeFileSync(HUQUQ_MAKTABI_FILE, JSON.stringify(data, null, 2), 'utf8');
     }

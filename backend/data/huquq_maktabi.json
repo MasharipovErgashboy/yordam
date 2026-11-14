@@ -30,7 +30,7 @@
       "title": "Konstitutsiyaviy huquqi",
       "iconName": "scale-outline",
       "subtitle": "Davlat tuzilishi, asosiy qonun va inson huquqlari kafolatlari",
-      "lessonsCount": 12,
+      "lessonsCount": 0,
       "level": "Boshlang'ich",
       "color": "#8B5CF6"
     },
@@ -40,7 +40,7 @@
       "title": "Fuqarolik huquqi",
       "iconName": "people",
       "subtitle": "Mulk huquqi, oldi-sotdi, shartnomalar va majburiyatlar tartibi",
-      "lessonsCount": 18,
+      "lessonsCount": 0,
       "level": "O‘rta",
       "color": "#00A3FF"
     },
@@ -50,7 +50,7 @@
       "title": "Oila huquqi",
       "iconName": "people",
       "subtitle": "Nikoh, mulkiy munosabatlar, aliment va bola huquqlari",
-      "lessonsCount": 14,
+      "lessonsCount": 4,
       "level": "Boshlang'ich",
       "color": "#EC4899"
     },
@@ -60,7 +60,7 @@
       "title": "Mehnat huquqi",
       "iconName": "hard-hat",
       "subtitle": "Mehnat shartnomasi, xodim huquqlari, oylik va dam olish",
-      "lessonsCount": 10,
+      "lessonsCount": 0,
       "level": "O'rta",
       "color": "#F59E0B"
     },
@@ -70,7 +70,7 @@
       "title": "Iste’molchi huquqlari",
       "iconName": "cart",
       "subtitle": "Sifatsiz tovarlar, kafolat, 14 kunda qaytarish va tovon",
-      "lessonsCount": 8,
+      "lessonsCount": 0,
       "level": "Boshlang'ich",
       "color": "#10B981"
     },
@@ -80,7 +80,7 @@
       "title": "Ma’muriy huquq",
       "iconName": "shield-checkmark",
       "subtitle": "Yo‘l harakati, jarimalar va davlat idoralari murojaatlari",
-      "lessonsCount": 11,
+      "lessonsCount": 0,
       "level": "O'rta",
       "color": "#6366F1"
     },
@@ -90,7 +90,7 @@
       "title": "Jinoyat huquqi",
       "iconName": "gavel",
       "subtitle": "Jinoiy javobgarlik, jazo turlari va protsessual normalar",
-      "lessonsCount": 16,
+      "lessonsCount": 0,
       "level": "Murakkab",
       "color": "#EF4444"
     },
@@ -100,7 +100,7 @@
       "title": "Uy-joy huquqi",
       "iconName": "home",
       "subtitle": "Ijara, xususiylashtirish, propiska va kommunal xizmatlar",
-      "lessonsCount": 9,
+      "lessonsCount": 0,
       "level": "Boshlang'ich",
       "color": "#14B8A6"
     },
@@ -110,7 +110,7 @@
       "title": "Raqamli huquqlar",
       "iconName": "laptop",
       "subtitle": "Shaxsiy ma’lumotlar, kiberjinoyat, IT shartnomalari",
-      "lessonsCount": 12,
+      "lessonsCount": 0,
       "level": "O'rta",
       "color": "#3B82F6"
     },
@@ -120,7 +120,7 @@
       "title": "Moliyaviy huquqlar",
       "iconName": "coins",
       "subtitle": "Kreditlar, soliqlar, bank shartnomalari va qarzdorlik",
-      "lessonsCount": 10,
+      "lessonsCount": 0,
       "level": "O'rta",
       "color": "#EAB308"
     }
@@ -244,8 +244,8 @@
       "lessons": "4 dars",
       "duration": "45 daqiqa",
       "imageUrl": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80",
-      "progress": 75,
-      "progressColor": "#10B981",
+      "progress": 0,
+      "progressColor": "#94A3B8",
       "iconBg": "#FEF9C3",
       "iconType": "rings",
       "createdAt": 1731530000000
@@ -257,8 +257,8 @@
       "lessons": "3 dars",
       "duration": "38 daqiqa",
       "imageUrl": "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=800&q=80",
-      "progress": 33,
-      "progressColor": "#F59E0B",
+      "progress": 0,
+      "progressColor": "#94A3B8",
       "iconBg": "#EFF6FF",
       "iconType": "people",
       "createdAt": 1731530100000
@@ -301,7 +301,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80",
       "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "Ushbu darsda nikoh tushunchasi, uning yuridik mohiyati, nikohning jamiyat va oila hayotidagi o‘rni, shuningdek, O‘zbekiston qonunchiligida nikoh bilan bog‘liq asosiy normalar ko‘rib chiqiladi.",
-      "status": "completed",
+      "status": "not_started",
       "plan": [
         {
           "id": "ch1",
@@ -356,7 +356,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
       "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "FHDYo organlarida nikohdan o‘tish shartlari, tibbiy ko‘rikdan o‘tish majburiyati va nikoh yoshi bo‘yicha talablar.",
-      "status": "completed",
+      "status": "not_started",
       "plan": [
         {
           "id": "ch2_1",
@@ -394,7 +394,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=800&q=80",
       "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "Er va xotinning shaxsiy hamda mulkiy huquqlari, birgalikdagi mulk va shaxsiy mulk farqlari.",
-      "status": "completed",
+      "status": "not_started",
       "plan": [
         {
           "id": "ch3_1",
@@ -432,7 +432,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
       "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "Oila a’zolarining o‘zaro moddiy ta’minot majburiyatlari va aliment undirish huquqlari.",
-      "status": "in_progress",
+      "status": "not_started",
       "plan": [
         {
           "id": "ch4_1",

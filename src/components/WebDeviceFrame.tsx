@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 interface WebDeviceFrameProps {
   children: React.ReactNode;
   currentScreen?: string;
+  onRestartApp?: () => void;
 }
 
 const logoImage = require('../../assets/images/logo.jpg');
@@ -19,6 +20,7 @@ const logoImage = require('../../assets/images/logo.jpg');
 export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
   children,
   currentScreen = 'splash',
+  onRestartApp,
 }) => {
   // Only activate frame on web desktop
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -35,6 +37,7 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
 
   const [zoomLevel, setZoomLevel] = useState<number | 'auto'>('auto');
   const [currentTime, setCurrentTime] = useState('09:41');
+  const [isPowerOn, setIsPowerOn] = useState(true);
 
   // Clock updates every minute
   useEffect(() => {
@@ -70,9 +73,9 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
     if (zoomLevel !== 'auto') {
       return zoomLevel;
     }
-    // iPhone total frame height is 958px + 70px header & margin = ~1028px
-    const availableHeight = windowDimensions.height - 80;
-    const availableWidth = windowDimensions.width - 40;
+    // iPhone total frame height is 958px + 60px margin = ~1018px
+    const availableHeight = windowDimensions.height - 60;
+    const availableWidth = windowDimensions.width - 280; // Account for left sidebar card
     const scaleY = availableHeight / 970;
     const scaleX = availableWidth / 480;
     const scale = Math.min(1, Math.min(scaleX, scaleY));
@@ -95,54 +98,118 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
       {/* Ambient background glow */}
       <View style={styles.ambientGlow} />
 
-      {/* Top Desktop Navigation & Controls Bar */}
-      <View style={styles.desktopTopNav}>
-        <View style={styles.topNavLeft}>
-          <Image source={logoImage} style={styles.topNavLogo} resizeMode="cover" />
-          <View>
-            <View style={styles.topNavTitleRow}>
-              <Text style={styles.topNavTitle}>YORDAM</Text>
+      {/* Left Vertical Control Sidebar (Moved from top to left side, vertically oriented) */}
+      <View style={styles.desktopSidebar}>
+        {/* Brand & App Info Header */}
+        <View style={styles.sidebarBrandRow}>
+          <Image source={logoImage} style={styles.sidebarLogo} resizeMode="cover" />
+          <View style={{ flex: 1 }}>
+            <View style={styles.sidebarTitleRow}>
+              <Text style={styles.sidebarTitle}>YORDAM</Text>
               <View style={styles.liveBadge}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveText}>WEB LIVE</Text>
+                <Text style={styles.liveText}>WEB</Text>
               </View>
             </View>
-            <Text style={styles.topNavSubtitle}>O‘zbekiston Huquqiy Hamkori</Text>
+            <Text style={styles.sidebarSubtitle}>Huquqiy Hamkor</Text>
           </View>
         </View>
 
+        {/* Divider */}
+        <View style={styles.sidebarDivider} />
 
-        {/* Right zoom / fit controls */}
-        <View style={styles.topNavRight}>
-          <View style={styles.zoomControlGroup}>
-            <TouchableOpacity
-              style={styles.zoomBtn}
-              onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 0.8 : Math.max(0.5, prev - 0.1)))}
-              activeOpacity={0.7}
-              accessibilityLabel="Kichraytirish"
-            >
-              <Ionicons name="remove" size={15} color="#94A3B8" />
-            </TouchableOpacity>
+        {/* Section 1: Telefon Quvvati / Ekrani */}
+        <Text style={styles.sidebarSectionLabel}>TELEFON BOSHQARUVI</Text>
 
-            <TouchableOpacity
-              style={[styles.zoomBtn, zoomLevel === 'auto' && styles.zoomBtnActive]}
-              onPress={() => setZoomLevel('auto')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.zoomBtnText, zoomLevel === 'auto' && styles.zoomBtnTextActive]}>
-                {zoomLevel === 'auto' ? `Fit (${Math.round(computedScale * 100)}%)` : `${Math.round(zoomLevel * 100)}%`}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.zoomBtn}
-              onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 1.0 : Math.min(1.1, prev + 0.1)))}
-              activeOpacity={0.7}
-              accessibilityLabel="Kattalashtirish"
-            >
-              <Ionicons name="add" size={15} color="#94A3B8" />
-            </TouchableOpacity>
+        {/* Power On / Off Toggle Button */}
+        <TouchableOpacity
+          style={[
+            styles.powerBtnCard,
+            isPowerOn ? styles.powerBtnCardOn : styles.powerBtnCardOff,
+          ]}
+          onPress={() => setIsPowerOn((prev) => !prev)}
+          activeOpacity={0.8}
+        >
+          <View
+            style={[
+              styles.powerIconBox,
+              isPowerOn ? styles.powerIconBoxOn : styles.powerIconBoxOff,
+            ]}
+          >
+            <Ionicons
+              name="power"
+              size={18}
+              color={isPowerOn ? '#EF4444' : '#10B981'}
+            />
           </View>
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text
+              style={[
+                styles.powerBtnTitle,
+                isPowerOn ? styles.powerBtnTitleOn : styles.powerBtnTitleOff,
+              ]}
+            >
+              {isPowerOn ? 'O‘chirish' : 'Yoqish'}
+            </Text>
+            <Text style={styles.powerBtnSubtitle}>
+              {isPowerOn ? 'Ekranni qulflash' : 'Ekranni uyg‘otish'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Restart to Splash Video Button */}
+        {onRestartApp && (
+          <TouchableOpacity
+            style={styles.restartBtnCard}
+            onPress={() => {
+              setIsPowerOn(true);
+              onRestartApp();
+            }}
+            activeOpacity={0.75}
+          >
+            <View style={styles.restartIconBox}>
+              <Ionicons name="reload" size={14} color="#38BDF8" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.restartBtnTitle}>Qayta boshlash</Text>
+              <Text style={styles.restartBtnSubtitle}>Splash videoni ko‘rish</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Divider */}
+        <View style={styles.sidebarDivider} />
+
+        {/* Section 2: Masshtab (Zoom) */}
+        <Text style={styles.sidebarSectionLabel}>MASSHTAB (ZOOM)</Text>
+        <View style={styles.zoomControlRow}>
+          <TouchableOpacity
+            style={styles.zoomBtn}
+            onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 0.8 : Math.max(0.5, prev - 0.1)))}
+            activeOpacity={0.7}
+            accessibilityLabel="Kichraytirish"
+          >
+            <Ionicons name="remove" size={15} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.zoomBtn, zoomLevel === 'auto' && styles.zoomBtnActive]}
+            onPress={() => setZoomLevel('auto')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.zoomBtnText, zoomLevel === 'auto' && styles.zoomBtnTextActive]}>
+              {zoomLevel === 'auto' ? `Fit (${Math.round(computedScale * 100)}%)` : `${Math.round(zoomLevel * 100)}%`}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.zoomBtn}
+            onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 1.0 : Math.min(1.1, prev + 0.1)))}
+            activeOpacity={0.7}
+            accessibilityLabel="Kattalashtirish"
+          >
+            <Ionicons name="add" size={15} color="#94A3B8" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -172,60 +239,90 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           {/* Volume Down */}
           <View style={styles.btnVolumeDown} />
 
-          {/* Hardware Button - Right Edge (Power/Side Button) */}
-          <View style={styles.btnPower} />
+          {/* Hardware Button - Right Edge (Interactive Physical Power/Side Button) */}
+          <TouchableOpacity
+            style={styles.btnPower}
+            activeOpacity={0.7}
+            onPress={() => setIsPowerOn((prev) => !prev)}
+            accessibilityLabel="Fizik quvvat tugmasi"
+          />
 
           {/* Inner Display Screen with 44px border radius */}
           <View style={styles.phoneScreen}>
             {/* Native App Viewport (430 x 932) */}
-            <View style={styles.appViewport}>{children}</View>
+            <View style={[styles.appViewport, !isPowerOn && { opacity: 0 }]}>
+              {children}
+            </View>
 
-            {/* iPhone Status Bar (Fixed at top, pointerEvents none) */}
-            <View style={styles.statusBarOverlay} pointerEvents="none">
-              {/* Left: Clock */}
-              <View style={styles.statusTimeCol}>
-                <Text style={[styles.statusTimeText, { color: statusColor }]}>{currentTime}</Text>
-              </View>
+            {/* Screen Off / Locked Overlay */}
+            {!isPowerOn && (
+              <TouchableOpacity
+                style={styles.screenOffOverlay}
+                activeOpacity={0.95}
+                onPress={() => setIsPowerOn(true)}
+              >
+                <View style={styles.screenOffContent}>
+                  <View style={styles.screenOffIconCircle}>
+                    <Ionicons name="power" size={26} color="#475569" />
+                  </View>
+                  <Text style={styles.screenOffTitle}>Telefon o‘chirilgan</Text>
+                  <Text style={styles.screenOffSub}>
+                    Ekranni yoqish uchun shu yerga yoki chap paneldagi «Yoqish» tugmasiga bosing
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
 
-              {/* Dynamic Island in center */}
-              <View style={styles.dynamicIslandContainer}>
-                <View style={styles.dynamicIslandPill}>
-                  {/* Left Sensor Dot */}
-                  <View style={styles.islandSensor} />
-                  {/* Right TrueDepth Camera Lens with subtle reflection */}
-                  <View style={styles.islandCamera}>
-                    <View style={styles.islandLensReflection} />
+            {/* iPhone Status Bar (Fixed at top, pointerEvents none, only when power is ON) */}
+            {isPowerOn && (
+              <View style={styles.statusBarOverlay} pointerEvents="none">
+                {/* Left: Clock */}
+                <View style={styles.statusTimeCol}>
+                  <Text style={[styles.statusTimeText, { color: statusColor }]}>{currentTime}</Text>
+                </View>
+
+                {/* Dynamic Island in center */}
+                <View style={styles.dynamicIslandContainer}>
+                  <View style={styles.dynamicIslandPill}>
+                    {/* Left Sensor Dot */}
+                    <View style={styles.islandSensor} />
+                    {/* Right TrueDepth Camera Lens with subtle reflection */}
+                    <View style={styles.islandCamera}>
+                      <View style={styles.islandLensReflection} />
+                    </View>
+                  </View>
+                </View>
+
+                {/* Right: Signal, Wi-Fi & Battery */}
+                <View style={styles.statusIconsCol}>
+                  {/* 4-bar cellular icon */}
+                  <View style={styles.cellularWrap}>
+                    <View style={[styles.cellularBar, { height: 4, backgroundColor: statusColor }]} />
+                    <View style={[styles.cellularBar, { height: 6, backgroundColor: statusColor }]} />
+                    <View style={[styles.cellularBar, { height: 8, backgroundColor: statusColor }]} />
+                    <View style={[styles.cellularBar, { height: 10, backgroundColor: statusColor }]} />
+                  </View>
+
+                  {/* Wi-Fi Icon */}
+                  <Ionicons name="wifi" size={14} color={statusColor} style={{ marginRight: 5 }} />
+
+                  {/* Battery Capsule with tip */}
+                  <View style={styles.batteryGroup}>
+                    <View style={[styles.batteryCapsule, { borderColor: statusMutedColor }]}>
+                      <View style={[styles.batteryFill, { backgroundColor: statusColor }]} />
+                    </View>
+                    <View style={[styles.batteryTip, { backgroundColor: statusMutedColor }]} />
                   </View>
                 </View>
               </View>
+            )}
 
-              {/* Right: Signal, Wi-Fi & Battery */}
-              <View style={styles.statusIconsCol}>
-                {/* 4-bar cellular icon */}
-                <View style={styles.cellularWrap}>
-                  <View style={[styles.cellularBar, { height: 4, backgroundColor: statusColor }]} />
-                  <View style={[styles.cellularBar, { height: 6, backgroundColor: statusColor }]} />
-                  <View style={[styles.cellularBar, { height: 8, backgroundColor: statusColor }]} />
-                  <View style={[styles.cellularBar, { height: 10, backgroundColor: statusColor }]} />
-                </View>
-
-                {/* Wi-Fi Icon */}
-                <Ionicons name="wifi" size={14} color={statusColor} style={{ marginRight: 5 }} />
-
-                {/* Battery Capsule with tip */}
-                <View style={styles.batteryGroup}>
-                  <View style={[styles.batteryCapsule, { borderColor: statusMutedColor }]}>
-                    <View style={[styles.batteryFill, { backgroundColor: statusColor }]} />
-                  </View>
-                  <View style={[styles.batteryTip, { backgroundColor: statusMutedColor }]} />
-                </View>
+            {/* Bottom Home Indicator Bar (Fixed at bottom, pointerEvents none, only when power is ON) */}
+            {isPowerOn && (
+              <View style={styles.homeBarOverlay} pointerEvents="none">
+                <View style={[styles.homeBarPill, { backgroundColor: homeBarColor }]} />
               </View>
-            </View>
-
-            {/* Bottom Home Indicator Bar (Fixed at bottom, pointerEvents none) */}
-            <View style={styles.homeBarOverlay} pointerEvents="none">
-              <View style={[styles.homeBarPill, { backgroundColor: homeBarColor }]} />
-            </View>
+            )}
           </View>
         </View>
       </View>
@@ -262,40 +359,38 @@ const styles: any = StyleSheet.create({
     pointerEvents: 'none',
   },
 
-  /* Desktop Top Navigation Bar */
-  desktopTopNav: {
+  /* Left Vertical Control Sidebar Card */
+  desktopSidebar: {
     position: 'absolute',
-    top: 14,
-    left: 20,
-    right: 20,
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    zIndex: 100,
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
-    borderRadius: 16,
+    left: 28,
+    top: '50%',
+    transform: [{ translateY: -175 }],
+    width: 230,
+    backgroundColor: 'rgba(15, 23, 42, 0.82)',
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    backdropFilter: 'blur(16px)' as any,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 16,
+    zIndex: 100,
+    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)' as any,
+    backdropFilter: 'blur(20px)' as any,
   },
-  topNavLeft: {
+  sidebarBrandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  topNavLogo: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+  sidebarLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
   },
-  topNavTitleRow: {
+  sidebarTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  topNavTitle: {
+  sidebarTitle: {
     fontSize: 14,
     fontWeight: '800',
     color: '#F8FAFC',
@@ -305,10 +400,10 @@ const styles: any = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
-    gap: 4,
+    gap: 3.5,
   },
   liveDot: {
     width: 5,
@@ -317,32 +412,116 @@ const styles: any = StyleSheet.create({
     backgroundColor: '#10B981',
   },
   liveText: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#10B981',
   },
-  topNavSubtitle: {
+  sidebarSubtitle: {
     fontSize: 10.5,
     color: '#94A3B8',
+    marginTop: 1,
+  },
+  sidebarDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginVertical: 13,
+  },
+  sidebarSectionLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.8,
+    marginBottom: 8,
   },
 
-
-  topNavRight: {
+  /* Power Button Card */
+  powerBtnCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  zoomControlGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+  powerBtnCardOn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: 'rgba(239, 68, 68, 0.28)',
+  },
+  powerBtnCardOff: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.38)',
+  },
+  powerIconBox: {
+    width: 34,
+    height: 34,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  powerIconBoxOn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.18)',
+  },
+  powerIconBoxOff: {
+    backgroundColor: 'rgba(16, 185, 129, 0.22)',
+  },
+  powerBtnTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  powerBtnTitleOn: {
+    color: '#FCA5A5',
+  },
+  powerBtnTitleOff: {
+    color: '#6EE7B7',
+  },
+  powerBtnSubtitle: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 1,
+  },
+
+  /* Restart to Splash Button */
+  restartBtnCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    padding: 9,
+    borderRadius: 11,
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.2)',
+  },
+  restartIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restartBtnTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#E2E8F0',
+  },
+  restartBtnSubtitle: {
+    fontSize: 9.5,
+    color: '#64748B',
+  },
+
+  /* Zoom Control Row */
+  zoomControlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     overflow: 'hidden',
   },
   zoomBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -362,7 +541,6 @@ const styles: any = StyleSheet.create({
   stageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 35,
   },
 
   /* Physical iPhone 15 Pro Max Chassis */
@@ -416,11 +594,12 @@ const styles: any = StyleSheet.create({
     position: 'absolute',
     right: -6.5,
     top: 215,
-    width: 3.5,
+    width: 6.5,
     height: 78,
     backgroundColor: '#353B47',
     borderTopRightRadius: 3,
     borderBottomRightRadius: 3,
+    cursor: 'pointer' as any,
   },
 
   /* Inner Screen Display (430 x 932) */
@@ -436,6 +615,47 @@ const styles: any = StyleSheet.create({
     flex: 1,
     width: 430,
     height: 932,
+  },
+
+  /* Screen Off / Locked Overlay */
+  screenOffOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 99999,
+    paddingHorizontal: 36,
+  },
+  screenOffContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  screenOffIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#0F172A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  screenOffTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#94A3B8',
+    marginBottom: 6,
+  },
+  screenOffSub: {
+    fontSize: 12,
+    color: '#475569',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 
   /* iPhone Status Bar Overlay */

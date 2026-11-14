@@ -105,7 +105,7 @@ export default function App() {
   };
 
   return (
-    <WebDeviceFrame currentScreen={currentScreen}>
+    <WebDeviceFrame currentScreen={currentScreen} onRestartApp={() => setScreenStack(['splash'])}>
       <SafeAreaProvider initialMetrics={isDesktopWeb ? webIphoneMetrics : undefined}>
         {isDesktopWeb ? (
           <SafeAreaInsetsContext.Provider value={{ top: 59, bottom: 34, left: 0, right: 0 }}>

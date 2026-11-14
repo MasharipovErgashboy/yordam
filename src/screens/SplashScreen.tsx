@@ -34,13 +34,58 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     handleFinish();
   });
 
-  // Fallback on web in case browser blocks autoplay or playToEnd event
+  // Dedicated Web HTML5 Video Autoplay & End Handler
   useEffect(() => {
     if (Platform.OS !== 'web') return;
-    const timer = setTimeout(() => {
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (typeof document !== 'undefined') {
+        const video = document.querySelector('video');
+        if (video) {
+          video.muted = true;
+          video.defaultMuted = true;
+          video.playsInline = true;
+          video.setAttribute('playsinline', '');
+          video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('muted', '');
+          video.setAttribute('autoplay', '');
+          video.style.objectFit = 'cover';
+          video.style.width = '100%';
+          video.style.height = '100%';
+
+          video.onended = () => {
+            handleFinish();
+          };
+
+          const promise = video.play();
+          if (promise !== undefined) {
+            promise
+              .then(() => {
+                clearInterval(interval);
+              })
+              .catch((err) => {
+                console.log('Video autoplay waiting for interaction or readyState:', err);
+              });
+          }
+        }
+      }
+
+      if (attempts > 15) {
+        clearInterval(interval);
+      }
+    }, 200);
+
+    // Fallback timer on web in case browser blocks video completely
+    const fallbackTimer = setTimeout(() => {
       handleFinish();
-    }, 3000);
-    return () => clearTimeout(timer);
+    }, 12000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return (

@@ -82,6 +82,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     };
   }, [isOtpModalVisible, resendCountdown]);
 
+  // Auto-focus OTP input whenever modal becomes visible
+  useEffect(() => {
+    if (isOtpModalVisible) {
+      const timer = setTimeout(() => {
+        otpInputRef.current?.focus();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isOtpModalVisible]);
+
   // Handle phone format helper
   const handlePhoneChange = (text: string) => {
     if (!text.startsWith('+998')) {
@@ -562,6 +572,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         visible={isOtpModalVisible}
         transparent
         animationType="fade"
+        onShow={() => {
+          setTimeout(() => {
+            otpInputRef.current?.focus();
+          }, 150);
+        }}
         onRequestClose={() => setIsOtpModalVisible(false)}
       >
         <KeyboardAvoidingView
@@ -579,42 +594,50 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <Text style={{ color: '#0284C7', fontWeight: '700' }}>{registerEmail}</Text> manziliga 6 xonali tasdiqlash kodi yuborildi.
             </Text>
 
-            {/* OTP Input Boxes */}
-            <View style={styles.otpBoxesRow}>
-              {[0, 1, 2, 3, 4, 5].map((index) => {
-                const char = otpCode[index] || '';
-                const isCurrent = otpCode.length === index;
-                return (
-                  <View
-                    key={index}
-                    style={[
-                      styles.otpDigitBox,
-                      isCurrent && styles.otpDigitBoxFocused,
-                      char ? styles.otpDigitBoxFilled : null,
-                    ]}
-                  >
-                    <Text style={[styles.otpDigitText, char ? styles.otpDigitTextFilled : null]}>
-                      {char}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
+            {/* OTP Input Container (Tapping anywhere opens keyboard) */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => otpInputRef.current?.focus()}
+              style={styles.otpBoxesContainer}
+            >
+              <View style={styles.otpBoxesRow} pointerEvents="none">
+                {[0, 1, 2, 3, 4, 5].map((index) => {
+                  const char = otpCode[index] || '';
+                  const isCurrent = otpCode.length === index;
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.otpDigitBox,
+                        isCurrent && styles.otpDigitBoxFocused,
+                        char ? styles.otpDigitBoxFilled : null,
+                      ]}
+                    >
+                      <Text style={[styles.otpDigitText, char ? styles.otpDigitTextFilled : null]}>
+                        {char}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
 
-            {/* Hidden actual text input for keyboard handling */}
-            <TextInput
-              ref={otpInputRef}
-              style={styles.hiddenOtpInput}
-              value={otpCode}
-              onChangeText={(text) => {
-                const clean = text.replace(/[^0-9]/g, '').slice(0, 6);
-                setOtpCode(clean);
-                setOtpError('');
-              }}
-              keyboardType="number-pad"
-              maxLength={6}
-              autoFocus
-            />
+              {/* Directly overlaid TextInput that receives touches and invokes system keyboard */}
+              <TextInput
+                ref={otpInputRef}
+                style={styles.overlayOtpInput}
+                value={otpCode}
+                onChangeText={(text) => {
+                  const clean = text.replace(/[^0-9]/g, '').slice(0, 6);
+                  setOtpCode(clean);
+                  setOtpError('');
+                }}
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                maxLength={6}
+                caretHidden
+                autoFocus
+              />
+            </TouchableOpacity>
 
             {/* Error Message */}
             {otpError ? (
@@ -942,11 +965,22 @@ const styles = StyleSheet.create({
   otpDigitTextFilled: {
     color: '#0284C7',
   },
-  hiddenOtpInput: {
+  otpBoxesContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginVertical: 6,
+  },
+  overlayOtpInput: {
     position: 'absolute',
-    opacity: 0,
-    width: 1,
-    height: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.01,
+    color: 'transparent',
+    fontSize: 24,
   },
   otpErrorBox: {
     flexDirection: 'row',

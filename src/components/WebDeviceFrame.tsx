@@ -119,121 +119,43 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           50% { transform: translate(-25px, 25px) rotate(15deg); opacity: 0.8; }
         }
 
-        /* Enforce Modal dialogs and alerts to stay strictly inside the 430x932 iPhone chassis */
-        #yordam-phone-screen {
-          contain: paint layout;
-        }
-        #yordam-phone-screen [aria-modal="true"],
-        #yordam-phone-screen [role="dialog"] {
-          position: absolute !important;
-          top: 0px !important;
-          left: 0px !important;
-          right: 0px !important;
-          bottom: 0px !important;
-          width: 100% !important;
-          height: 100% !important;
-          max-width: 430px !important;
-          max-height: 932px !important;
-          border-radius: 44px !important;
-          overflow: hidden !important;
+        /* Constrain all React Native Web Modals & Dialogs strictly within the iPhone 15 Pro Max display */
+        @media (min-width: 501px) {
+          [aria-modal="true"],
+          [role="dialog"] {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background-color: transparent !important;
+            pointer-events: none !important;
+            z-index: 99999 !important;
+          }
+
+          [aria-modal="true"] > div,
+          [role="dialog"] > div {
+            pointer-events: auto !important;
+            width: 430px !important;
+            height: 932px !important;
+            max-width: 430px !important;
+            max-height: 932px !important;
+            transform: scale(var(--phone-scale, 1)) !important;
+            transform-origin: center center !important;
+            border-radius: 44px !important;
+            overflow: hidden !important;
+            position: relative !important;
+            flex: none !important;
+          }
         }
       `;
       document.head.appendChild(styleEl);
     }
-  }, []);
-
-  // Reparent all React Native Web Modals/Portals inside the iPhone chassis so they never spill outside
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-
-    // Safely wrap document.body.removeChild so removing reparented modal portal nodes never throws
-    const originalRemoveChild = document.body.removeChild.bind(document.body);
-    document.body.removeChild = function <T extends Node>(child: T): T {
-      if (child.parentNode === document.body) {
-        return originalRemoveChild(child);
-      } else if (child.parentNode) {
-        return child.parentNode.removeChild(child) as T;
-      }
-      return child;
-    };
-
-    const captureModalNode = (node: Node) => {
-      if (!(node instanceof HTMLElement)) return;
-      const phoneScreen = document.getElementById('yordam-phone-screen');
-      if (!phoneScreen) return;
-
-      // Check if this node is a modal portal or contains a modal
-      const isModal =
-        node.getAttribute('aria-modal') === 'true' ||
-        node.getAttribute('role') === 'dialog' ||
-        node.querySelector('[aria-modal="true"]') ||
-        node.querySelector('[role="dialog"]');
-
-      if (isModal) {
-        if (node.parentNode !== phoneScreen) {
-          node.style.position = 'absolute';
-          node.style.top = '0px';
-          node.style.left = '0px';
-          node.style.right = '0px';
-          node.style.bottom = '0px';
-          node.style.width = '100%';
-          node.style.height = '100%';
-          node.style.zIndex = '9999';
-          node.style.pointerEvents = 'auto';
-          phoneScreen.appendChild(node);
-        }
-      } else {
-        // Child content might be portaled asynchronously by React
-        const childObserver = new MutationObserver(() => {
-          if (
-            node.getAttribute('aria-modal') === 'true' ||
-            node.getAttribute('role') === 'dialog' ||
-            node.querySelector('[aria-modal="true"]') ||
-            node.querySelector('[role="dialog"]')
-          ) {
-            if (node.parentNode !== phoneScreen) {
-              node.style.position = 'absolute';
-              node.style.top = '0px';
-              node.style.left = '0px';
-              node.style.right = '0px';
-              node.style.bottom = '0px';
-              node.style.width = '100%';
-              node.style.height = '100%';
-              node.style.zIndex = '9999';
-              node.style.pointerEvents = 'auto';
-              phoneScreen.appendChild(node);
-            }
-            childObserver.disconnect();
-          }
-        });
-        childObserver.observe(node, { childList: true, subtree: true });
-        setTimeout(() => childObserver.disconnect(), 2000);
-      }
-    };
-
-    const bodyObserver = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        for (const addedNode of mutation.addedNodes) {
-          if (addedNode.parentNode === document.body) {
-            captureModalNode(addedNode);
-          }
-        }
-      }
-    });
-
-    bodyObserver.observe(document.body, { childList: true });
-
-    // Check any existing modals on mount
-    Array.from(document.body.children).forEach((child) => {
-      if (child.id !== 'root' && child.tagName === 'DIV') {
-        captureModalNode(child);
-      }
-    });
-
-    return () => {
-      bodyObserver.disconnect();
-      document.body.removeChild = originalRemoveChild;
-    };
   }, []);
 
   // Calculate auto-fit scale so the whole iPhone fits on the user's screen without scrolling
@@ -249,6 +171,12 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
     const scale = Math.min(1, Math.min(scaleX, scaleY));
     return Math.max(0.55, Math.min(1, scale));
   }, [windowDimensions, zoomLevel]);
+
+  // Synchronize dynamic phone scale CSS variable for desktop modals
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    document.documentElement.style.setProperty('--phone-scale', String(computedScale));
+  }, [computedScale]);
 
   // Prime Web Audio and Unmute on direct user gesture
   const triggerAudioActivation = () => {

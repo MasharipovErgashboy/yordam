@@ -245,6 +245,99 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
   };
   const [isSubmittingLesson, setIsSubmittingLesson] = useState(false);
 
+  // Modal 2.5: Edit Lesson
+  const [showEditLessonModal, setShowEditLessonModal] = useState(false);
+  const [editingLesson, setEditingLesson] = useState<CourseLessonItem | null>(null);
+  const [editLessonCourseId, setEditLessonCourseId] = useState('');
+  const [editLessonTitle, setEditLessonTitle] = useState('');
+  const [editLessonDuration, setEditLessonDuration] = useState('10 daqiqa');
+  const [editLessonOrder, setEditLessonOrder] = useState<number>(1);
+  const [editLessonCoverImage, setEditLessonCoverImage] = useState('');
+  const [editLessonYoutubeUrl, setEditLessonYoutubeUrl] = useState('');
+  const [editLessonDescription, setEditLessonDescription] = useState('');
+  const [editLessonPlan, setEditLessonPlan] = useState<LessonChapter[]>([]);
+  const [editLessonMaterials, setEditLessonMaterials] = useState<LessonMaterial[]>([]);
+  const [isSubmittingEditLesson, setIsSubmittingEditLesson] = useState(false);
+  const [isUploadingEditMaterial, setIsUploadingEditMaterial] = useState(false);
+  const editMaterialFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenEditLesson = (lesson: CourseLessonItem) => {
+    setEditingLesson(lesson);
+    setEditLessonCourseId(lesson.courseId || topicCourses[0]?.id || '');
+    setEditLessonTitle(lesson.title || '');
+    setEditLessonDuration(lesson.duration || '10 daqiqa');
+    setEditLessonOrder(lesson.order || 1);
+    setEditLessonCoverImage(lesson.imageUrl || '');
+    setEditLessonYoutubeUrl(lesson.youtubeUrl || '');
+    setEditLessonDescription(lesson.description || '');
+    setEditLessonPlan(Array.isArray(lesson.plan) ? [...lesson.plan] : []);
+    setEditLessonMaterials(Array.isArray(lesson.materials) ? [...lesson.materials] : []);
+    setShowEditLessonModal(true);
+  };
+
+  const handleUploadEditMaterials = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingEditMaterial(true);
+
+    const newItems: LessonMaterial[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      let fileType = 'pdf';
+      if (ext === 'docx' || ext === 'doc') fileType = 'docx';
+      else if (ext === 'xlsx' || ext === 'xls') fileType = 'xlsx';
+      else if (ext === 'pdf') fileType = 'pdf';
+      else fileType = ext;
+
+      let formattedSize = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+      if (file.size < 1024 * 1024) {
+        formattedSize = `${Math.max(1, Math.round(file.size / 1024))} KB`;
+      }
+
+      try {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        let uploadedUrl = base64;
+        try {
+          const uploadRes = await fetch(`${apiBaseUrl}/api/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: file.name,
+              data: base64,
+              type: fileType,
+            }),
+          });
+          const uploadJson = await uploadRes.json();
+          if (uploadJson.success && uploadJson.fileUrl) {
+            uploadedUrl = uploadJson.fileUrl;
+          }
+        } catch (uploadErr) {
+          console.warn('Backend upload failed, fallback to base64 data URL:', uploadErr);
+        }
+
+        newItems.push({
+          id: `mat_${Date.now()}_${i}_${Math.floor(Math.random() * 1000)}`,
+          name: file.name,
+          size: formattedSize,
+          type: fileType,
+          fileUrl: uploadedUrl,
+        });
+      } catch (err) {
+        console.error('File reading error:', err);
+      }
+    }
+
+    setEditLessonMaterials((prev) => [...prev, ...newItems]);
+    setIsUploadingEditMaterial(false);
+  };
+
   // Modal 3: Create Certificate
   const [showCertModal, setShowCertModal] = useState(false);
   const [certTopicId, setCertTopicId] = useState(topic.id);
@@ -424,6 +517,50 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
       alert('Server bilan bog‘lanishda xatolik yuz berdi');
     } finally {
       setIsSubmittingLesson(false);
+    }
+  };
+
+  // Update Lesson
+  const handleUpdateLesson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLesson) return;
+    if (!editLessonTitle.trim()) {
+      alert('Iltimos, dars nomini kiriting!');
+      return;
+    }
+
+    try {
+      setIsSubmittingEditLesson(true);
+      const res = await fetch(`${apiBaseUrl}/api/huquq-maktabi/lessons/${editingLesson.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: editLessonCourseId,
+          topicId: topic.id,
+          title: editLessonTitle.trim(),
+          duration: editLessonDuration.trim() || '10 daqiqa',
+          order: editLessonOrder,
+          imageUrl: editLessonCoverImage.trim(),
+          youtubeUrl: editLessonYoutubeUrl.trim(),
+          description: editLessonDescription.trim(),
+          plan: editLessonPlan.filter((p) => p.title.trim()),
+          materials: editLessonMaterials.filter((m) => m.name.trim()),
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setShowEditLessonModal(false);
+        setEditingLesson(null);
+        onRefresh();
+      } else {
+        alert(json.message || 'Xatolik yuz berdi');
+      }
+    } catch (err) {
+      console.error('Error updating lesson:', err);
+      alert('Server bilan bog‘lanishda xatolik yuz berdi');
+    } finally {
+      setIsSubmittingEditLesson(false);
     }
   };
 
@@ -1187,25 +1324,46 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                         </td>
 
                         <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => handleDeleteLesson(l.id)}
-                            style={{
-                              width: '34px',
-                              height: '34px',
-                              borderRadius: '8px',
-                              border: 'none',
-                              background: 'rgba(239, 68, 68, 0.12)',
-                              color: '#EF4444',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.2s',
-                            }}
-                            title="Darsni o‘chirish"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                            <button
+                              onClick={() => handleOpenEditLesson(l)}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: 'rgba(0, 229, 255, 0.12)',
+                                color: '#00E5FF',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                              }}
+                              title="Darsni tahrirlash"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLesson(l.id)}
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: 'rgba(239, 68, 68, 0.12)',
+                                color: '#EF4444',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                              }}
+                              title="Darsni o‘chirish"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -3008,6 +3166,704 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                   }}
                 >
                   {isSubmittingLesson ? 'Saqlanmoqda...' : 'Darsni saqlash'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2.5: DARSNI TAHRIRLASH */}
+      {/* ========================================================================= */}
+      {showEditLessonModal && editingLesson && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.85)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '20px',
+          }}
+          onClick={() => {
+            setShowEditLessonModal(false);
+            setEditingLesson(null);
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '680px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: '#0B132B',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '24px',
+              padding: '28px',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.65)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: 'rgba(0, 229, 255, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Pencil size={18} color="#00E5FF" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+                    Darsni tahrirlash
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>
+                    Dars ma’lumotlari, video havola, reja va materiallarni o‘zgartirish
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditLessonModal(false);
+                  setEditingLesson(null);
+                }}
+                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateLesson} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Select Course */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Biriktirilgan kurs *
+                </label>
+                <select
+                  value={editLessonCourseId}
+                  onChange={(e) => setEditLessonCourseId(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    outline: 'none',
+                  }}
+                >
+                  {topicCourses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title} ({c.lessons})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Lesson Title & Order */}
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Dars nomi *
+                  </label>
+                  <input
+                    type="text"
+                    value={editLessonTitle}
+                    onChange={(e) => setEditLessonTitle(e.target.value)}
+                    placeholder="Masalan: Nikoh tushunchasi va huquqiy asosi"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Navbati
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editLessonOrder}
+                    onChange={(e) => setEditLessonOrder(Number(e.target.value))}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Duration & YouTube URL */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Davomiyligi
+                  </label>
+                  <input
+                    type="text"
+                    value={editLessonDuration}
+                    onChange={(e) => setEditLessonDuration(e.target.value)}
+                    placeholder="10 daqiqa"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    YouTube video havolasi
+                  </label>
+                  <input
+                    type="text"
+                    value={editLessonYoutubeUrl}
+                    onChange={(e) => setEditLessonYoutubeUrl(e.target.value)}
+                    placeholder="https://youtu.be/... yoki embed link"
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Cover Image */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Dars muqova rasmi (Cover)
+                </label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  {editLessonCoverImage ? (
+                    <img
+                      src={editLessonCoverImage}
+                      alt="Cover Preview"
+                      style={{
+                        width: '54px',
+                        height: '54px',
+                        borderRadius: '12px',
+                        objectFit: 'cover',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '54px',
+                        height: '54px',
+                        borderRadius: '12px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px dashed rgba(255, 255, 255, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Video size={18} color="#64748B" />
+                    </div>
+                  )}
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <label
+                        style={{
+                          padding: '8px 14px',
+                          borderRadius: '10px',
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          color: '#FFFFFF',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <Upload size={14} /> Rasm tanlash
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={(e) => handleFileUpload(e, setEditLessonCoverImage)}
+                        />
+                      </label>
+                      {editLessonCoverImage && (
+                        <button
+                          type="button"
+                          onClick={() => setEditLessonCoverImage('')}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#EF4444',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Tozalash
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Yoki rasm URL manzilini kiriting..."
+                      value={editLessonCoverImage}
+                      onChange={(e) => setEditLessonCoverImage(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        color: '#94A3B8',
+                        fontSize: '12px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Dars haqida qisqacha tavsif
+                </label>
+                <textarea
+                  value={editLessonDescription}
+                  onChange={(e) => setEditLessonDescription(e.target.value)}
+                  rows={2}
+                  placeholder="Ushbu darsda o‘rganiladigan asosiy huquqiy tushunchalar..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                    resize: 'none',
+                  }}
+                />
+              </div>
+
+              {/* Dynamic Lesson Chapters (Plan) */}
+              <div
+                style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '14px',
+                  padding: '14px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#CBD5E1', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ListOrdered size={14} color="#00E5FF" />
+                    Dars rejasi va vaqti ({editLessonPlan.length} band)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditLessonPlan([
+                        ...editLessonPlan,
+                        { id: `ch_${Date.now()}`, title: '', timeRange: '00:00 – 00:00' },
+                      ])
+                    }
+                    style={{
+                      background: 'rgba(0, 229, 255, 0.1)',
+                      border: 'none',
+                      color: '#00E5FF',
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    + Reja bandi qo‘shish
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {editLessonPlan.map((ch, idx) => (
+                    <div key={ch.id || idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        placeholder="Reja mavzusi"
+                        value={ch.title}
+                        onChange={(e) => {
+                          const updated = [...editLessonPlan];
+                          updated[idx].title = e.target.value;
+                          setEditLessonPlan(updated);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '7px 10px',
+                          borderRadius: '8px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '12px',
+                          outline: 'none',
+                        }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="00:00 – 03:00"
+                        value={ch.timeRange}
+                        onChange={(e) => {
+                          const updated = [...editLessonPlan];
+                          updated[idx].timeRange = e.target.value;
+                          setEditLessonPlan(updated);
+                        }}
+                        style={{
+                          width: '120px',
+                          padding: '7px 10px',
+                          borderRadius: '8px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#94A3B8',
+                          fontSize: '12px',
+                          outline: 'none',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditLessonPlan(editLessonPlan.filter((_, i) => i !== idx))}
+                        style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {editLessonPlan.length === 0 && (
+                    <div style={{ fontSize: '11px', color: '#64748B', textAlign: 'center', padding: '6px' }}>
+                      Hozircha reja bandlari qo‘shilmagan.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Materials with Real File Upload */}
+              <div
+                style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '16px',
+                  padding: '16px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '8px',
+                        background: 'rgba(52, 211, 153, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#34D399',
+                      }}
+                    >
+                      <Paperclip size={15} />
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#F1F5F9', display: 'block' }}>
+                        Qo‘shimcha materiallar (PDF, DOCX, XLSX)
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#94A3B8' }}>
+                        Darsga biriktirilgan hujjatlar ({editLessonMaterials.length} ta)
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => editMaterialFileInputRef.current?.click()}
+                    disabled={isUploadingEditMaterial}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.3) 100%)',
+                      border: '1px solid rgba(52, 211, 153, 0.4)',
+                      color: '#34D399',
+                      fontSize: '12px',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      cursor: isUploadingEditMaterial ? 'wait' : 'pointer',
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <Upload size={13} />
+                    {isUploadingEditMaterial ? 'Yuklanmoqda...' : '+ Fayl yuklash'}
+                  </button>
+                </div>
+
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={editMaterialFileInputRef}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files) handleUploadEditMaterials(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+
+                {/* Drag and Drop Zone if empty */}
+                {editLessonMaterials.length === 0 ? (
+                  <div
+                    onClick={() => editMaterialFileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = '#34D399';
+                      e.currentTarget.style.background = 'rgba(52, 211, 153, 0.08)';
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                      if (e.dataTransfer.files) handleUploadEditMaterials(e.dataTransfer.files);
+                    }}
+                    style={{
+                      border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      padding: '24px 16px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <FileUp size={28} color="#34D399" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>
+                      Fayllarni bu yerga tashlang yoki tanlash uchun bosing
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>
+                      Qo‘llab-quvvatlanadi: .PDF, .DOCX, .XLSX, .DOC, .XLS (avtomatik o‘lcham va format aniqlanadi)
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {editLessonMaterials.map((mat, idx) => {
+                      const isPdf = mat.type === 'pdf' || mat.name?.toLowerCase().endsWith('.pdf');
+                      const isDoc = mat.type === 'docx' || mat.type === 'doc' || mat.name?.toLowerCase().endsWith('.doc') || mat.name?.toLowerCase().endsWith('.docx');
+                      const isXls = mat.type === 'xlsx' || mat.type === 'xls' || mat.name?.toLowerCase().endsWith('.xls') || mat.name?.toLowerCase().endsWith('.xlsx');
+                      const badgeBg = isPdf ? 'rgba(239, 68, 68, 0.18)' : isXls ? 'rgba(16, 185, 129, 0.18)' : isDoc ? 'rgba(59, 130, 246, 0.18)' : 'rgba(148, 163, 184, 0.18)';
+                      const badgeColor = isPdf ? '#EF4444' : isXls ? '#10B981' : isDoc ? '#3B82F6' : '#94A3B8';
+                      const badgeLabel = isPdf ? 'PDF' : isXls ? 'XLSX' : isDoc ? 'DOCX' : 'FAYL';
+
+                      return (
+                        <div
+                          key={mat.id || idx}
+                          style={{
+                            display: 'flex',
+                            gap: '10px',
+                            alignItems: 'center',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '10px',
+                            padding: '8px 12px',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              color: badgeColor,
+                              background: badgeBg,
+                              padding: '3px 7px',
+                              borderRadius: '6px',
+                              letterSpacing: '0.5px',
+                            }}
+                          >
+                            {badgeLabel}
+                          </span>
+
+                          <input
+                            type="text"
+                            placeholder="Fayl nomi"
+                            value={mat.name}
+                            onChange={(e) => {
+                              const updated = [...editLessonMaterials];
+                              updated[idx].name = e.target.value;
+                              setEditLessonMaterials(updated);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: '#FFFFFF',
+                              fontSize: '12px',
+                              outline: 'none',
+                            }}
+                          />
+
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: '#94A3B8',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {mat.size || '1.0 MB'}
+                          </span>
+
+                          {mat.fileUrl && (
+                            <a
+                              href={mat.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Faylni ko‘rish"
+                              style={{
+                                color: '#00E5FF',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px',
+                                textDecoration: 'none',
+                              }}
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+
+                          <button
+                            type="button"
+                            title="O‘chirish"
+                            onClick={() => setEditLessonMaterials(editLessonMaterials.filter((_, i) => i !== idx))}
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              border: 'none',
+                              color: '#EF4444',
+                              borderRadius: '6px',
+                              padding: '5px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => editMaterialFileInputRef.current?.click()}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#34D399',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Plus size={12} /> Yana fayl yuklash
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditLessonModal(false);
+                    setEditingLesson(null);
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    color: '#94A3B8',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEditLesson}
+                  style={{
+                    padding: '10px 24px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #0284C7 0%, #00E5FF 100%)',
+                    color: '#04101E',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: isSubmittingEditLesson ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 15px rgba(0, 229, 255, 0.35)',
+                  }}
+                >
+                  {isSubmittingEditLesson ? 'Saqlanmoqda...' : 'O‘zgarishlarni saqlash'}
                 </button>
               </div>
             </form>

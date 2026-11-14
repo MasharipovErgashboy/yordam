@@ -1056,6 +1056,62 @@ app.post('/api/huquq-maktabi/lessons', (req, res) => {
   }
 });
 
+// 20. Update Lesson
+app.put('/api/huquq-maktabi/lessons/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { courseId, topicId, title, duration, order, imageUrl, youtubeUrl, description, plan, materials } = req.body;
+
+    const data = readHuquqMaktabi();
+    if (!Array.isArray(data.lessons)) data.lessons = [];
+
+    const lIdx = data.lessons.findIndex((l) => l.id === id);
+    if (lIdx === -1) {
+      return res.status(404).json({ success: false, message: 'Dars topilmadi' });
+    }
+
+    const prevCourseId = data.lessons[lIdx].courseId;
+    const updatedLesson = {
+      ...data.lessons[lIdx],
+      courseId: courseId || data.lessons[lIdx].courseId,
+      topicId: topicId !== undefined ? topicId : data.lessons[lIdx].topicId,
+      title: title ? title.trim() : data.lessons[lIdx].title,
+      duration: duration || data.lessons[lIdx].duration,
+      order: order !== undefined ? Number(order) : data.lessons[lIdx].order,
+      imageUrl: imageUrl !== undefined ? imageUrl : data.lessons[lIdx].imageUrl,
+      youtubeUrl: youtubeUrl !== undefined ? youtubeUrl : data.lessons[lIdx].youtubeUrl,
+      description: description !== undefined ? description : data.lessons[lIdx].description,
+      plan: Array.isArray(plan) ? plan : data.lessons[lIdx].plan,
+      materials: Array.isArray(materials) ? materials : data.lessons[lIdx].materials,
+      updatedAt: Date.now(),
+    };
+
+    data.lessons[lIdx] = updatedLesson;
+    data.lessons.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+    // Update lesson counts in affected courses
+    if (Array.isArray(data.courses)) {
+      const affectedCourseIds = new Set([prevCourseId, updatedLesson.courseId]);
+      affectedCourseIds.forEach((cId) => {
+        if (!cId) return;
+        const cIdx = data.courses.findIndex((c) => c.id === cId);
+        if (cIdx !== -1) {
+          const count = data.lessons.filter((l) => l.courseId === cId).length;
+          data.courses[cIdx].lessons = `${count} dars`;
+        }
+      });
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'lesson:updated', lesson: updatedLesson, data });
+
+    return res.json({ success: true, lesson: updatedLesson, message: 'Dars muvaffaqiyatli yangilandi' });
+  } catch (err) {
+    console.error('Error updating lesson:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
 // 20. Delete Lesson
 app.delete('/api/huquq-maktabi/lessons/:id', (req, res) => {
   try {

@@ -952,6 +952,54 @@ app.delete('/api/huquq-maktabi/courses/:id', (req, res) => {
   }
 });
 
+// 18.1 Update Course
+app.put('/api/huquq-maktabi/courses/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { topicId, title, lessons, duration, imageUrl, iconType, iconBg, progressColor } = req.body;
+    const data = readHuquqMaktabi();
+    if (!Array.isArray(data.courses)) data.courses = [];
+
+    const courseIndex = data.courses.findIndex((c) => c.id === id);
+    if (courseIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Kurs topilmadi' });
+    }
+
+    const existing = data.courses[courseIndex];
+    const updated = {
+      ...existing,
+      topicId: topicId !== undefined ? topicId : existing.topicId,
+      title: title !== undefined ? title.trim() : existing.title,
+      lessons: lessons !== undefined ? lessons.trim() : existing.lessons,
+      duration: duration !== undefined ? duration.trim() : existing.duration,
+      imageUrl: imageUrl !== undefined ? imageUrl.trim() : existing.imageUrl,
+      iconType: iconType !== undefined ? iconType : existing.iconType,
+      iconBg: iconBg !== undefined ? iconBg : existing.iconBg,
+      progressColor: progressColor !== undefined ? progressColor : existing.progressColor,
+      updatedAt: Date.now(),
+    };
+
+    data.courses[courseIndex] = updated;
+
+    // If topicId changed, update topicId of all lessons belonging to this course
+    if (topicId && topicId !== existing.topicId && Array.isArray(data.lessons)) {
+      data.lessons.forEach((l) => {
+        if (l.courseId === id) {
+          l.topicId = topicId;
+        }
+      });
+    }
+
+    saveHuquqMaktabi(data);
+    broadcast('huquq-maktabi:updated', { type: 'course:updated', course: updated, data });
+
+    return res.json({ success: true, course: updated, message: 'Kurs muvaffaqiyatli tahrirlandi' });
+  } catch (err) {
+    console.error('Error updating course:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
 // 19. Add Lesson to Course
 app.post('/api/huquq-maktabi/lessons', (req, res) => {
   try {

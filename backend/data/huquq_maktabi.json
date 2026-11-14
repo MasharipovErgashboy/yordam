@@ -236,7 +236,21 @@
       }
     ]
   },
-  "courses": [],
+  "courses": [
+    {
+      "id": "course_1794615919411_912",
+      "topicId": "konstitutsiya",
+      "title": "Nikoh va oila munosabati",
+      "lessons": "4 dars",
+      "duration": "45 daqiqa",
+      "imageUrl": "https://www.google.com/imgres?q=nikoh%20va%20oila&imgurl=https%3A%2F%2Fstorage.kun.uz%2Fsource%2F3%2FF0oIGOouXOkfm9dTy_yNWIC1bRLaDLUX.jpg&imgrefurl=https%3A%2F%2Fkun.uz%2Fnews%2F2018%2F04%2F12%2Foila-va-niko-munosabatlarining-ukukij-tartibiga-bagislangan-risola-tajerlandi&docid=eziCmDqzIIjimM&tbnid=keHj4HTyFPcTBM&vet=12ahUKEwibpcaXmYaYAxVmBdsEHRL4CskQnPAOegQIOhAA..i&w=541&h=397&hcb=2&ved=2ahUKEwibpcaXmYaYAxVmBdsEHRL4CskQnPAOegQIOhAA",
+      "progress": 0,
+      "progressColor": "#10B981",
+      "iconBg": "#EFF6FF",
+      "iconType": "rings",
+      "createdAt": 1794615919411
+    }
+  ],
   "lessons": [],
   "certificates": [
     {

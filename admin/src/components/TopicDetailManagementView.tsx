@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Check,
   Search,
+  Pencil,
 } from 'lucide-react';
 import type { TopicItem } from './HuquqMaktabiDetailView';
 
@@ -135,6 +136,33 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
     };
   }, [isTopicDropdownOpen]);
 
+  // Modal 1.5: Edit Course
+  const [showEditCourseModal, setShowEditCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<TopicCourse | null>(null);
+  const [editCourseTopicId, setEditCourseTopicId] = useState('');
+  const [editCourseTitle, setEditCourseTitle] = useState('');
+  const [editCourseLessonsCount, setEditCourseLessonsCount] = useState('');
+  const [editCourseDuration, setEditCourseDuration] = useState('');
+  const [editCourseImage, setEditCourseImage] = useState('');
+  const [isSubmittingEditCourse, setIsSubmittingEditCourse] = useState(false);
+  const [isEditTopicDropdownOpen, setIsEditTopicDropdownOpen] = useState(false);
+  const [editTopicSearchTerm, setEditTopicSearchTerm] = useState('');
+  const editTopicDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (editTopicDropdownRef.current && !editTopicDropdownRef.current.contains(e.target as Node)) {
+        setIsEditTopicDropdownOpen(false);
+      }
+    };
+    if (isEditTopicDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditTopicDropdownOpen]);
+
   // Modal 2: Create Lesson
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [lessonCourseId, setLessonCourseId] = useState(topicCourses[0]?.id || '');
@@ -230,6 +258,57 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Open Edit Course Modal
+  const handleOpenEditCourse = (course: TopicCourse) => {
+    setEditingCourse(course);
+    setEditCourseTopicId(course.topicId || topic.id);
+    setEditCourseTitle(course.title);
+    setEditCourseLessonsCount(course.lessons || '4 dars');
+    setEditCourseDuration(course.duration || '45 daqiqa');
+    setEditCourseImage(course.imageUrl || '');
+    setIsEditTopicDropdownOpen(false);
+    setEditTopicSearchTerm('');
+    setShowEditCourseModal(true);
+  };
+
+  // Submit Course Edits
+  const handleSaveEditCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCourse || !editCourseTitle.trim()) {
+      alert('Iltimos, kurs nomini kiriting!');
+      return;
+    }
+
+    try {
+      setIsSubmittingEditCourse(true);
+      const res = await fetch(`${apiBaseUrl}/api/huquq-maktabi/courses/${editingCourse.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topicId: editCourseTopicId,
+          title: editCourseTitle.trim(),
+          lessons: editCourseLessonsCount.trim() || '4 dars',
+          duration: editCourseDuration.trim() || '45 daqiqa',
+          imageUrl: editCourseImage.trim(),
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setShowEditCourseModal(false);
+        setEditingCourse(null);
+        onRefresh();
+      } else {
+        alert(json.message || 'Xatolik yuz berdi');
+      }
+    } catch (err) {
+      console.error('Error updating course:', err);
+      alert('Server bilan bog‘lanishda xatolik yuz berdi');
+    } finally {
+      setIsSubmittingEditCourse(false);
     }
   };
 
@@ -733,25 +812,65 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                       </td>
 
                       <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => handleDeleteCourse(c.id)}
-                          style={{
-                            width: '34px',
-                            height: '34px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: 'rgba(239, 68, 68, 0.12)',
-                            color: '#EF4444',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s',
-                          }}
-                          title="Kursni o‘chirish"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCourse(c)}
+                            style={{
+                              width: '34px',
+                              height: '34px',
+                              borderRadius: '8px',
+                              border: '1px solid rgba(0, 229, 255, 0.25)',
+                              background: 'rgba(0, 229, 255, 0.1)',
+                              color: '#00E5FF',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s',
+                            }}
+                            title="Kursni tahrirlash"
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(0, 229, 255, 0.22)';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(0, 229, 255, 0.1)';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCourse(c.id)}
+                            style={{
+                              width: '34px',
+                              height: '34px',
+                              borderRadius: '8px',
+                              border: '1px solid rgba(239, 68, 68, 0.2)',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              color: '#EF4444',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s',
+                            }}
+                            title="Kursni o‘chirish"
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1746,6 +1865,441 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                   }}
                 >
                   {isSubmittingCourse ? 'Saqlanmoqda...' : 'Kursni yaratish'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 1.5: KURSNI TAHRIRLASH */}
+      {/* ========================================================================= */}
+      {showEditCourseModal && editingCourse && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 7, 18, 0.85)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+            padding: '20px',
+          }}
+          onClick={() => setShowEditCourseModal(false)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              background: '#0B132B',
+              border: '1px solid rgba(0, 229, 255, 0.3)',
+              borderRadius: '24px',
+              padding: '28px',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(0, 229, 255, 0.12)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: 'rgba(0, 229, 255, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Pencil size={18} color="#00E5FF" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+                    Kursni tahrirlash
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>
+                    O‘quv kursi ma’lumotlarini tahrirlash va yangilash
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditCourseModal(false)}
+                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditCourse} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Select Topic */}
+              {(() => {
+                const selectedTopicObj = allTopics.find((t) => t.id === editCourseTopicId) || topic;
+                const filteredTopics = allTopics.filter((t) => {
+                  if (!editTopicSearchTerm.trim()) return true;
+                  const term = editTopicSearchTerm.toLowerCase();
+                  return (
+                    t.title.toLowerCase().includes(term) ||
+                    (t.subtitle && t.subtitle.toLowerCase().includes(term)) ||
+                    String(t.order).includes(term)
+                  );
+                });
+
+                return (
+                  <div style={{ position: 'relative' }} ref={editTopicDropdownRef}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#CBD5E1' }}>
+                        Biriktirilgan mavzu *
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#00E5FF', fontWeight: 600 }}>
+                        {allTopics.length} ta yo‘nalish
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsEditTopicDropdownOpen((prev) => !prev)}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '14px',
+                        background: isEditTopicDropdownOpen ? 'rgba(0, 229, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+                        border: isEditTopicDropdownOpen ? '1px solid #00E5FF' : '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: isEditTopicDropdownOpen ? '0 0 0 3px rgba(0, 229, 255, 0.18)' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        boxSizing: 'border-box',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                        <div
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '10px',
+                            background: selectedTopicObj.color ? `${selectedTopicObj.color}22` : 'rgba(0, 229, 255, 0.15)',
+                            border: `1px solid ${selectedTopicObj.color || '#00E5FF'}44`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Layers size={18} color={selectedTopicObj.color || '#00E5FF'} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {selectedTopicObj.title}
+                            </span>
+                            <span
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: '6px',
+                                background: 'rgba(0, 229, 255, 0.15)',
+                                color: '#00E5FF',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                              }}
+                            >
+                              #{selectedTopicObj.order}
+                            </span>
+                          </div>
+                          <span style={{ display: 'block', fontSize: '11.5px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {selectedTopicObj.subtitle || 'Belgilangan o‘quv mavzusi'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <ChevronDown
+                        size={16}
+                        color={isEditTopicDropdownOpen ? '#00E5FF' : '#94A3B8'}
+                        style={{
+                          transform: isEditTopicDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.25s ease',
+                          flexShrink: 0,
+                        }}
+                      />
+                    </button>
+
+                    {isEditTopicDropdownOpen && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 8px)',
+                          left: 0,
+                          right: 0,
+                          zIndex: 1000,
+                          background: '#0B132B',
+                          border: '1px solid rgba(0, 229, 255, 0.35)',
+                          borderRadius: '16px',
+                          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 229, 255, 0.15)',
+                          padding: '10px',
+                          boxSizing: 'border-box',
+                          backdropFilter: 'blur(20px)',
+                        }}
+                      >
+                        <div style={{ position: 'relative', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+                          <Search size={14} color="#64748B" style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
+                          <input
+                            type="text"
+                            placeholder="Mavzularni qidirish..."
+                            value={editTopicSearchTerm}
+                            onChange={(e) => setEditTopicSearchTerm(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            autoFocus
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px 8px 34px',
+                              borderRadius: '10px',
+                              background: 'rgba(255, 255, 255, 0.06)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              color: '#FFFFFF',
+                              fontSize: '12.5px',
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ maxHeight: '220px', overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {filteredTopics.map((t) => {
+                            const isSelected = t.id === editCourseTopicId;
+                            return (
+                              <div
+                                key={t.id}
+                                onClick={() => {
+                                  setEditCourseTopicId(t.id);
+                                  setIsEditTopicDropdownOpen(false);
+                                  setEditTopicSearchTerm('');
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  padding: '10px 12px',
+                                  borderRadius: '12px',
+                                  cursor: 'pointer',
+                                  background: isSelected
+                                    ? 'linear-gradient(90deg, rgba(0, 229, 255, 0.16) 0%, rgba(0, 229, 255, 0.04) 100%)'
+                                    : 'transparent',
+                                  border: isSelected ? '1px solid rgba(0, 229, 255, 0.35)' : '1px solid transparent',
+                                  transition: 'all 0.15s ease',
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                                  <span
+                                    style={{
+                                      width: '26px',
+                                      height: '26px',
+                                      borderRadius: '8px',
+                                      background: isSelected ? 'rgba(0, 229, 255, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+                                      color: isSelected ? '#00E5FF' : '#94A3B8',
+                                      fontSize: '11px',
+                                      fontWeight: 700,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {t.order}
+                                  </span>
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontSize: '13.5px', fontWeight: 600, color: isSelected ? '#00E5FF' : '#FFFFFF' }}>
+                                      {t.title}
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '310px' }}>
+                                      {t.subtitle || 'O‘quv mavzusi'}
+                                    </div>
+                                  </div>
+                                </div>
+                                {isSelected && <Check size={14} color="#00E5FF" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Course Title */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Kurs nomi *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Masalan: Nikoh va oila munosabatlari"
+                  value={editCourseTitle}
+                  onChange={(e) => setEditCourseTitle(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {/* Grid: Lessons count & Duration */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Darslar soni
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: 4 dars"
+                    value={editCourseLessonsCount}
+                    onChange={(e) => setEditCourseLessonsCount(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                    Davomiyligi
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: 45 daqiqa"
+                    value={editCourseDuration}
+                    onChange={(e) => setEditCourseDuration(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Image URL / Upload */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#CBD5E1', marginBottom: '6px' }}>
+                  Kurs muqova rasmi (URL yoki fayl yuklash)
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="https://... yoki fayl tanlang"
+                    value={editCourseImage}
+                    onChange={(e) => setEditCourseImage(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                  <label
+                    style={{
+                      padding: '11px 16px',
+                      borderRadius: '12px',
+                      background: 'rgba(0, 229, 255, 0.15)',
+                      border: '1px solid rgba(0, 229, 255, 0.3)',
+                      color: '#00E5FF',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Upload size={15} />
+                    Yuklash
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={(e) => handleFileUpload(e, setEditCourseImage)}
+                    />
+                  </label>
+                </div>
+                {editCourseImage && (
+                  <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <img
+                      src={editCourseImage}
+                      alt="Preview"
+                      style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.2)' }}
+                    />
+                    <span style={{ fontSize: '12px', color: '#10B981' }}>Rasm biriktirildi</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEditCourseModal(false)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#94A3B8',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEditCourse}
+                  style={{
+                    padding: '10px 24px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #0284C7 0%, #00E5FF 100%)',
+                    color: '#04101E',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: isSubmittingEditCourse ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 15px rgba(0, 229, 255, 0.35)',
+                  }}
+                >
+                  {isSubmittingEditCourse ? 'Saqlanmoqda...' : 'O‘zgarishlarni saqlash'}
                 </button>
               </div>
             </form>

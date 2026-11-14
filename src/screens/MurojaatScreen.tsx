@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { WS_BASE_URL, getCandidateUrls } from '../config/api';
 
 // ==================== INTERFACES & TYPES ====================
 interface MurojaatScreenProps {
@@ -66,6 +67,40 @@ export interface SavedApplication {
   regNumber: string;
   status: 'Tayyor' | 'Yuborildi' | 'Jarayonda' | 'Ijobiy hal etildi';
   generatedText: string;
+}
+
+// ==================== TEMPLATE MAPPER ====================
+export function mapBackendTemplate(tpl: any): ApplicationTemplate {
+  return {
+    id: tpl.id,
+    title: tpl.title,
+    icon: 'document-text-outline',
+    iconColor: '#0284C7',
+    iconBg: '#F0F9FF',
+    category: tpl.categoryName || 'Umumiy',
+    targetOrg: tpl.targetOrg || "Tegishli davlat organi",
+    description: tpl.description || "Rasmiy murojaat va ariza shakli.",
+    law: tpl.law || "O'zbekiston Respublikasining «Jismoniy va yuridik shaxslarning murojaatlari to'g'risida»gi Qonuni",
+    durationDays: tpl.durationDays || "15 ish kuni",
+    requiredDocs: Array.isArray(tpl.requiredDocs) && tpl.requiredDocs.length > 0
+      ? tpl.requiredDocs
+      : ["Shaxsni tasdiqlovchi hujjat (pasport/ID karta nusxasi)"],
+    expectedResult: "Murojaatni qonunda belgilangan muddatda ko'rib chiqish va asoslantirilgan javob olish.",
+    sampleData: {
+      fio: 'Hayitboyev Samandar',
+      address: 'Toshkent shahri',
+      phone: '+998 94 490 09 01',
+      details: tpl.description || 'Murojaat tafsilotlari...',
+      demand: 'Mazkur masalani qonuniy ko‘rib chiqib, ijobiy hal etishingizni so‘rayman.',
+    },
+    fields: [
+      { key: 'fio', label: "To'liq ism-sharif (F.I.O)", placeholder: "Ism familiyangiz", required: true, step: 1 },
+      { key: 'address', label: "Yashash manzilingiz", placeholder: "Viloyat, shahar, tuman, ko'cha...", required: true, step: 1 },
+      { key: 'phone', label: "Aloqa telefon raqamingiz", placeholder: "+998 90 123 45 67", required: true, step: 1 },
+      { key: 'details', label: "Holat va muammo tafsilotlari", placeholder: "Muammoni batafsil bayon qiling...", multiline: true, required: true, step: 2 },
+      { key: 'demand', label: "Qonuniy talabingiz va iltimosingiz", placeholder: "Qanday amaliy chora ko'rilishini so'raysiz...", multiline: true, required: true, step: 3 },
+    ],
+  };
 }
 
 // ==================== TEMPLATES DATA ====================
@@ -514,9 +549,91 @@ export const MurojaatScreen: React.FC<MurojaatScreenProps> = ({ onBack }) => {
   ]);
 
   const scrollRef = useRef<any>(null);
-  const categories = ['Barchasi', 'Mehnat', "Iste'molchi", 'Moliya', 'Davlat', 'Mulk', 'Taklif'];
 
-  const filteredTemplates = APPLICATION_TEMPLATES.filter((t) => {
+  // Dynamic categories and templates from Backend / Admin panel
+  const [backendCategories, setBackendCategories] = useState<{ id: string; name: string }[]>([]);
+  const [templatesList, setTemplatesList] = useState<ApplicationTemplate[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // Load real data from Backend and setup WebSocket real-time listener
+  useEffect(() => {
+    let isMounted = true;
+    let ws: WebSocket | null = null;
+
+    const fetchMurojaatData = async () => {
+      try {
+        setIsDataLoading(true);
+        const urls = getCandidateUrls('/api/murojaat');
+        for (const url of urls) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const data = await res.json();
+              if (isMounted && data.success) {
+                if (Array.isArray(data.categories)) {
+                  setBackendCategories(data.categories);
+                }
+                if (Array.isArray(data.templates)) {
+                  setTemplatesList(data.templates.map(mapBackendTemplate));
+                }
+              }
+              break;
+            }
+          } catch {}
+        }
+      } catch (err) {
+        console.error('Murojaat fetch error:', err);
+      } finally {
+        if (isMounted) setIsDataLoading(false);
+      }
+    };
+
+    fetchMurojaatData();
+
+    // WebSocket real-time subscription
+    try {
+      ws = new WebSocket(WS_BASE_URL);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.event === 'murojaat:updated' && msg.data) {
+            if (isMounted && Array.isArray(msg.data.categories)) {
+              setBackendCategories(msg.data.categories);
+            }
+            if (isMounted && Array.isArray(msg.data.templates)) {
+              setTemplatesList(msg.data.templates.map(mapBackendTemplate));
+            }
+          } else if (msg.event === 'initial:sync' && msg.data?.murojaat) {
+            if (isMounted && Array.isArray(msg.data.murojaat.categories)) {
+              setBackendCategories(msg.data.murojaat.categories);
+            }
+            if (isMounted && Array.isArray(msg.data.murojaat.templates)) {
+              setTemplatesList(msg.data.murojaat.templates.map(mapBackendTemplate));
+            }
+          }
+        } catch {}
+      };
+    } catch {}
+
+    return () => {
+      isMounted = false;
+      if (ws) ws.close();
+    };
+  }, []);
+
+  // Dynamic categories from backend
+  const categories = [
+    'Barchasi',
+    ...backendCategories.map((c) => c.name),
+  ];
+
+  // Effective templates: real backend templates or fallback
+  const effectiveTemplates = templatesList.length > 0 ? templatesList : APPLICATION_TEMPLATES;
+
+  const filteredTemplates = effectiveTemplates.filter((t) => {
     const matchCat = selectedCategory === 'Barchasi' || t.category === selectedCategory;
     const matchSearch =
       searchQuery.trim().length === 0 ||

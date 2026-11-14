@@ -1,0 +1,80 @@
+{
+  "categories": [
+    {
+      "id": "cat_mehnat",
+      "name": "Mehnat munosabatlari",
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "cat_istemolchi",
+      "name": "Iste'molchi huquqlari",
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "cat_davlat",
+      "name": "Davlat organlari va hokimiyat",
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "cat_mulk",
+      "name": "Mulk va uy-joy masalalari",
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "cat_sud",
+      "name": "Sud va prokuratura",
+      "createdAt": "14.11.2026, 22:30"
+    }
+  ],
+  "templates": [
+    {
+      "id": "tpl_mehnat_1",
+      "categoryId": "cat_mehnat",
+      "categoryName": "Mehnat munosabatlari",
+      "title": "Noqonuniy bo'shatish bo'yicha shikoyat",
+      "targetOrg": "Bandlik va mehnat munosabatlari vazirligi Davlat mehnat inspeksiyasi",
+      "durationDays": "15 ish kuni",
+      "description": "Ish beruvchi tomonidan asossiz yoki qonunga xilof ravishda ishdan bo'shatilgan, maosh ushlab qolingan taqdirda rasmiy shikoyat arizasi.",
+      "law": "O'zbekiston Respublikasi Mehnat Kodeksi, 100 va 161-moddalar",
+      "requiredDocs": [
+        "Mehnat daftarchasi yoki elektron yozuv nusxasi",
+        "Ishdan bo'shatish to'g'risidagi buyruq nusxasi",
+        "Mehnat shartnomasi",
+        "Bank plastik kartasi hisob ko'chirmasi"
+      ],
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "tpl_istemolchi_1",
+      "categoryId": "cat_istemolchi",
+      "categoryName": "Iste'molchi huquqlari",
+      "title": "Sifatsiz tovar yoki xizmat bo'yicha shikoyat",
+      "targetOrg": "Raqobatni rivojlantirish va iste'molchilar huquqlarini himoya qilish qo'mitasi",
+      "durationDays": "10 ish kuni",
+      "description": "Savdo markazi yoki xizmat ko'rsatuvchi tomonidan nuqsonli mahsulot sotilganda yoki pulni qaytarish rad etilganda taqdim etiluvchi ariza.",
+      "law": "O'RQ-273 «Iste'molchilar huquqlarini himoya qilish to'g'risida»gi Qonun, 14, 18-moddalar",
+      "requiredDocs": [
+        "To'lov cheki yoki bank o'tkazma kvitansiyasi",
+        "Kafolat taloni (agar mavjud bo'lsa)",
+        "Tovarning nosozlik holati aks etgan dalillar"
+      ],
+      "createdAt": "14.11.2026, 22:30"
+    },
+    {
+      "id": "tpl_davlat_1",
+      "categoryId": "cat_davlat",
+      "categoryName": "Davlat organlari va hokimiyat",
+      "title": "Davlat xizmati ko'rsatishdan asossiz rad etish shikoyati",
+      "targetOrg": "Adliya vazirligi huzuridagi Davlat xizmatlari agentligi",
+      "durationDays": "5 ish kuni",
+      "description": "Davlat organlari yoki davlat xizmatlari markazlari tomonidan belgilangan muddat buzilganda yoki asossiz rad javobi berilganda.",
+      "law": "O'RQ-385 «Davlat xizmatlari to'g'risida»gi Qonun, 20-modda",
+      "requiredDocs": [
+        "Davlat xizmatlari markazi arizasi raqami",
+        "Rad etish to'g'risidagi elektron bildirishnoma",
+        "Taqdim etilgan hujjatlar to'plami nusxasi"
+      ],
+      "createdAt": "14.11.2026, 22:30"
+    }
+  ]
+}

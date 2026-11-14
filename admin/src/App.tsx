@@ -8,6 +8,7 @@ import { ChartsSection } from './components/ChartsSection';
 import { ApplicationsTable } from './components/ApplicationsTable';
 import { NewApplicationModal } from './components/NewApplicationModal';
 import { HuquqMaktabiDetailView } from './components/HuquqMaktabiDetailView';
+import { MurojaatDetailView } from './components/MurojaatDetailView';
 import {
   Briefcase,
   Search,
@@ -1024,6 +1025,10 @@ export default function App() {
               onBack={() => setCurrentServiceSubView(null)}
               onRefresh={fetchHuquqMaktabiData}
             />
+          ) : currentServiceSubView === 'murojaat' ? (
+            <MurojaatDetailView
+              onBack={() => setCurrentServiceSubView(null)}
+            />
           ) : (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             {/* Top Overview KPI Cards */}
@@ -1345,11 +1350,19 @@ export default function App() {
                                 onClick={() => {
                                   if (srv.id === 'huquq_maktabi') {
                                     setCurrentServiceSubView('huquq_maktabi');
+                                  } else if (srv.id === 'murojaat') {
+                                    setCurrentServiceSubView('murojaat');
                                   } else {
                                     setSelectedServiceDetail(srv);
                                   }
                                 }}
-                                title={srv.id === 'huquq_maktabi' ? 'Huquq maktabi boshqaruvi' : 'Batafsil ma’lumot'}
+                                title={
+                                  srv.id === 'huquq_maktabi'
+                                    ? 'Huquq maktabi boshqaruvi'
+                                    : srv.id === 'murojaat'
+                                    ? 'Murojaat va arizalar boshqaruvi'
+                                    : 'Batafsil ma’lumot'
+                                }
                                 style={{
                                   width: '34px',
                                   height: '34px',

@@ -19,6 +19,7 @@ const DATA_DIR = path.join(__dirname, '../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SERVICES_FILE = path.join(DATA_DIR, 'services.json');
 const HUQUQ_MAKTABI_FILE = path.join(DATA_DIR, 'huquq_maktabi.json');
+const MUROJAAT_FILE = path.join(DATA_DIR, 'murojaat.json');
 
 // Ensure data folder and files exist
 if (!fs.existsSync(DATA_DIR)) {
@@ -29,6 +30,9 @@ if (!fs.existsSync(USERS_FILE)) {
 }
 if (!fs.existsSync(SERVICES_FILE)) {
   fs.writeFileSync(SERVICES_FILE, JSON.stringify([], null, 2), 'utf8');
+}
+if (!fs.existsSync(MUROJAAT_FILE)) {
+  fs.writeFileSync(MUROJAAT_FILE, JSON.stringify({ categories: [], templates: [] }, null, 2), 'utf8');
 }
 
 const UPLOADS_DIR = path.join(__dirname, '../uploads');
@@ -74,9 +78,10 @@ wss.on('connection', (ws) => {
     const services = readServices();
     const users = readUsers().map(({ password: _, ...u }) => u);
     const huquqMaktabi = readHuquqMaktabi();
+    const murojaat = readMurojaat();
     ws.send(JSON.stringify({
       event: 'initial:sync',
-      data: { services, users, usersCount: users.length, huquqMaktabi },
+      data: { services, users, usersCount: users.length, huquqMaktabi, murojaat },
       timestamp: Date.now(),
     }));
   } catch (err) {
@@ -127,6 +132,33 @@ function saveServices(services) {
     return true;
   } catch (err) {
     console.error('Error saving services file:', err);
+    return false;
+  }
+}
+
+// Helper: Read Murojaat & Arizalar data
+function readMurojaat() {
+  try {
+    if (!fs.existsSync(MUROJAAT_FILE)) return { categories: [], templates: [] };
+    const raw = fs.readFileSync(MUROJAAT_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+      templates: Array.isArray(parsed.templates) ? parsed.templates : [],
+    };
+  } catch (err) {
+    console.error('Error reading murojaat file:', err);
+    return { categories: [], templates: [] };
+  }
+}
+
+// Helper: Save Murojaat & Arizalar data
+function saveMurojaat(data) {
+  try {
+    fs.writeFileSync(MUROJAAT_FILE, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error saving murojaat file:', err);
     return false;
   }
 }
@@ -1229,6 +1261,287 @@ app.delete('/api/huquq-maktabi/certificates/:id', (req, res) => {
     return res.json({ success: true, message: 'Sertifikat muvaffaqiyatli o‘chirildi' });
   } catch (err) {
     console.error('Error deleting certificate:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// ============================================================================
+// MUROJAAT VA ARIZALAR (CATEGORIES & TEMPLATES) REAL-TIME ROUTES
+// ============================================================================
+
+// 1. Get all Murojaat categories and templates
+app.get('/api/murojaat', (req, res) => {
+  try {
+    const data = readMurojaat();
+    return res.json({
+      success: true,
+      categories: data.categories || [],
+      templates: data.templates || [],
+    });
+  } catch (err) {
+    console.error('Error fetching murojaat data:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 2. Create new Category
+app.post('/api/murojaat/categories', (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Kategoriya nomini kiriting' });
+    }
+
+    const data = readMurojaat();
+    const newCategory = {
+      id: `cat_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      name: name.trim(),
+      createdAt: `${formatDate()}, ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}`,
+    };
+
+    data.categories.push(newCategory);
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'category:added',
+      category: newCategory,
+      data,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Kategoriya muvaffaqiyatli yaratildi',
+      category: newCategory,
+      data,
+    });
+  } catch (err) {
+    console.error('Error creating category:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 3. Update Category
+app.put('/api/murojaat/categories/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Kategoriya nomi bo‘sh bo‘lishi mumkin emas' });
+    }
+
+    const data = readMurojaat();
+    const index = data.categories.findIndex((c) => c.id === id);
+    if (index === -1) {
+      return res.status(400).json({ success: false, message: 'Kategoriya topilmadi' });
+    }
+
+    data.categories[index].name = name.trim();
+
+    // Also update categoryName in matching templates
+    data.templates = data.templates.map((tpl) => {
+      if (tpl.categoryId === id) {
+        return { ...tpl, categoryName: name.trim() };
+      }
+      return tpl;
+    });
+
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'category:updated',
+      category: data.categories[index],
+      data,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Kategoriya muvaffaqiyatli yangilandi',
+      category: data.categories[index],
+      data,
+    });
+  } catch (err) {
+    console.error('Error updating category:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 4. Delete Category
+app.delete('/api/murojaat/categories/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = readMurojaat();
+
+    data.categories = data.categories.filter((c) => c.id !== id);
+    // Remove associated templates or keep them unassigned
+    data.templates = data.templates.filter((tpl) => tpl.categoryId !== id);
+
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'category:deleted',
+      id,
+      data,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Kategoriya va unga tegishli andozalar o‘chirildi',
+      data,
+    });
+  } catch (err) {
+    console.error('Error deleting category:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 5. Create new Template (Andoza)
+app.post('/api/murojaat/templates', (req, res) => {
+  try {
+    const {
+      categoryId,
+      categoryName,
+      title,
+      durationDays,
+      description,
+      targetOrg,
+      law,
+      requiredDocs,
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: 'Andoza nomini kiriting' });
+    }
+    if (!categoryId) {
+      return res.status(400).json({ success: false, message: 'Kategoriyani tanlang' });
+    }
+
+    const data = readMurojaat();
+    const cat = data.categories.find((c) => c.id === categoryId);
+    const resolvedCategoryName = cat ? cat.name : (categoryName || 'Umumiy');
+
+    // Clean required documents list
+    const docs = Array.isArray(requiredDocs)
+      ? requiredDocs.map((d) => (typeof d === 'string' ? d.trim() : '')).filter(Boolean)
+      : [];
+
+    const newTemplate = {
+      id: `tpl_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      categoryId,
+      categoryName: resolvedCategoryName,
+      title: title.trim(),
+      durationDays: (durationDays || '15 ish kuni').trim(),
+      description: (description || '').trim(),
+      targetOrg: (targetOrg || '').trim(),
+      law: (law || '').trim(),
+      requiredDocs: docs,
+      createdAt: `${formatDate()}, ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}`,
+    };
+
+    data.templates.push(newTemplate);
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'template:added',
+      template: newTemplate,
+      data,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Andoza muvaffaqiyatli yaratildi',
+      template: newTemplate,
+      data,
+    });
+  } catch (err) {
+    console.error('Error creating template:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 6. Update Template
+app.put('/api/murojaat/templates/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      categoryId,
+      categoryName,
+      title,
+      durationDays,
+      description,
+      targetOrg,
+      law,
+      requiredDocs,
+    } = req.body;
+
+    const data = readMurojaat();
+    const index = data.templates.findIndex((t) => t.id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Andoza topilmadi' });
+    }
+
+    const existing = data.templates[index];
+    const cat = categoryId ? data.categories.find((c) => c.id === categoryId) : null;
+
+    const docs = Array.isArray(requiredDocs)
+      ? requiredDocs.map((d) => (typeof d === 'string' ? d.trim() : '')).filter(Boolean)
+      : existing.requiredDocs;
+
+    const updatedTemplate = {
+      ...existing,
+      categoryId: categoryId || existing.categoryId,
+      categoryName: cat ? cat.name : (categoryName || existing.categoryName),
+      title: title ? title.trim() : existing.title,
+      durationDays: durationDays ? durationDays.trim() : existing.durationDays,
+      description: description !== undefined ? description.trim() : existing.description,
+      targetOrg: targetOrg !== undefined ? targetOrg.trim() : existing.targetOrg,
+      law: law !== undefined ? law.trim() : existing.law,
+      requiredDocs: docs,
+      updatedAt: `${formatDate()}, ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}`,
+    };
+
+    data.templates[index] = updatedTemplate;
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'template:updated',
+      template: updatedTemplate,
+      data,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Andoza muvaffaqiyatli yangilandi',
+      template: updatedTemplate,
+      data,
+    });
+  } catch (err) {
+    console.error('Error updating template:', err);
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
+// 7. Delete Template
+app.delete('/api/murojaat/templates/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = readMurojaat();
+
+    data.templates = data.templates.filter((t) => t.id !== id);
+    saveMurojaat(data);
+
+    broadcast('murojaat:updated', {
+      type: 'template:deleted',
+      id,
+      data,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Andoza muvaffaqiyatli o‘chirildi',
+      data,
+    });
+  } catch (err) {
+    console.error('Error deleting template:', err);
     return res.status(500).json({ success: false, message: 'Server xatosi' });
   }
 });

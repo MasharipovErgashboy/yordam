@@ -72,8 +72,10 @@
     "iconName": "file-text",
     "badgeColor": "#0284C7",
     "isActive": true,
-    "usedUserIds": [],
-    "usersCount": 0,
+    "usedUserIds": [
+      "u_1794675552363_961"
+    ],
+    "usersCount": 1,
     "lastUpdated": "Bugun, 21:00",
     "features": [
       "Davlat organlari va vazirliklarga rasmiy ariza va shikoyatlar",
@@ -91,8 +93,10 @@
     "iconName": "landmark",
     "badgeColor": "#10B981",
     "isActive": true,
-    "usedUserIds": [],
-    "usersCount": 0,
+    "usedUserIds": [
+      "u_1794675552363_961"
+    ],
+    "usersCount": 1,
     "lastUpdated": "Bugun, 21:00",
     "features": [
       "Kredit shartnomalaridagi noqonuniy foiz va ortiqcha to‘lovlar tahlili",

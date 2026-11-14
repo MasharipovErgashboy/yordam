@@ -42,3 +42,4 @@ if (Platform.OS === 'web' && typeof window !== 'undefined') {
     return originalAddEventListener(type, wrappedHandler);
   };
 }
+

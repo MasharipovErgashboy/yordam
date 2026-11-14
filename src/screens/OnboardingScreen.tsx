@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,17 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 }) => {
   const { width, height } = useWindowDimensions();
   const screenWidth = Platform.OS === 'web' && width > 500 ? 430 : width;
-  const insets = useSafeAreaInsets();
+  const rawInsets = useSafeAreaInsets();
+  const insets = useMemo(() => {
+    if (Platform.OS === 'web' && width > 500) {
+      return {
+        ...rawInsets,
+        top: Math.max(rawInsets.top, 59),
+        bottom: Math.max(rawInsets.bottom, 34),
+      };
+    }
+    return rawInsets;
+  }, [rawInsets, width]);
   const flatListRef = useRef<FlatList<OnboardingSlideData>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 

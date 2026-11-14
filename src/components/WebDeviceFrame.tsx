@@ -111,13 +111,6 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           </View>
         </View>
 
-        {/* Center device badge */}
-        <View style={styles.deviceBadgePill}>
-          <Ionicons name="phone-portrait-outline" size={15} color="#38BDF8" style={{ marginRight: 6 }} />
-          <Text style={styles.deviceBadgeText}>iPhone 15 Pro Max</Text>
-          <Text style={styles.deviceBadgeDivider}>•</Text>
-          <Text style={styles.deviceBadgeSub}>430 × 932 pt</Text>
-        </View>
 
         {/* Right zoom / fit controls */}
         <View style={styles.topNavRight}>
@@ -333,31 +326,6 @@ const styles: any = StyleSheet.create({
     color: '#94A3B8',
   },
 
-  deviceBadgePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(30, 41, 59, 0.8)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.2)',
-  },
-  deviceBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#E2E8F0',
-  },
-  deviceBadgeDivider: {
-    fontSize: 11,
-    color: '#64748B',
-    marginHorizontal: 6,
-  },
-  deviceBadgeSub: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontFamily: 'monospace',
-  },
 
   topNavRight: {
     flexDirection: 'row',

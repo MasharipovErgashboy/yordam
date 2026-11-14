@@ -379,7 +379,17 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   onOpenBankHuquq,
   onOpenMurojaat,
 }) => {
-  const insets = useSafeAreaInsets();
+  const rawInsets = useSafeAreaInsets();
+  const insets = useMemo(() => {
+    if (Platform.OS === 'web' && width > 500) {
+      return {
+        ...rawInsets,
+        top: Math.max(rawInsets.top, 59),
+        bottom: Math.max(rawInsets.bottom, 34),
+      };
+    }
+    return rawInsets;
+  }, [rawInsets]);
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [serviceCategory, setServiceCategory] = useState<ServiceCategory>('all');

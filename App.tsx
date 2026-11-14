@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, BackHandler, Platform } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { MainHomeScreen } from './src/screens/MainHomeScreen';
@@ -100,59 +100,110 @@ export default function App() {
 
   const isDesktopWeb = Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth > 500;
   const webIphoneMetrics = {
-    insets: { top: 54, bottom: 34, left: 0, right: 0 },
+    insets: { top: 59, bottom: 34, left: 0, right: 0 },
     frame: { x: 0, y: 0, width: 430, height: 932 },
   };
 
   return (
     <WebDeviceFrame currentScreen={currentScreen}>
       <SafeAreaProvider initialMetrics={isDesktopWeb ? webIphoneMetrics : undefined}>
-        <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
-          {currentScreen === 'splash' && (
-            <SplashScreen
-              onFinish={handleSplashFinish}
-            />
-          )}
+        {isDesktopWeb ? (
+          <SafeAreaInsetsContext.Provider value={{ top: 59, bottom: 34, left: 0, right: 0 }}>
+            <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
+              {currentScreen === 'splash' && (
+                <SplashScreen
+                  onFinish={handleSplashFinish}
+                />
+              )}
 
-          {currentScreen === 'onboarding' && (
-            <OnboardingScreen
-              onNavigateToMain={() => navigateTo('main')}
-              onRestartSplash={() => setScreenStack(['splash'])}
-            />
-          )}
+              {currentScreen === 'onboarding' && (
+                <OnboardingScreen
+                  onNavigateToMain={() => navigateTo('main')}
+                  onRestartSplash={() => setScreenStack(['splash'])}
+                />
+              )}
 
-          {currentScreen === 'main' && (
-            <MainHomeScreen
-              onBackToOnboarding={() => setScreenStack(['onboarding'])}
-              isAuthenticated={isAuthenticated}
-              user={user}
-              onRequireAuth={() => navigateTo('auth')}
-              onLogout={handleLogout}
-              onOpenBankHuquq={() => navigateTo('bank_huquq')}
-              onOpenMurojaat={() => navigateTo('murojaat')}
-            />
-          )}
+              {currentScreen === 'main' && (
+                <MainHomeScreen
+                  onBackToOnboarding={() => setScreenStack(['onboarding'])}
+                  isAuthenticated={isAuthenticated}
+                  user={user}
+                  onRequireAuth={() => navigateTo('auth')}
+                  onLogout={handleLogout}
+                  onOpenBankHuquq={() => navigateTo('bank_huquq')}
+                  onOpenMurojaat={() => navigateTo('murojaat')}
+                />
+              )}
 
-          {currentScreen === 'bank_huquq' && (
-            <BankHuquqScreen
-              onBack={goBack}
-            />
-          )}
+              {currentScreen === 'bank_huquq' && (
+                <BankHuquqScreen
+                  onBack={goBack}
+                />
+              )}
 
-          {currentScreen === 'murojaat' && (
-            <MurojaatScreen
-              onBack={goBack}
-            />
-          )}
+              {currentScreen === 'murojaat' && (
+                <MurojaatScreen
+                  onBack={goBack}
+                />
+              )}
 
-          {currentScreen === 'auth' && (
-            <AuthScreen
-              initialTab="login"
-              onAuthSuccess={handleAuthSuccess}
-              onCancel={goBack}
-            />
-          )}
-        </View>
+              {currentScreen === 'auth' && (
+                <AuthScreen
+                  initialTab="login"
+                  onAuthSuccess={handleAuthSuccess}
+                  onCancel={goBack}
+                />
+              )}
+            </View>
+          </SafeAreaInsetsContext.Provider>
+        ) : (
+          <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
+            {currentScreen === 'splash' && (
+              <SplashScreen
+                onFinish={handleSplashFinish}
+              />
+            )}
+
+            {currentScreen === 'onboarding' && (
+              <OnboardingScreen
+                onNavigateToMain={() => navigateTo('main')}
+                onRestartSplash={() => setScreenStack(['splash'])}
+              />
+            )}
+
+            {currentScreen === 'main' && (
+              <MainHomeScreen
+                onBackToOnboarding={() => setScreenStack(['onboarding'])}
+                isAuthenticated={isAuthenticated}
+                user={user}
+                onRequireAuth={() => navigateTo('auth')}
+                onLogout={handleLogout}
+                onOpenBankHuquq={() => navigateTo('bank_huquq')}
+                onOpenMurojaat={() => navigateTo('murojaat')}
+              />
+            )}
+
+            {currentScreen === 'bank_huquq' && (
+              <BankHuquqScreen
+                onBack={goBack}
+              />
+            )}
+
+            {currentScreen === 'murojaat' && (
+              <MurojaatScreen
+                onBack={goBack}
+              />
+            )}
+
+            {currentScreen === 'auth' && (
+              <AuthScreen
+                initialTab="login"
+                onAuthSuccess={handleAuthSuccess}
+                onCancel={goBack}
+              />
+            )}
+          </View>
+        )}
       </SafeAreaProvider>
     </WebDeviceFrame>
   );

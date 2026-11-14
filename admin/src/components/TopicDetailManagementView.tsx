@@ -1896,7 +1896,7 @@ export const TopicDetailManagementView: React.FC<TopicDetailManagementViewProps>
                                           maxWidth: '310px',
                                         }}
                                       >
-                                        {t.subtitle || 'Huquq maktabi o‘quv mavzusi'}
+                                        {t.subtitle || 'Huquq akademiyasi o‘quv mavzusi'}
                                       </div>
                                     </div>
                                   </div>

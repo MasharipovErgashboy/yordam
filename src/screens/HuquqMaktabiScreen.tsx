@@ -587,7 +587,7 @@ const DIGITAL_STORE_ITEMS: DigitalStoreItem[] = [
     iconColor: '#D97706',
     isNew: true,
     popularity: 92,
-    desc: 'Haqiqiy çarmdan işlangan sifatli bloknot hamda Huquq maktabi logotipi öyilgan metall ruçka töplami.',
+    desc: 'Haqiqiy çarmdan işlangan sifatli bloknot hamda Huquq akademiyasi logotipi öyilgan metall ruçka töplami.',
   },
   {
     id: 'maxsus_anjom_planner',
@@ -604,7 +604,7 @@ const DIGITAL_STORE_ITEMS: DigitalStoreItem[] = [
   },
   {
     id: 'maxsus_brend_hoodie',
-    title: 'Huquq maktabi brendli hoodie',
+    title: 'Huquq akademiyasi brendli hoodie',
     category: 'maxsus',
     categoryLabel: 'Maxsus sovğalar',
     subcategory: 'Brend sovg‘alari',
@@ -615,7 +615,7 @@ const DIGITAL_STORE_ITEMS: DigitalStoreItem[] = [
     isPopular: true,
     isNew: true,
     popularity: 98,
-    desc: '100% paxtali, issiq va zamonaviy Huquq maktabi kaştali logotipiga ega premium hoodie (ölçamlari mavjud).',
+    desc: '100% paxtali, issiq va zamonaviy Huquq akademiyasi kaştali logotipiga ega premium hoodie (ölçamlari mavjud).',
   },
   {
     id: 'maxsus_brend_tshirt',
@@ -659,7 +659,7 @@ const DIGITAL_STORE_ITEMS: DigitalStoreItem[] = [
   },
   {
     id: 'maxsus_kubok_oltin',
-    title: 'Huquq maktabi çempion kubogi',
+    title: 'Huquq akademiyasi çempion kubogi',
     category: 'maxsus',
     categoryLabel: 'Maxsus sovğalar',
     subcategory: 'Maxsus sovg‘alar',
@@ -1544,15 +1544,15 @@ const HERO_SLIDES: HeroSlide[] = [
   {
     id: 'school_promo_slide',
     type: 'promo',
-    badge: 'HUQUQ MAKTABI',
+    badge: 'HUQUQ AKADEMIYASI',
     badgeBg: '#EFF6FF',
     badgeTextColor: '#0284C7',
     title: 'Professional yuridik\nbilimlar platformasi',
     subtitle: 'Interaktiv darslar, amaliy keyslar va rasmiy diplomlar!',
     ctaText: 'Kurslarni örganiş',
     image: heroIllustration,
-    actionAlertTitle: 'Huquq maktabi platformasi',
-    actionAlertMessage: 'Huquq maktabi orqali qonunchilik asoslarini o‘rganing, testlar yeching, ball to‘plang va rasmiy sertifikatlarga ega bo‘ling!',
+    actionAlertTitle: 'Huquq akademiyasi platformasi',
+    actionAlertMessage: 'Huquq akademiyasi orqali qonunchilik asoslarini o‘rganing, testlar yeching, ball to‘plang va rasmiy sertifikatlarga ega bo‘ling!',
   },
   {
     id: 'labor_code_slide',
@@ -1918,7 +1918,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
     if (activeUser?.name && activeUser.name.trim()) return activeUser.name.trim();
     const combined = `${activeUser?.firstName || ''} ${activeUser?.lastName || ''}`.trim();
     if (combined) return combined;
-    return 'Huquq Maktabi Talabasi';
+    return 'Huquq Akademiyasi Talabasi';
   }, [activeUser]);
 
   const userPhoneOrEmail = useMemo(() => {
@@ -2766,7 +2766,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                   />
                   <Text style={styles.headerMainTitle}>
                     <Text style={styles.headerTitleDark}>Huquq </Text>
-                    <Text style={styles.headerTitleOrange}>maktabi</Text>
+                    <Text style={styles.headerTitleOrange}>akademiyasi</Text>
                   </Text>
                 </View>
               ) : isViewingCertificate ? (
@@ -2780,7 +2780,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                     style={styles.headerScaleIconSmall}
                     resizeMode="contain"
                   />
-                  <Text style={styles.headerCompletedTitle}>Huquq maktabi</Text>
+                  <Text style={styles.headerCompletedTitle}>Huquq akademiyasi</Text>
                 </View>
               ) : selectedReviewQuestionIndex !== null ? (
                 <View style={styles.videoHeaderTitleRow}>
@@ -2853,7 +2853,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                   />
                   <Text style={styles.headerMainTitle}>
                     <Text style={styles.headerTitleDark}>Huquq </Text>
-                    <Text style={styles.headerTitleOrange}>maktabi</Text>
+                    <Text style={styles.headerTitleOrange}>akademiyasi</Text>
                   </Text>
                 </View>
               )}
@@ -3348,15 +3348,15 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
               activeOpacity={0.7}
               onPress={() =>
                 Alert.alert(
-                  'Huquq maktabi haqida',
-                  'Huquq maktabi — yuridik savodxonlikni oşiriş, amaliy qonunçilik darslari va test simulyatsiyalari uçun maxsus mini platforma.\n\nVersiya: 1.4.0 (2024)'
+                  'Huquq akademiyasi haqida',
+                  'Huquq akademiyasi — yuridik savodxonlikni oşiriş, amaliy qonunçilik darslari va test simulyatsiyalari uçun maxsus mini platforma.\n\nVersiya: 1.4.0 (2024)'
                 )
               }
             >
               <View style={[styles.profileMenuIconBox, { backgroundColor: '#F1F5F9' }]}>
                 <Ionicons name="information-circle" size={18} color="#475569" />
               </View>
-              <Text style={styles.profileMenuLabel}>Huquq maktabi haqida</Text>
+              <Text style={styles.profileMenuLabel}>Huquq akademiyasi haqida</Text>
               <Text style={{ fontSize: 12, color: '#94A3B8', marginRight: 6 }}>v1.4.0</Text>
               <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
             </TouchableOpacity>
@@ -6849,7 +6849,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.detailTalimBannerTitle}>
-                          Huquq maktabi akademik resursi
+                          Huquq akademiyasi akademik resursi
                         </Text>
                         <Text style={styles.detailTalimBannerSub}>
                           Materiallar Özbekiston Respublikasi yetakçi huquqşunoslari tomonidan tasdiqlangan
@@ -6968,7 +6968,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                         <View style={{ flex: 1 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.detailTalimExpertName}>
-                              Huquq maktabi ilmiy kengaşi
+                              Huquq akademiyasi ilmiy kengaşi
                             </Text>
                             <Ionicons name="checkmark-circle" size={15} color="#2563EB" style={{ marginLeft: 5 }} />
                           </View>
@@ -7344,7 +7344,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                           <Ionicons name="business" size={22} color="#7C3AED" />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.detailPickupBuilding}>Huquq maktabi boş binosi</Text>
+                          <Text style={styles.detailPickupBuilding}>Huquq akademiyasi boş binosi</Text>
                           <Text style={styles.detailPickupAddress}>
                             Toşkent ş., Çilonzor tumani, Bunyodkor köçasi, 15-uy
                           </Text>
@@ -7709,7 +7709,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
                           <View style={styles.myPurchasePickupRow}>
                             <Ionicons name="location-outline" size={16} color="#7C3AED" style={{ marginRight: 6 }} />
                             <Text style={styles.myPurchasePickupText} numberOfLines={1}>
-                              Huquq maktabi boş binosi (Bunyodkor 15)
+                              Huquq akademiyasi boş binosi (Bunyodkor 15)
                             </Text>
                           </View>
                           <View style={styles.myPurchaseOrderFooterRow}>
@@ -8114,7 +8114,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, 
             <View style={styles.rankingHeaderBanner}>
               <View style={styles.rankingBannerContent}>
                 <Ionicons name="leaf-outline" size={18} color="#F59E0B" style={{ marginRight: 6 }} />
-                <Text style={styles.rankingBannerTitle}>Huquq maktabi reytingi</Text>
+                <Text style={styles.rankingBannerTitle}>Huquq akademiyasi reytingi</Text>
                 <Ionicons name="leaf-outline" size={18} color="#F59E0B" style={{ marginLeft: 6, transform: [{ scaleX: -1 }] }} />
               </View>
               <Text style={styles.rankingBannerSub}>Jami 12 648 nafar öquvçi</Text>

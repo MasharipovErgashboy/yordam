@@ -97,7 +97,7 @@ const PRIMARY_SERVICES: ServiceGridItem[] = [
   },
   {
     id: 'huquq_maktabi',
-    title: 'Huquq\nmaktabi',
+    title: 'Huquq\nakademiyasi',
     iconName: 'school',
     iconFamily: 'Ionicons',
     iconColor: '#0284C7',
@@ -316,7 +316,7 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   },
   {
     id: 'huquq_maktabi',
-    name: 'Huquq Maktabi',
+    name: 'Huquq Akademiyasi',
     category: 'protection',
     categoryLabel: 'Ta’lim',
     description: 'Fuqarolar uçun hayotiy huquqiy vaziyatlar, qöllanmalar, testlar va audio-darsliklar.',

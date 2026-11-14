@@ -18,7 +18,7 @@ export interface BackendServiceItem {
 const FALLBACK_SERVICES: BackendServiceItem[] = [
   {
     id: 'huquq_maktabi',
-    title: 'Huquq Maktabi',
+    title: 'Huquq Akademiyasi',
     category: 'protection',
     categoryLabel: 'Ta’lim',
     desc: 'Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar.',

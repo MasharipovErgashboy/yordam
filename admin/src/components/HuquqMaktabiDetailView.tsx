@@ -439,7 +439,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
               <span style={{ fontSize: '12px', color: '#64748B' }}>• Real-time jonli sinxronizatsiya</span>
             </div>
             <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: '-0.3px' }}>
-              Huquq Maktabi Boshqaruvi
+              Huquq Akademiyasi Boshqaruvi
             </h1>
           </div>
         </div>
@@ -616,7 +616,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                   Hozircha faol reklama yo‘q
                 </h3>
                 <p style={{ fontSize: '12.5px', color: '#64748B', maxWidth: '380px', margin: '0 auto' }}>
-                  «Yangi reklama qo‘shish» tugmasi orqali Huquq maktabi bosh sahifasi uchun swiper rasmini joylashtiring.
+                  «Yangi reklama qo‘shish» tugmasi orqali Huquq akademiyasi bosh sahifasi uchun swiper rasmini joylashtiring.
                 </p>
               </div>
             ) : (
@@ -1517,7 +1517,7 @@ export const HuquqMaktabiDetailView: React.FC<Props> = ({ onBack, data, onRefres
                 </div>
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 2px 0' }}>
-                    {bannerTarget === 'store' ? 'Do‘kon uchun reklama qo‘shish' : 'Huquq maktabi uchun reklama'}
+                    {bannerTarget === 'store' ? 'Do‘kon uchun reklama qo‘shish' : 'Huquq akademiyasi uchun reklama'}
                   </h3>
                   <span style={{ fontSize: '12px', color: '#94A3B8' }}>Swiper rasmi va muddatini belgilash</span>
                 </div>

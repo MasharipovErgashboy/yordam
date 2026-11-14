@@ -95,7 +95,7 @@ export default function App() {
   const [servicesList, setServicesList] = useState<LegalServiceItem[]>([
     {
       id: 'huquq_maktabi',
-      title: 'Huquq Maktabi',
+      title: 'Huquq Akademiyasi',
       category: 'protection',
       categoryLabel: 'Ta’lim',
       desc: 'Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar.',
@@ -1358,7 +1358,7 @@ export default function App() {
                                 }}
                                 title={
                                   srv.id === 'huquq_maktabi'
-                                    ? 'Huquq maktabi boshqaruvi'
+                                    ? 'Huquq akademiyasi boshqaruvi'
                                     : srv.id === 'murojaat'
                                     ? 'Murojaat va arizalar boshqaruvi'
                                     : 'Batafsil ma’lumot'
@@ -1652,7 +1652,7 @@ export default function App() {
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        placeholder="Masalan: Huquq maktabi"
+                        placeholder="Masalan: Huquq akademiyasi"
                         style={{
                           width: '100%',
                           height: '44px',

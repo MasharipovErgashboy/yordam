@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { legalServicesApi } from '../services/legalServicesApi';
+import { authService, UserProfile } from '../services/authService';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 const { width } = Dimensions.get('window');
@@ -1600,6 +1601,7 @@ type SchoolTab = 'home' | 'topics' | 'tests' | 'results';
 
 interface HuquqMaktabiScreenProps {
   onBack: () => void;
+  currentUser?: UserProfile | null;
 }
 
 interface QuickActionItem {
@@ -1885,12 +1887,68 @@ const extractYouTubeVideoId = (urlOrEmbed?: string): string | null => {
   return null;
 };
 
-export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }) => {
+export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack, currentUser }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<SchoolTab>('home');
   const [dailyQuizAnswered, setDailyQuizAnswered] = useState(false);
   const [quizModalVisible, setQuizModalVisible] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+
+  // Authenticated User Profile session handling
+  const [activeUser, setActiveUser] = useState<UserProfile | null>(currentUser || null);
+
+  useEffect(() => {
+    if (currentUser) {
+      setActiveUser(currentUser);
+    } else {
+      authService
+        .getSession()
+        .then((session) => {
+          if (session?.user) {
+            setActiveUser(session.user);
+          }
+        })
+        .catch((err) => {
+          console.warn('Error fetching session in HuquqMaktabi:', err);
+        });
+    }
+  }, [currentUser]);
+
+  const userDisplayName = useMemo(() => {
+    if (activeUser?.name && activeUser.name.trim()) return activeUser.name.trim();
+    const combined = `${activeUser?.firstName || ''} ${activeUser?.lastName || ''}`.trim();
+    if (combined) return combined;
+    return 'Huquq Maktabi Talabasi';
+  }, [activeUser]);
+
+  const userPhoneOrEmail = useMemo(() => {
+    if (activeUser?.phone && activeUser.phone.trim()) return activeUser.phone.trim();
+    if (activeUser?.email && activeUser.email.trim()) return activeUser.email.trim();
+    return '+998 90 123 45 67';
+  }, [activeUser]);
+
+  const userInitial = useMemo(() => {
+    if (activeUser?.firstName && activeUser.firstName.trim()) {
+      return activeUser.firstName.trim().charAt(0).toUpperCase();
+    }
+    if (activeUser?.name && activeUser.name.trim()) {
+      return activeUser.name.trim().charAt(0).toUpperCase();
+    }
+    return 'U';
+  }, [activeUser]);
+
+  const userDisplayId = useMemo(() => {
+    if (activeUser?.id) {
+      const cleanId = String(activeUser.id).replace(/\D/g, '');
+      const idSuffix = cleanId ? cleanId.slice(-4).padStart(4, '0') : String(activeUser.id).slice(-4);
+      return `ID: HM-2024-${idSuffix}`;
+    }
+    return 'ID: HM-2024-884';
+  }, [activeUser]);
+
+  const userRoleTitle = useMemo(() => {
+    return activeUser?.role || 'Faol o‘quvchi';
+  }, [activeUser]);
 
   // Dynamic real-time legal topics and banners synchronized with Admin Panel & Backend
   const [legalCategories, setLegalCategories] = useState<LegalCategory[]>(LEGAL_CATEGORIES);
@@ -2877,7 +2935,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                     onPress={() =>
                       Alert.alert(
                         'PDF yuklab oliş',
-                        '“Ergaşboy Maşaripov - Nikoh va oila munosabatlari.pdf” sertifikati muvaffaqiyatli yuklab olindi va qurilmangizga saqlandi.'
+                        `“${userDisplayName} - Nikoh va oila munosabatlari.pdf” sertifikati muvaffaqiyatli yuklab olindi va qurilmangizga saqlandi.`
                       )
                     }
                   >
@@ -3042,12 +3100,20 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             <View style={styles.profileHeroTopRow}>
               {/* Avatar with Gold Star Badge */}
               <View style={styles.profileAvatarContainer}>
-                <LinearGradient
-                  colors={['#0284C7', '#0369A1']}
-                  style={styles.profileAvatarCircle}
-                >
-                  <Text style={styles.profileAvatarLetter}>A</Text>
-                </LinearGradient>
+                {activeUser?.avatar ? (
+                  <Image
+                    source={{ uri: activeUser.avatar }}
+                    style={styles.profileAvatarCircle}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <LinearGradient
+                    colors={['#0284C7', '#0369A1']}
+                    style={styles.profileAvatarCircle}
+                  >
+                    <Text style={styles.profileAvatarLetter}>{userInitial}</Text>
+                  </LinearGradient>
+                )}
                 <View style={styles.profileAvatarBadge}>
                   <Ionicons name="star" size={11} color="#FFFFFF" />
                 </View>
@@ -3056,13 +3122,13 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               {/* User Name & Details */}
               <View style={styles.profileHeroDetailsCol}>
                 <View style={styles.profileNameRow}>
-                  <Text style={styles.profileUserName}>Azizbek Rahimov</Text>
+                  <Text style={styles.profileUserName}>{userDisplayName}</Text>
                   <Ionicons name="checkmark-circle" size={16} color="#0284C7" style={{ marginLeft: 4 }} />
                 </View>
-                <Text style={styles.profileUserPhone}>+998 90 123 45 67</Text>
+                <Text style={styles.profileUserPhone}>{userPhoneOrEmail}</Text>
                 <View style={styles.profileIdRow}>
                   <View style={styles.profileIdPill}>
-                    <Text style={styles.profileIdPillText}>ID: HM-2024-884</Text>
+                    <Text style={styles.profileIdPillText}>{userDisplayId}</Text>
                   </View>
                   <View style={[styles.profileIdPill, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
                     <Ionicons name="ribbon" size={11} color="#B45309" style={{ marginRight: 3 }} />
@@ -3075,7 +3141,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
             {/* Level XP Progress Bar */}
             <View style={styles.profileLevelProgressSection}>
               <View style={styles.profileLevelLabelRow}>
-                <Text style={styles.profileLevelCurrentLabel}>4-daraja • Faol öquvçi</Text>
+                <Text style={styles.profileLevelCurrentLabel}>4-daraja • {userRoleTitle}</Text>
                 <Text style={styles.profileLevelTargetLabel}>2 450 / 3 000 XP</Text>
               </View>
               <View style={styles.profileLevelTrack}>
@@ -3901,7 +3967,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 onPress={() => {
                   Alert.alert(
                     'PDF yuklab oliş',
-                    '“Ergaşboy Maşaripov - Nikoh va oila munosabatlari.pdf” sertifikati muvaffaqiyatli yuklab olindi va qurilmangizga saqlandi.'
+                    `“${userDisplayName} - Nikoh va oila munosabatlari.pdf” sertifikati muvaffaqiyatli yuklab olindi va qurilmangizga saqlandi.`
                   );
                 }}
               >
@@ -6298,7 +6364,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                       </View>
                       <View style={styles.confirmSummaryRow}>
                         <Text style={styles.confirmSummaryLabel}>Foydalanuvçi hisobi</Text>
-                        <Text style={styles.confirmSummaryValue}>Huquq maktabi talabasi (Siz)</Text>
+                        <Text style={styles.confirmSummaryValue}>{userDisplayName} (Siz)</Text>
                       </View>
                       <View style={styles.confirmSummaryRow}>
                         <Text style={styles.confirmSummaryLabel}>Faollaşuv holati</Text>
@@ -9029,17 +9095,26 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
                 {/* 3. User Profile Dark Navy Card */}
                 <View style={styles.userProfileDarkCard}>
                   <View style={styles.userProfileTopRow}>
-                    <Image
-                      source={videoLessonInstructorImage}
-                      style={styles.userProfileAvatar}
-                      resizeMode="cover"
-                    />
+                    {activeUser?.avatar ? (
+                      <Image
+                        source={{ uri: activeUser.avatar }}
+                        style={styles.userProfileAvatar}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <LinearGradient
+                        colors={['#0284C7', '#0369A1']}
+                        style={[styles.userProfileAvatar, { alignItems: 'center', justifyContent: 'center' }]}
+                      >
+                        <Text style={{ fontSize: 18, fontWeight: '800', color: '#FFFFFF' }}>{userInitial}</Text>
+                      </LinearGradient>
+                    )}
 
                     <View style={styles.userProfileNameCol}>
-                      <Text style={styles.userProfileNameText}>Ergaşboy Maşaripov</Text>
+                      <Text style={styles.userProfileNameText}>{userDisplayName}</Text>
                       <View style={styles.userProfileCrownBadge}>
                         <FontAwesome5 name="crown" size={10} color="#FFFFFF" style={{ marginRight: 4 }} />
-                        <Text style={styles.userProfileCrownText}>Premium</Text>
+                        <Text style={styles.userProfileCrownText}>{activeUser?.role || 'Faol talaba'}</Text>
                       </View>
                     </View>
 

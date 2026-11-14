@@ -699,7 +699,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   });
 
   if (isHuquqMaktabiOpen) {
-    return <HuquqMaktabiScreen onBack={() => setIsHuquqMaktabiOpen(false)} />;
+    return <HuquqMaktabiScreen onBack={() => setIsHuquqMaktabiOpen(false)} currentUser={user} />;
   }
 
   if (isIshHuquqiOpen) {

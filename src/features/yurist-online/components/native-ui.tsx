@@ -1,7 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewProps, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
 import { ArrowLeft, ChevronRight, Scale, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
 
 import { colors, fonts, radius, spacing } from '../constants/tokens'
@@ -18,12 +17,6 @@ export function Header({ onBack }: { title?: string; subtitle?: string; onProfil
   function handleBack() {
     if (onBack) {
       onBack()
-      return
-    }
-    if (router.canGoBack()) {
-      router.back()
-    } else {
-      router.replace('/(tabs)')
     }
   }
 

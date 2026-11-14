@@ -37,7 +37,9 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
 
   const [zoomLevel, setZoomLevel] = useState<number | 'auto'>('auto');
   const [currentTime, setCurrentTime] = useState('09:41');
-  const [isPowerOn, setIsPowerOn] = useState(true);
+
+  // Phone starts in OFF state by default on web desktop as requested by user
+  const [isPowerOn, setIsPowerOn] = useState(false);
 
   // Clock updates every minute
   useEffect(() => {
@@ -75,12 +77,29 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
     }
     // iPhone total frame height is 958px + 60px margin = ~1018px
     const availableHeight = windowDimensions.height - 60;
-    const availableWidth = windowDimensions.width - 280; // Account for left sidebar card
+    const availableWidth = windowDimensions.width - 160; // Account for slim left dock
     const scaleY = availableHeight / 970;
     const scaleX = availableWidth / 480;
     const scale = Math.min(1, Math.min(scaleX, scaleY));
     return Math.max(0.55, Math.min(1, scale));
   }, [windowDimensions, zoomLevel]);
+
+  // Turn on handler: powers on and immediately restarts app from splash video
+  const handleTurnOn = () => {
+    setIsPowerOn(true);
+    if (onRestartApp) {
+      onRestartApp();
+    }
+  };
+
+  // Toggle power handler: if turning on, restart app fresh
+  const handleTogglePower = () => {
+    if (!isPowerOn) {
+      handleTurnOn();
+    } else {
+      setIsPowerOn(false);
+    }
+  };
 
   // Dark or light status bar based on screen
   const isDarkScreen = currentScreen === 'splash';
@@ -98,119 +117,79 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
       {/* Ambient background glow */}
       <View style={styles.ambientGlow} />
 
-      {/* Left Vertical Control Sidebar (Moved from top to left side, vertically oriented) */}
-      <View style={styles.desktopSidebar}>
-        {/* Brand & App Info Header */}
-        <View style={styles.sidebarBrandRow}>
-          <Image source={logoImage} style={styles.sidebarLogo} resizeMode="cover" />
-          <View style={{ flex: 1 }}>
-            <View style={styles.sidebarTitleRow}>
-              <Text style={styles.sidebarTitle}>YORDAM</Text>
-              <View style={styles.liveBadge}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveText}>WEB</Text>
-              </View>
-            </View>
-            <Text style={styles.sidebarSubtitle}>Huquqiy Hamkor</Text>
-          </View>
+      {/* Left Elongated Minimalist Control Dock (Slim vertical capsule, icon-only) */}
+      <View style={styles.desktopDock}>
+        {/* Top App Logo & Live Status Indicator */}
+        <View style={styles.dockLogoWrap}>
+          <Image source={logoImage} style={styles.dockLogo} resizeMode="cover" />
+          <View style={styles.dockLiveDot} />
         </View>
 
         {/* Divider */}
-        <View style={styles.sidebarDivider} />
+        <View style={styles.dockDivider} />
 
-        {/* Section 1: Telefon Quvvati / Ekrani */}
-        <Text style={styles.sidebarSectionLabel}>TELEFON BOSHQARUVI</Text>
-
-        {/* Power On / Off Toggle Button */}
+        {/* Power On / Off Icon Button */}
         <TouchableOpacity
           style={[
-            styles.powerBtnCard,
-            isPowerOn ? styles.powerBtnCardOn : styles.powerBtnCardOff,
+            styles.dockBtn,
+            styles.dockPowerBtn,
+            isPowerOn ? styles.dockPowerBtnOn : styles.dockPowerBtnOff,
           ]}
-          onPress={() => setIsPowerOn((prev) => !prev)}
-          activeOpacity={0.8}
+          onPress={handleTogglePower}
+          activeOpacity={0.75}
+          accessibilityLabel={isPowerOn ? "Telefonni o‘chirish" : "Telefonni yoqish"}
         >
-          <View
-            style={[
-              styles.powerIconBox,
-              isPowerOn ? styles.powerIconBoxOn : styles.powerIconBoxOff,
-            ]}
-          >
-            <Ionicons
-              name="power"
-              size={18}
-              color={isPowerOn ? '#EF4444' : '#10B981'}
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text
-              style={[
-                styles.powerBtnTitle,
-                isPowerOn ? styles.powerBtnTitleOn : styles.powerBtnTitleOff,
-              ]}
-            >
-              {isPowerOn ? 'O‘chirish' : 'Yoqish'}
-            </Text>
-            <Text style={styles.powerBtnSubtitle}>
-              {isPowerOn ? 'Ekranni qulflash' : 'Ekranni uyg‘otish'}
-            </Text>
-          </View>
+          <Ionicons
+            name="power"
+            size={20}
+            color={isPowerOn ? '#EF4444' : '#10B981'}
+          />
         </TouchableOpacity>
 
-        {/* Restart to Splash Video Button */}
+        {/* Restart Icon Button (Always turns on & replays splash video) */}
         {onRestartApp && (
           <TouchableOpacity
-            style={styles.restartBtnCard}
-            onPress={() => {
-              setIsPowerOn(true);
-              onRestartApp();
-            }}
+            style={[styles.dockBtn, styles.dockRestartBtn]}
+            onPress={handleTurnOn}
             activeOpacity={0.75}
+            accessibilityLabel="Qayta ishga tushirish"
           >
-            <View style={styles.restartIconBox}>
-              <Ionicons name="reload" size={14} color="#38BDF8" />
-            </View>
-            <View style={{ flex: 1, marginLeft: 10 }}>
-              <Text style={styles.restartBtnTitle}>Qayta boshlash</Text>
-              <Text style={styles.restartBtnSubtitle}>Splash videoni ko‘rish</Text>
-            </View>
+            <Ionicons name="reload" size={17} color="#38BDF8" />
           </TouchableOpacity>
         )}
 
         {/* Divider */}
-        <View style={styles.sidebarDivider} />
+        <View style={styles.dockDivider} />
 
-        {/* Section 2: Masshtab (Zoom) */}
-        <Text style={styles.sidebarSectionLabel}>MASSHTAB (ZOOM)</Text>
-        <View style={styles.zoomControlRow}>
-          <TouchableOpacity
-            style={styles.zoomBtn}
-            onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 0.8 : Math.max(0.5, prev - 0.1)))}
-            activeOpacity={0.7}
-            accessibilityLabel="Kichraytirish"
-          >
-            <Ionicons name="remove" size={15} color="#94A3B8" />
-          </TouchableOpacity>
+        {/* Zoom Controls: +, Fit, - */}
+        <TouchableOpacity
+          style={[styles.dockBtn, styles.dockZoomBtn]}
+          onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 1.0 : Math.min(1.1, prev + 0.1)))}
+          activeOpacity={0.7}
+          accessibilityLabel="Kattalashtirish"
+        >
+          <Ionicons name="add" size={18} color="#E2E8F0" />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.zoomBtn, zoomLevel === 'auto' && styles.zoomBtnActive]}
-            onPress={() => setZoomLevel('auto')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.zoomBtnText, zoomLevel === 'auto' && styles.zoomBtnTextActive]}>
-              {zoomLevel === 'auto' ? `Fit (${Math.round(computedScale * 100)}%)` : `${Math.round(zoomLevel * 100)}%`}
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.dockFitBadge, zoomLevel === 'auto' && styles.dockFitBadgeActive]}
+          onPress={() => setZoomLevel('auto')}
+          activeOpacity={0.7}
+          accessibilityLabel="Avtomatik o‘lcham (Fit)"
+        >
+          <Text style={[styles.dockFitText, zoomLevel === 'auto' && styles.dockFitTextActive]}>
+            {zoomLevel === 'auto' ? `${Math.round(computedScale * 100)}%` : `${Math.round(zoomLevel * 100)}%`}
+          </Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.zoomBtn}
-            onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 1.0 : Math.min(1.1, prev + 0.1)))}
-            activeOpacity={0.7}
-            accessibilityLabel="Kattalashtirish"
-          >
-            <Ionicons name="add" size={15} color="#94A3B8" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[styles.dockBtn, styles.dockZoomBtn]}
+          onPress={() => setZoomLevel((prev) => (prev === 'auto' ? 0.8 : Math.max(0.5, prev - 0.1)))}
+          activeOpacity={0.7}
+          accessibilityLabel="Kichraytirish"
+        >
+          <Ionicons name="remove" size={18} color="#E2E8F0" />
+        </TouchableOpacity>
       </View>
 
       {/* Main Center Stage: Scaled iPhone 15 Pro Max Chassis */}
@@ -243,31 +222,28 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           <TouchableOpacity
             style={styles.btnPower}
             activeOpacity={0.7}
-            onPress={() => setIsPowerOn((prev) => !prev)}
+            onPress={handleTogglePower}
             accessibilityLabel="Fizik quvvat tugmasi"
           />
 
           {/* Inner Display Screen with 44px border radius */}
           <View style={styles.phoneScreen}>
-            {/* Native App Viewport (430 x 932) */}
-            <View style={[styles.appViewport, !isPowerOn && { opacity: 0 }]}>
-              {children}
-            </View>
-
-            {/* Screen Off / Locked Overlay */}
-            {!isPowerOn && (
+            {/* Native App Viewport (430 x 932) - mounted only when power is ON for fresh boot */}
+            {isPowerOn ? (
+              <View style={styles.appViewport}>{children}</View>
+            ) : (
               <TouchableOpacity
                 style={styles.screenOffOverlay}
                 activeOpacity={0.95}
-                onPress={() => setIsPowerOn(true)}
+                onPress={handleTurnOn}
               >
                 <View style={styles.screenOffContent}>
                   <View style={styles.screenOffIconCircle}>
-                    <Ionicons name="power" size={26} color="#475569" />
+                    <Ionicons name="power" size={28} color="#10B981" />
                   </View>
                   <Text style={styles.screenOffTitle}>Telefon o‘chirilgan</Text>
                   <Text style={styles.screenOffSub}>
-                    Ekranni yoqish uchun shu yerga yoki chap paneldagi «Yoqish» tugmasiga bosing
+                    Yoqish uchun ekranga yoki chap paneldagi tugmaga bosing
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -359,181 +335,100 @@ const styles: any = StyleSheet.create({
     pointerEvents: 'none',
   },
 
-  /* Left Vertical Control Sidebar Card */
-  desktopSidebar: {
+  /* Left Elongated Minimalist Control Dock (Slim vertical capsule, icon-only) */
+  desktopDock: {
     position: 'absolute',
-    left: 28,
+    left: 36,
     top: '50%',
     transform: [{ translateY: -175 }],
-    width: 230,
-    backgroundColor: 'rgba(15, 23, 42, 0.82)',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 16,
-    zIndex: 100,
-    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)' as any,
-    backdropFilter: 'blur(20px)' as any,
-  },
-  sidebarBrandRow: {
-    flexDirection: 'row',
+    width: 66,
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    borderRadius: 33,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    paddingVertical: 16,
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'center',
+    zIndex: 100,
+    boxShadow:
+      '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 25px rgba(2, 132, 199, 0.15)' as any,
+    backdropFilter: 'blur(24px)' as any,
   },
-  sidebarLogo: {
+  dockLogoWrap: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dockLogo: {
     width: 36,
     height: 36,
-    borderRadius: 9,
-  },
-  sidebarTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  sidebarTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#F8FAFC',
-    letterSpacing: 0.5,
-  },
-  liveBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
-    borderRadius: 4,
-    gap: 3.5,
-  },
-  liveDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: '#10B981',
-  },
-  liveText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#10B981',
-  },
-  sidebarSubtitle: {
-    fontSize: 10.5,
-    color: '#94A3B8',
-    marginTop: 1,
-  },
-  sidebarDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    marginVertical: 13,
-  },
-  sidebarSectionLabel: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-  },
-
-  /* Power Button Card */
-  powerBtnCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  powerBtnCardOn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: 'rgba(239, 68, 68, 0.28)',
-  },
-  powerBtnCardOff: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    borderColor: 'rgba(16, 185, 129, 0.38)',
-  },
-  powerIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  powerIconBoxOn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.18)',
-  },
-  powerIconBoxOff: {
-    backgroundColor: 'rgba(16, 185, 129, 0.22)',
-  },
-  powerBtnTitle: {
-    fontSize: 12.5,
-    fontWeight: '700',
-  },
-  powerBtnTitleOn: {
-    color: '#FCA5A5',
-  },
-  powerBtnTitleOff: {
-    color: '#6EE7B7',
-  },
-  powerBtnSubtitle: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 1,
-  },
-
-  /* Restart to Splash Button */
-  restartBtnCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    padding: 9,
-    borderRadius: 11,
-    backgroundColor: 'rgba(30, 41, 59, 0.6)',
-    borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.2)',
-  },
-  restartIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 7,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  restartBtnTitle: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#E2E8F0',
-  },
-  restartBtnSubtitle: {
-    fontSize: 9.5,
-    color: '#64748B',
-  },
-
-  /* Zoom Control Row */
-  zoomControlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(30, 41, 59, 0.6)',
     borderRadius: 10,
+  },
+  dockLiveDot: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    borderWidth: 1.5,
+    borderColor: '#0F172A',
+  },
+  dockDivider: {
+    width: 28,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: 12,
+  },
+
+  /* Circular Dock Buttons */
+  dockBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 3,
+  },
+  dockPowerBtn: {
+    borderWidth: 1.5,
+  },
+  dockPowerBtnOn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.14)',
+    borderColor: 'rgba(239, 68, 68, 0.38)',
+  },
+  dockPowerBtnOff: {
+    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+    borderColor: 'rgba(16, 185, 129, 0.5)',
+  },
+  dockRestartBtn: {
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.28)',
+  },
+  dockZoomBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
-    overflow: 'hidden',
   },
-  zoomBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
+  dockFitBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+    marginVertical: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  zoomBtnActive: {
+  dockFitBadgeActive: {
     backgroundColor: 'rgba(2, 132, 199, 0.25)',
   },
-  zoomBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
+  dockFitText: {
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#94A3B8',
+    fontFamily: 'monospace',
   },
-  zoomBtnTextActive: {
+  dockFitTextActive: {
     color: '#38BDF8',
   },
 

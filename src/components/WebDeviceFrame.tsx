@@ -189,7 +189,9 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
             ctx.resume();
           }
         }
-      } catch (_) {}
+      } catch {
+        // AudioContext not supported or blocked
+      }
 
       if (typeof document !== 'undefined') {
         document.querySelectorAll('video, audio').forEach((el) => {
@@ -262,8 +264,9 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           styles.gridBackgroundLayer,
           {
             backgroundImage: isDarkTheme
-              ? 'linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px)'
-              : 'linear-gradient(to right, rgba(2, 132, 199, 0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(2, 132, 199, 0.07) 1px, transparent 1px)',
+              ? 'radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.25) 1px, transparent 0), linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px)'
+              : 'radial-gradient(circle at 1.5px 1.5px, rgba(2, 132, 199, 0.5) 1.5px, transparent 0), linear-gradient(to right, rgba(2, 132, 199, 0.22) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgba(2, 132, 199, 0.22) 1.5px, transparent 1.5px)',
+            backgroundSize: isDarkTheme ? '50px 50px' : '44px 44px',
           } as any,
         ]}
       />
@@ -275,7 +278,7 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           {
             top: '18%',
             left: '18%',
-            backgroundColor: isDarkTheme ? 'rgba(2, 132, 199, 0.16)' : 'rgba(56, 189, 248, 0.18)',
+            backgroundColor: isDarkTheme ? 'rgba(2, 132, 199, 0.16)' : 'rgba(56, 189, 248, 0.25)',
           },
         ]}
       />
@@ -285,7 +288,7 @@ export const WebDeviceFrame: React.FC<WebDeviceFrameProps> = ({
           {
             bottom: '12%',
             right: '18%',
-            backgroundColor: isDarkTheme ? 'rgba(99, 102, 241, 0.14)' : 'rgba(168, 85, 247, 0.12)',
+            backgroundColor: isDarkTheme ? 'rgba(99, 102, 241, 0.14)' : 'rgba(129, 140, 248, 0.22)',
           },
         ]}
       />
@@ -678,7 +681,7 @@ const styles: any = StyleSheet.create({
     backgroundColor: '#060A14',
   },
   desktopBackdropLight: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EEF2F6',
   },
 
   /* Dynamic Animated Background Layers */
@@ -727,11 +730,11 @@ const styles: any = StyleSheet.create({
       '0 14px 40px 0 rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(56, 189, 248, 0.08)' as any,
   },
   floatingSquareLight: {
-    backgroundColor: 'rgba(255, 255, 255, 0.78)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderWidth: 1.5,
-    borderColor: 'rgba(2, 132, 199, 0.22)',
+    borderColor: 'rgba(2, 132, 199, 0.35)',
     boxShadow:
-      '0 14px 35px 0 rgba(15, 23, 42, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.85)' as any,
+      '0 14px 35px 0 rgba(15, 23, 42, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.9), 0 0 20px rgba(2, 132, 199, 0.16)' as any,
   },
   innerSquareDot: {
     width: 8,

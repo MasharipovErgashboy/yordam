@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, BackHandler } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { MainHomeScreen } from './src/screens/MainHomeScreen';
+import { BankHuquqScreen } from './src/screens/BankHuquqScreen';
+import { MurojaatScreen } from './src/screens/MurojaatScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { authService, UserProfile } from './src/services/authService';
 
-type AppScreen = 'splash' | 'onboarding' | 'main' | 'auth';
+type AppScreen = 'splash' | 'onboarding' | 'main' | 'auth' | 'bank_huquq' | 'murojaat';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
+  const [screenStack, setScreenStack] = useState<AppScreen[]>(['splash']);
+  const currentScreen = screenStack[screenStack.length - 1] || 'splash';
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
@@ -30,13 +33,45 @@ export default function App() {
     loadSession();
   }, []);
 
+  const navigateTo = useCallback((screen: AppScreen) => {
+    setScreenStack((prev) => {
+      if (screen === 'main') {
+        return ['main'];
+      }
+      return [...prev, screen];
+    });
+  }, []);
+
+  const goBack = useCallback(() => {
+    setScreenStack((prev) => {
+      if (prev.length > 1) {
+        return prev.slice(0, -1);
+      }
+      return prev;
+    });
+  }, []);
+
+  // Global Android/Telefon Hardware Back Button Handler
+  useEffect(() => {
+    const handleHardwareBack = () => {
+      if (screenStack.length > 1) {
+        goBack();
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', handleHardwareBack);
+    return () => sub.remove();
+  }, [screenStack, goBack]);
+
   const handleSplashFinish = async () => {
     try {
       const session = await authService.getSession();
       if (session.user && session.token) {
         setUser(session.user);
         setIsAuthenticated(true);
-        setCurrentScreen('main');
+        setScreenStack(['main']);
         return;
       }
     } catch (err) {
@@ -44,16 +79,16 @@ export default function App() {
     }
 
     if (isAuthenticated) {
-      setCurrentScreen('main');
+      setScreenStack(['main']);
     } else {
-      setCurrentScreen('onboarding');
+      navigateTo('onboarding');
     }
   };
 
   const handleAuthSuccess = (authenticatedUser: UserProfile) => {
     setUser(authenticatedUser);
     setIsAuthenticated(true);
-    setCurrentScreen('main');
+    setScreenStack(['main']);
   };
 
   const handleLogout = async () => {
@@ -73,18 +108,32 @@ export default function App() {
 
         {currentScreen === 'onboarding' && (
           <OnboardingScreen
-            onNavigateToMain={() => setCurrentScreen('main')}
-            onRestartSplash={() => setCurrentScreen('splash')}
+            onNavigateToMain={() => navigateTo('main')}
+            onRestartSplash={() => setScreenStack(['splash'])}
           />
         )}
 
         {currentScreen === 'main' && (
           <MainHomeScreen
-            onBackToOnboarding={() => setCurrentScreen('onboarding')}
+            onBackToOnboarding={() => setScreenStack(['onboarding'])}
             isAuthenticated={isAuthenticated}
             user={user}
-            onRequireAuth={() => setCurrentScreen('auth')}
+            onRequireAuth={() => navigateTo('auth')}
             onLogout={handleLogout}
+            onOpenBankHuquq={() => navigateTo('bank_huquq')}
+            onOpenMurojaat={() => navigateTo('murojaat')}
+          />
+        )}
+
+        {currentScreen === 'bank_huquq' && (
+          <BankHuquqScreen
+            onBack={goBack}
+          />
+        )}
+
+        {currentScreen === 'murojaat' && (
+          <MurojaatScreen
+            onBack={goBack}
           />
         )}
 
@@ -92,7 +141,7 @@ export default function App() {
           <AuthScreen
             initialTab="login"
             onAuthSuccess={handleAuthSuccess}
-            onCancel={() => setCurrentScreen('main')}
+            onCancel={goBack}
           />
         )}
       </View>

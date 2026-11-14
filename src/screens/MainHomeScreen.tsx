@@ -10,8 +10,11 @@ import {
   Image,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
+  BackHandler,
   Keyboard,
-} from 'react-native';
+} from 'react-native'; from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,6 +44,8 @@ interface MainHomeScreenProps {
   user?: UserProfile | null;
   onRequireAuth?: () => void;
   onLogout?: () => void;
+  onOpenBankHuquq?: () => void;
+  onOpenMurojaat?: () => void;
 }
 
 const logoImage = require('../../assets/images/logo.jpg');
@@ -371,6 +376,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   user = null,
   onRequireAuth,
   onLogout,
+  onOpenBankHuquq,
+  onOpenMurojaat,
 }) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -393,6 +400,41 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
 
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
+
+  // Telefon orqaga tugmasi (Hardware Back)
+  useEffect(() => {
+    const onHardwareBack = () => {
+      // 1. Agar xizmat modali ochiq bo'lsa, uni yopish
+      if (selectedService) {
+        setSelectedService(null);
+        return true;
+      }
+      // 2. Agar qidiruv kiritilgan bo'lsa, qidiruvni tozalash
+      if (searchQuery.trim().length > 0 || serviceSearch.trim().length > 0) {
+        setSearchQuery('');
+        setServiceSearch('');
+        return true;
+      }
+      // 3. Agar 'home' tabida bo'lmasa, 'home' (bosh sahifa) tabiga qaytish
+      if (activeTab !== 'home') {
+        setActiveTab('home');
+        return true;
+      }
+      // 4. Asosiy ekranda bo'lganda ilovadan chiqishni tasdiqlash
+      Alert.alert(
+        'Ilovadan chiqish',
+        '«Yordam» ilovasidan chiqmoqchimisiz?',
+        [
+          { text: 'Bekor qilish', style: 'cancel' },
+          { text: 'Chiqish', onPress: () => BackHandler.exitApp() },
+        ]
+      );
+      return true;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [selectedService, searchQuery, serviceSearch, activeTab]);
 
   // Dynamic services synchronized with Backend & Admin Panel (Real-Time)
   const [backendServices, setBackendServices] = useState<Record<string, BackendServiceItem>>({});
@@ -542,6 +584,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
   }, []);
 
   const hideNavbar = activeTab === 'ai_assistant' && keyboardVisible;
+>>>>>>> origin/Samandar
 
   const handleQuickGridClick = (item: ServiceGridItem) => {
     if (!checkAuth()) return;
@@ -612,11 +655,20 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
     } else if (sId === 'yurist_online') {
       setIsYuristOnlineOpen(true);
     } else if (sId === 'bank_kredit_himoyasi') {
+      if (onOpenBankHuquq) {
+        onOpenBankHuquq();
+        return;
+      }
       Alert.alert(
         'Bank Kreditlari Himoyasi',
         '🏦 Kredit masalalari böyiça amaliy yönalişni tanlang:\n\n1. Kartadan asossiz yeçilgan pulni qaytariş talabnomasi\n2. Yaşirin foiz va komissiyalar tahlili\n3. Roziliksiz (firibgarlik) rasmiylaştirilgan kredit şikoyati\n4. Kredit restrukturizatsiyasi va yengillik sörovi\n5. Markaziy bank (3030-son Nizom) va sudga murojaat\n\nTanlangan yönaliş böyiça ariza andozasi yuklanmoqda.',
         [{ text: 'Tuşundim' }]
       );
+    } else if (sId === 'murojaat') {
+      if (onOpenMurojaat) {
+        onOpenMurojaat();
+        return;
+      }
     } else {
       Alert.alert(
         'Xizmat tanlandi',
@@ -723,7 +775,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
           </Text>
         </View>
 
-        {/* Right Action Icons: Notification Bell & Scanner */}
+        {/* Right Action Icons: Scanner */}
         <View style={styles.headerRightActions}>
           {/* Notification Button */}
           <TouchableOpacity
@@ -734,7 +786,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
             <Ionicons name="notifications-outline" size={20} color="#1F2937" />
             <View style={styles.notificationDot} />
           </TouchableOpacity>
-
           {/* Scanner Button */}
           <TouchableOpacity
             style={styles.iconCircleButton}
@@ -934,8 +985,78 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
             </View>
           </ScrollView>
         </View>
+      ) : activeTab === 'ai_assistant' ? (
+        /* ===================== AI YORDAMCHI TAB (standalone with KeyboardAvoidingView) ===================== */
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
+        >
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: 16 }]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* AI Header Card */}
+            <View style={styles.aiTabHeaderCard}>
+              <Image source={robotImage} style={{ width: 64, height: 64 }} resizeMode="contain" />
+              <View style={{ flex: 1, marginLeft: 14 }}>
+                <Text style={styles.aiTabTitle}>HAQIM AI Yordamchi</Text>
+                <Text style={styles.aiTabDesc}>
+                  O'zbekiston Respublikasi qonunchiligi bo'yicha istalgan huquqiy savolingizni bering.
+                </Text>
+              </View>
+            </View>
+
+            <Text style={[styles.sectionTitle, { marginTop: 8, marginBottom: 10 }]}>
+              Tezkor huquqiy savollar:
+            </Text>
+
+            <TouchableOpacity
+              style={styles.quickPromptCard}
+              onPress={() => Alert.alert('HAQIM AI', 'Ijara shartnomasi bo\u2018yicha maslahat tahlili boshlanmoqda...')}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
+              <Text style={styles.quickPromptText}>Kvartira ijarasi shartnomasi qanday bekor qilinadi?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickPromptCard}
+              onPress={() => Alert.alert('HAQIM AI', 'Mehnat nizosi bo\u2018yicha tahlil boshlanmoqda...')}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
+              <Text style={styles.quickPromptText}>Ish beruvchi ogohlantirishsiz ishdan bo\u2018shatishi mumkinmi?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickPromptCard}
+              onPress={() => Alert.alert('HAQIM AI', 'Iste\u2018molchi huquqlari bo\u2018yicha tahlil boshlanmoqda...')}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0284C7" />
+              <Text style={styles.quickPromptText}>Nuqsonli tovarni qancha muddatda qaytarish mumkin?</Text>
+            </TouchableOpacity>
+          </ScrollView>
+
+          {/* Chat input pinned above keyboard */}
+          <View style={[styles.chatInputBar, { marginBottom: Math.max(insets.bottom + 60, 70) }]}>
+            <TextInput
+              style={styles.chatInput}
+              placeholder="Savolingizni bu yerga yozing..."
+              placeholderTextColor="#9CA3AF"
+              returnKeyType="send"
+              onSubmitEditing={() => Alert.alert('HAQIM AI', 'Savolingiz qabul qilindi, tahlil qilinmoqda...')}
+            />
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={() => Alert.alert('HAQIM AI', 'Savolingiz qabul qilindi, tahlil qilinmoqda...')}
+            >
+              <Ionicons name="arrow-up" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       ) : (
-        /* ===================== OTHER TABS (HOME, AI, PROFILE) ===================== */
+        /* ===================== OTHER TABS (HOME, PROFILE) ===================== */
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 85 }]}
@@ -1173,7 +1294,6 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
               ))}
             </>
           )}
-
 
           {/* ===================== 4. PROFIL TAB (PREMIUM REDESIGN) ===================== */}
           {activeTab === 'profile' && (

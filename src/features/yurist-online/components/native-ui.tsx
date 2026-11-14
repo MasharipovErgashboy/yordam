@@ -1,7 +1,8 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewProps, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ChevronRight, Scale, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
+import { router } from 'expo-router'
+import { ArrowLeft, ChevronRight, Scale, Search, ShieldCheck, Star, type LucideIcon } from 'lucide-react-native'
 
 import { colors, fonts, radius, spacing } from '../constants/tokens'
 
@@ -13,13 +14,24 @@ export function Page({ children, scroll = true, contentStyle, ...props }: { chil
 
 export function Header({ onBack }: { title?: string; subtitle?: string; onProfile?: () => void; onBack?: () => void; onNotifications?: () => void; showBrand?: boolean; showActions?: boolean }) {
   const insets = useSafeAreaInsets()
+
+  function handleBack() {
+    if (onBack) {
+      onBack()
+      return
+    }
+    if (router.canGoBack()) {
+      router.back()
+    } else {
+      router.replace('/(tabs)')
+    }
+  }
+
   return <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 4 }]}>
     <View style={styles.headerLeft}>
-      {onBack ? (
-        <Pressable onPress={onBack} hitSlop={10} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Orqaga">
-          <ChevronRight size={22} color={colors.primary} style={{ transform: [{ rotate: '180deg' }] }} />
-        </Pressable>
-      ) : null}
+      <Pressable onPress={handleBack} hitSlop={10} style={({ pressed }) => [styles.backButton, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Orqaga">
+        <ArrowLeft size={22} color={colors.primary} />
+      </Pressable>
       <View style={styles.brandIcon}><Scale size={18} color="#fff" /></View>
       <View style={styles.headerText}>
         <Text style={styles.headerTitle}>YURIST ONLINE</Text>

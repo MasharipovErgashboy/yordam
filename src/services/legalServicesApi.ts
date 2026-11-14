@@ -1,4 +1,4 @@
-import { API_BASE_URL, WS_BASE_URL } from '../config/api';
+import { API_BASE_URL, WS_BASE_URL, getCandidateUrls } from '../config/api';
 import type { UserProfile } from './authService';
 
 export interface BackendServiceItem {
@@ -52,11 +52,7 @@ const FALLBACK_SERVICES: BackendServiceItem[] = [
 ];
 
 async function apiFetch(endpoint: string, options: RequestInit): Promise<Response> {
-  const urls = [
-    `${API_BASE_URL}${endpoint}`,
-    `http://localhost:5000${endpoint}`,
-    `http://10.0.2.2:5000${endpoint}`,
-  ];
+  const urls = getCandidateUrls(endpoint);
 
   let lastError: any = null;
 

@@ -109,9 +109,8 @@ export const LegalMapTicketScreen: React.FC<LegalMapTicketScreenProps> = ({
       <LegalHeader
         title="LegalMap"
         badgeText="Navbat va Qabul"
-        showBack={true}
+        showBack={false}
         showClose={false}
-        onBack={onBack}
       />
 
       <ScrollView

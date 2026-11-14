@@ -50,8 +50,10 @@
     "iconName": "briefcase",
     "badgeColor": "#F59E0B",
     "isActive": true,
-    "usedUserIds": [],
-    "usersCount": 0,
+    "usedUserIds": [
+      "u_1794578344256_724"
+    ],
+    "usersCount": 1,
     "lastUpdated": "Bugun, 20:00",
     "features": [
       "Yangi Mehnat kodeksi asosidagi huquqiy kafolatlar",

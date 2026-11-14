@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Plus,
   Trash2,
+  Pencil,
   FileText,
   Clock,
   Building2,
@@ -45,7 +46,7 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<'kategoriyalar' | 'andozalar'>('kategoriyalar');
   const [categories, setCategories] = useState<MurojaatCategory[]>([]);
   const [templates, setTemplates] = useState<MurojaatTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [isWsConnected, setIsWsConnected] = useState(false);
 
   // Search & Filter
@@ -69,6 +70,26 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
   const [templateRequiredDocs, setTemplateRequiredDocs] = useState<string[]>(['']);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
   const [templateError, setTemplateError] = useState('');
+
+  // Modal 3: Edit Category
+  const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState('');
+  const [editCategoryName, setEditCategoryName] = useState('');
+  const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
+  const [editCategoryError, setEditCategoryError] = useState('');
+
+  // Modal 4: Edit Template
+  const [isEditTemplateModalOpen, setIsEditTemplateModalOpen] = useState(false);
+  const [editingTemplateId, setEditingTemplateId] = useState('');
+  const [editTemplateCategoryId, setEditTemplateCategoryId] = useState('');
+  const [editTemplateTitle, setEditTemplateTitle] = useState('');
+  const [editTemplateDurationDays, setEditTemplateDurationDays] = useState('15 ish kuni');
+  const [editTemplateDesc, setEditTemplateDesc] = useState('');
+  const [editTemplateTargetOrg, setEditTemplateTargetOrg] = useState('');
+  const [editTemplateLaw, setEditTemplateLaw] = useState('');
+  const [editTemplateRequiredDocs, setEditTemplateRequiredDocs] = useState<string[]>(['']);
+  const [isUpdatingTemplate, setIsUpdatingTemplate] = useState(false);
+  const [editTemplateError, setEditTemplateError] = useState('');
 
   // Fetch data
   const fetchData = async () => {
@@ -274,6 +295,127 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
       }
     } catch (err) {
       console.error('Delete template error:', err);
+    }
+  };
+
+  // 6. Edit Category Handlers
+  const handleOpenEditCategory = (cat: MurojaatCategory) => {
+    setEditingCategoryId(cat.id);
+    setEditCategoryName(cat.name);
+    setEditCategoryError('');
+    setIsEditCategoryModalOpen(true);
+  };
+
+  const handleUpdateCategory = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanName = editCategoryName.trim();
+    if (!cleanName) {
+      setEditCategoryError('Kategoriya nomini kiriting');
+      return;
+    }
+
+    setIsUpdatingCategory(true);
+    setEditCategoryError('');
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/murojaat/categories/${editingCategoryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: cleanName }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.data?.categories) {
+          setCategories(data.data.categories);
+        } else if (data.category) {
+          setCategories((prev) => prev.map((c) => (c.id === editingCategoryId ? data.category : c)));
+        }
+        setIsEditCategoryModalOpen(false);
+      } else {
+        setEditCategoryError(data.message || 'Xatolik yuz berdi');
+      }
+    } catch (err: any) {
+      setEditCategoryError('Server bilan aloqa uzildi');
+    } finally {
+      setIsUpdatingCategory(false);
+    }
+  };
+
+  // 7. Edit Template Handlers
+  const handleOpenEditTemplate = (tpl: MurojaatTemplate) => {
+    setEditingTemplateId(tpl.id);
+    setEditTemplateCategoryId(tpl.categoryId);
+    setEditTemplateTitle(tpl.title);
+    setEditTemplateDurationDays(tpl.durationDays || '15 ish kuni');
+    setEditTemplateDesc(tpl.description || '');
+    setEditTemplateTargetOrg(tpl.targetOrg || '');
+    setEditTemplateLaw(tpl.law || '');
+    setEditTemplateRequiredDocs(tpl.requiredDocs && tpl.requiredDocs.length > 0 ? [...tpl.requiredDocs] : ['']);
+    setEditTemplateError('');
+    setIsEditTemplateModalOpen(true);
+  };
+
+  const handleEditAddDocInput = () => {
+    setEditTemplateRequiredDocs((prev) => [...prev, '']);
+  };
+
+  const handleEditDocChange = (index: number, val: string) => {
+    setEditTemplateRequiredDocs((prev) => {
+      const copy = [...prev];
+      copy[index] = val;
+      return copy;
+    });
+  };
+
+  const handleEditRemoveDocInput = (index: number) => {
+    setEditTemplateRequiredDocs((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateTemplate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!editTemplateTitle.trim()) {
+      setEditTemplateError('Andoza nomini kiriting');
+      return;
+    }
+    if (!editTemplateCategoryId) {
+      setEditTemplateError('Kategoriyani tanlang');
+      return;
+    }
+
+    setIsUpdatingTemplate(true);
+    setEditTemplateError('');
+
+    try {
+      const payload = {
+        categoryId: editTemplateCategoryId,
+        title: editTemplateTitle.trim(),
+        durationDays: editTemplateDurationDays.trim() || '15 ish kuni',
+        description: editTemplateDesc.trim(),
+        targetOrg: editTemplateTargetOrg.trim(),
+        law: editTemplateLaw.trim(),
+        requiredDocs: editTemplateRequiredDocs.map((d) => d.trim()).filter(Boolean),
+      };
+
+      const res = await fetch(`http://localhost:5000/api/murojaat/templates/${editingTemplateId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.data?.templates) {
+          setTemplates(data.data.templates);
+        } else if (data.template) {
+          setTemplates((prev) => prev.map((t) => (t.id === editingTemplateId ? data.template : t)));
+        }
+        setIsEditTemplateModalOpen(false);
+      } else {
+        setEditTemplateError(data.message || 'Xatolik yuz berdi');
+      }
+    } catch (err: any) {
+      setEditTemplateError('Server bilan aloqa uzildi');
+    } finally {
+      setIsUpdatingTemplate(false);
     }
   };
 
@@ -629,25 +771,47 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                      title="Kategoriyani o‘chirish"
-                      style={{
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '9px',
-                        border: '1px solid rgba(239, 68, 68, 0.25)',
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        color: '#EF4444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={() => handleOpenEditCategory(cat)}
+                        title="Kategoriyani tahrirlash"
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '9px',
+                          border: '1px solid rgba(0, 163, 255, 0.3)',
+                          background: 'rgba(0, 163, 255, 0.1)',
+                          color: '#00A3FF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        <Pencil size={15} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                        title="Kategoriyani o‘chirish"
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '9px',
+                          border: '1px solid rgba(239, 68, 68, 0.25)',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          color: '#EF4444',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -841,8 +1005,29 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
                     )}
                   </div>
 
-                  {/* Card Footer: Delete action */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                  {/* Card Footer: Edit and Delete actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <button
+                      onClick={() => handleOpenEditTemplate(tpl)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(0, 163, 255, 0.3)',
+                        background: 'rgba(0, 163, 255, 0.1)',
+                        color: '#00A3FF',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <Pencil size={14} />
+                      Tahrirlash
+                    </button>
+
                     <button
                       onClick={() => handleDeleteTemplate(tpl.id, tpl.title)}
                       style={{
@@ -861,7 +1046,7 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
                       }}
                     >
                       <Trash2 size={14} />
-                      Andozani o‘chirish
+                      O‘chirish
                     </button>
                   </div>
                 </div>
@@ -1409,6 +1594,543 @@ export const MurojaatDetailView: React.FC<Props> = ({ onBack }) => {
                 >
                   <FileCheck2 size={16} />
                   {isCreatingTemplate ? 'Saqlanmoqda...' : 'Andozani saqlash'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 3: KATEGORIYANI TAHRIRLASH */}
+      {/* ===================================================================== */}
+      {isEditCategoryModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(3, 7, 18, 0.82)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            className="animate-scale-in"
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              borderRadius: '20px',
+              border: '1px solid rgba(0, 163, 255, 0.35)',
+              background: 'linear-gradient(180deg, #0d162d 0%, #080e1b 100%)',
+              boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 163, 255, 0.2)',
+              padding: '26px 28px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: 'rgba(0, 163, 255, 0.15)',
+                    border: '1px solid rgba(0, 163, 255, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#00A3FF',
+                  }}
+                >
+                  <Pencil size={18} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                    Kategoriyani tahrirlash
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>Kategoriya nomini yangilang</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsEditCategoryModalOpen(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#94A3B8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCategory}>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '8px' }}>
+                  Kategoriya nomi <span style={{ color: '#EF4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Masalan: Mehnat, Ta’lim, Mulk..."
+                  value={editCategoryName}
+                  onChange={(e) => {
+                    setEditCategoryName(e.target.value);
+                    setEditCategoryError('');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid rgba(0, 163, 255, 0.4)',
+                    background: 'rgba(8, 14, 27, 0.8)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {editCategoryError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#EF4444',
+                    fontSize: '12.5px',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <AlertCircle size={16} />
+                  <span>{editCategoryError}</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditCategoryModalOpen(false)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: '#94A3B8',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Bekor qilish
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isUpdatingCategory}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #0284C7 0%, #00A3FF 100%)',
+                    color: '#FFFFFF',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 15px rgba(0, 163, 255, 0.35)',
+                    opacity: isUpdatingCategory ? 0.7 : 1,
+                  }}
+                >
+                  <Pencil size={16} />
+                  {isUpdatingCategory ? 'Saqlanmoqda...' : 'O‘zgarishlarni saqlash'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 4: ANDOZANI TAHRIRLASH */}
+      {/* ===================================================================== */}
+      {isEditTemplateModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(3, 7, 18, 0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            overflowY: 'auto',
+          }}
+        >
+          <div
+            className="animate-scale-in"
+            style={{
+              width: '100%',
+              maxWidth: '680px',
+              borderRadius: '22px',
+              border: '1px solid rgba(0, 163, 255, 0.35)',
+              background: 'linear-gradient(180deg, #0d162d 0%, #080e1b 100%)',
+              boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 163, 255, 0.2)',
+              padding: '28px 32px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '12px',
+                    background: 'rgba(0, 163, 255, 0.15)',
+                    border: '1px solid rgba(0, 163, 255, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#00A3FF',
+                  }}
+                >
+                  <Pencil size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                    Andozani tahrirlash
+                  </h3>
+                  <span style={{ fontSize: '12.5px', color: '#94A3B8' }}>
+                    Andoza ma’lumotlari va talab qilinadigan hujjatlarni o‘zgartiring
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsEditTemplateModalOpen(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#94A3B8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateTemplate}>
+              {/* 1. Kategoriya tanlash va Muddat */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                    Kategoriya <span style={{ color: '#EF4444' }}>*</span>
+                  </label>
+                  <select
+                    value={editTemplateCategoryId}
+                    onChange={(e) => setEditTemplateCategoryId(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      background: '#0d162d',
+                      color: '#FFFFFF',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id} style={{ background: '#0d162d', color: '#FFFFFF' }}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                    Ko‘rib chiqilish muddati
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: 15 ish kuni"
+                    value={editTemplateDurationDays}
+                    onChange={(e) => setEditTemplateDurationDays(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      background: 'rgba(8, 14, 27, 0.8)',
+                      color: '#FFFFFF',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* 2. Andoza nomi va Davlat organi */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                    Andoza nomi <span style={{ color: '#EF4444' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: Oylik maosh undirish to‘g‘risida"
+                    value={editTemplateTitle}
+                    onChange={(e) => setEditTemplateTitle(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      background: 'rgba(8, 14, 27, 0.8)',
+                      color: '#FFFFFF',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                    Davlat organi nomi
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: Bosh prokuratura, Hokimiyat"
+                    value={editTemplateTargetOrg}
+                    onChange={(e) => setEditTemplateTargetOrg(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      background: 'rgba(8, 14, 27, 0.8)',
+                      color: '#FFFFFF',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* 3. Description (Tavsif) */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                  Tavsif (Description)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Ariza qachon va qaysi holatlarda topshirilishi haqida tushuntirish..."
+                  value={editTemplateDesc}
+                  onChange={(e) => setEditTemplateDesc(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    background: 'rgba(8, 14, 27, 0.8)',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {/* 4. Qonuniy asos va moddalar qismi */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0', marginBottom: '6px' }}>
+                  Qonuniy asos va moddalar
+                </label>
+                <input
+                  type="text"
+                  placeholder="Masalan: Mehnat Kodeksining 161-moddasi, O‘RQ-369"
+                  value={editTemplateLaw}
+                  onChange={(e) => setEditTemplateLaw(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    background: 'rgba(8, 14, 27, 0.8)',
+                    color: '#FFFFFF',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {/* 5. Talab qilinadigan hujjatlar qismi (Dinamik inputlar) */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#E2E8F0' }}>
+                    Talab qilinadigan hujjatlar
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleEditAddDocInput}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(0, 163, 255, 0.3)',
+                      background: 'rgba(0, 163, 255, 0.12)',
+                      color: '#00A3FF',
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Plus size={14} />
+                    Yangi hujjat qo‘shish
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {editTemplateRequiredDocs.map((doc, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="text"
+                        placeholder={`Hujjat #${idx + 1} (masalan: Pasport nusxasi, Chek...)`}
+                        value={doc}
+                        onChange={(e) => handleEditDocChange(idx, e.target.value)}
+                        style={{
+                          flex: 1,
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          background: 'rgba(8, 14, 27, 0.8)',
+                          color: '#FFFFFF',
+                          fontSize: '13px',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      {editTemplateRequiredDocs.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleEditRemoveDocInput(idx)}
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(239, 68, 68, 0.25)',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: '#EF4444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <X size={15} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {editTemplateError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#EF4444',
+                    fontSize: '12.5px',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <AlertCircle size={16} />
+                  <span>{editTemplateError}</span>
+                </div>
+              )}
+
+              {/* Modal Buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditTemplateModalOpen(false)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: '#94A3B8',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Bekor qilish
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isUpdatingTemplate}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 22px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #0284C7 0%, #00A3FF 100%)',
+                    color: '#FFFFFF',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 15px rgba(0, 163, 255, 0.35)',
+                    opacity: isUpdatingTemplate ? 0.7 : 1,
+                  }}
+                >
+                  <Pencil size={16} />
+                  {isUpdatingTemplate ? 'Saqlanmoqda...' : 'O‘zgarishlarni saqlash'}
                 </button>
               </div>
             </form>

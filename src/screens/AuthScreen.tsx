@@ -594,50 +594,62 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <Text style={{ color: '#0284C7', fontWeight: '700' }}>{registerEmail}</Text> manziliga 6 xonali tasdiqlash kodi yuborildi.
             </Text>
 
-            {/* OTP Input Container (Tapping anywhere opens keyboard) */}
+            {/* OTP Input Visual Boxes (Tapping opens keyboard) */}
             <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => otpInputRef.current?.focus()}
-              style={styles.otpBoxesContainer}
+              activeOpacity={0.8}
+              onPress={() => {
+                otpInputRef.current?.focus();
+              }}
+              style={styles.otpBoxesRow}
             >
-              <View style={styles.otpBoxesRow} pointerEvents="none">
-                {[0, 1, 2, 3, 4, 5].map((index) => {
-                  const char = otpCode[index] || '';
-                  const isCurrent = otpCode.length === index;
-                  return (
-                    <View
-                      key={index}
-                      style={[
-                        styles.otpDigitBox,
-                        isCurrent && styles.otpDigitBoxFocused,
-                        char ? styles.otpDigitBoxFilled : null,
-                      ]}
-                    >
-                      <Text style={[styles.otpDigitText, char ? styles.otpDigitTextFilled : null]}>
-                        {char}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-
-              {/* Directly overlaid TextInput that receives touches and invokes system keyboard */}
-              <TextInput
-                ref={otpInputRef}
-                style={styles.overlayOtpInput}
-                value={otpCode}
-                onChangeText={(text) => {
-                  const clean = text.replace(/[^0-9]/g, '').slice(0, 6);
-                  setOtpCode(clean);
-                  setOtpError('');
-                }}
-                keyboardType="number-pad"
-                textContentType="oneTimeCode"
-                maxLength={6}
-                caretHidden
-                autoFocus
-              />
+              {[0, 1, 2, 3, 4, 5].map((index) => {
+                const char = otpCode[index] || '';
+                const isCurrent = otpCode.length === index;
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.otpDigitBox,
+                      isCurrent && styles.otpDigitBoxFocused,
+                      char ? styles.otpDigitBoxFilled : null,
+                    ]}
+                  >
+                    <Text style={[styles.otpDigitText, char ? styles.otpDigitTextFilled : null]}>
+                      {char}
+                    </Text>
+                  </View>
+                );
+              })}
             </TouchableOpacity>
+
+            {/* Real Visible Input Box (Android & iOS 100% Reliable Keyboard Trigger) */}
+            <View style={styles.otpDirectInputContainer}>
+              <View style={styles.otpDirectInputWrapper}>
+                <Ionicons name="keypad-outline" size={20} color="#0284C7" style={{ marginRight: 8 }} />
+                <TextInput
+                  ref={otpInputRef}
+                  style={styles.otpDirectTextInput}
+                  value={otpCode}
+                  onChangeText={(text) => {
+                    const clean = text.replace(/[^0-9]/g, '').slice(0, 6);
+                    setOtpCode(clean);
+                    setOtpError('');
+                  }}
+                  placeholder="Kodni bu yerga kiriting"
+                  placeholderTextColor="#94A3B8"
+                  keyboardType="number-pad"
+                  textContentType="oneTimeCode"
+                  maxLength={6}
+                  autoFocus={true}
+                  selectTextOnFocus
+                />
+                {otpCode.length > 0 && (
+                  <TouchableOpacity onPress={() => setOtpCode('')} style={{ padding: 4 }}>
+                    <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
 
             {/* Error Message */}
             {otpError ? (
@@ -965,22 +977,27 @@ const styles = StyleSheet.create({
   otpDigitTextFilled: {
     color: '#0284C7',
   },
-  otpBoxesContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+  otpDirectInputContainer: {
     width: '100%',
-    marginVertical: 6,
+    marginTop: 8,
+    marginBottom: 6,
   },
-  overlayOtpInput: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.01,
-    color: 'transparent',
-    fontSize: 24,
+  otpDirectInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#0284C7',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  otpDirectTextInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    letterSpacing: 3,
   },
   otpErrorBox: {
     flexDirection: 'row',

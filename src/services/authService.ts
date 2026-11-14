@@ -36,12 +36,16 @@ async function apiFetch(endpoint: string, options: RequestInit): Promise<Respons
   for (const url of urls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeoutId);
       return res;
-    } catch (err) {
-      lastError = err;
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.message?.includes('canceled') || err?.message?.includes('aborted')) {
+        lastError = new Error('Server javob berish vaqti tugadi (Timeout). Tarmoq aloqasini tekshiring.');
+      } else {
+        lastError = err;
+      }
     }
   }
 

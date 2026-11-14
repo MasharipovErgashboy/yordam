@@ -2,35 +2,40 @@
   "categories": [
     {
       "id": "cat_mehnat",
-      "name": "Mehnat munosabatlari",
-      "createdAt": "14.11.2026, 22:30"
+      "name": "Mehnat",
+      "createdAt": "14.11.2026, 23:25"
     },
     {
       "id": "cat_istemolchi",
-      "name": "Iste'molchi huquqlari",
-      "createdAt": "14.11.2026, 22:30"
+      "name": "Iste'molchi",
+      "createdAt": "14.11.2026, 23:25"
+    },
+    {
+      "id": "cat_moliya",
+      "name": "Moliya",
+      "createdAt": "14.11.2026, 23:25"
     },
     {
       "id": "cat_davlat",
-      "name": "Davlat organlari va hokimiyat",
-      "createdAt": "14.11.2026, 22:30"
+      "name": "Davlat",
+      "createdAt": "14.11.2026, 23:25"
     },
     {
       "id": "cat_mulk",
-      "name": "Mulk va uy-joy masalalari",
-      "createdAt": "14.11.2026, 22:30"
+      "name": "Mulk",
+      "createdAt": "14.11.2026, 23:25"
     },
     {
-      "id": "cat_sud",
-      "name": "Sud va prokuratura",
-      "createdAt": "14.11.2026, 22:30"
+      "id": "cat_taklif",
+      "name": "Taklif",
+      "createdAt": "14.11.2026, 23:25"
     }
   ],
   "templates": [
     {
-      "id": "tpl_mehnat_1",
+      "id": "mehnat_shikoyat",
       "categoryId": "cat_mehnat",
-      "categoryName": "Mehnat munosabatlari",
+      "categoryName": "Mehnat",
       "title": "Noqonuniy bo'shatish bo'yicha shikoyat",
       "targetOrg": "Bandlik va mehnat munosabatlari vazirligi Davlat mehnat inspeksiyasi",
       "durationDays": "15 ish kuni",
@@ -40,30 +45,48 @@
         "Mehnat daftarchasi yoki elektron yozuv nusxasi",
         "Ishdan bo'shatish to'g'risidagi buyruq nusxasi",
         "Mehnat shartnomasi",
-        "Bank plastik kartasi hisob ko'chirmasi"
+        "Bank plastik kartasi hisob ko'chirmasi (agar maosh to'lanmagan bo'lsa)"
       ],
-      "createdAt": "14.11.2026, 22:30"
+      "createdAt": "14.11.2026, 23:25"
     },
     {
-      "id": "tpl_istemolchi_1",
+      "id": "istemolchi_shikoyat",
       "categoryId": "cat_istemolchi",
-      "categoryName": "Iste'molchi huquqlari",
+      "categoryName": "Iste'molchi",
       "title": "Sifatsiz tovar yoki xizmat bo'yicha shikoyat",
       "targetOrg": "Raqobatni rivojlantirish va iste'molchilar huquqlarini himoya qilish qo'mitasi",
       "durationDays": "10 ish kuni",
-      "description": "Savdo markazi yoki xizmat ko'rsatuvchi tomonidan nuqsonli mahsulot sotilganda yoki pulni qaytarish rad etilganda taqdim etiluvchi ariza.",
+      "description": "Savdo markazi, onlayn do'kon yoki xizmat ko'rsatuvchi tomonidan nosoz mahsulot sotilganda yoki pulni qaytarish rad etilganda taqdim etiluvchi ariza.",
       "law": "O'RQ-273 «Iste'molchilar huquqlarini himoya qilish to'g'risida»gi Qonun, 14, 18-moddalar",
       "requiredDocs": [
         "To'lov cheki yoki bank o'tkazma kvitansiyasi",
         "Kafolat taloni (agar mavjud bo'lsa)",
-        "Tovarning nosozlik holati aks etgan dalillar"
+        "Tovarning nosozlik holati aks etgan surat yoki video dalillar",
+        "Sotuvchiga yozilgan oldingi murojaat yozishmalari"
       ],
-      "createdAt": "14.11.2026, 22:30"
+      "createdAt": "14.11.2026, 23:25"
     },
     {
-      "id": "tpl_davlat_1",
+      "id": "bank_shikoyat",
+      "categoryId": "cat_moliya",
+      "categoryName": "Moliya",
+      "title": "Bank noqonuniy foizi va yechib olingan mablag' shikoyati",
+      "targetOrg": "O'zbekiston Respublikasi Markaziy banki Bank xizmatlari iste'molchilarining huquqlarini himoya qilish xizmati",
+      "durationDays": "15 ish kuni",
+      "description": "Bank kartasidan noqonuniy pul yechilganda, shartnomada ko'rsatilmagan ortiqcha foiz yoki komissiyalar hisoblanganda yuboriladigan ariza.",
+      "law": "O'RQ-1060 «Banklar va bank faoliyati to'g'risida»gi Qonun; Markaziy bank 3030-son Nizomi",
+      "requiredDocs": [
+        "Bank plastik kartasi rekvizitlari va hisob ko'chirmasi",
+        "Kredit shartnomasi va to'lov jadvali",
+        "Yechib olingan summa bo'yicha bank SMS xabarlari",
+        "Bank filialiga berilgan yozma ariza nusxasi"
+      ],
+      "createdAt": "14.11.2026, 23:25"
+    },
+    {
+      "id": "davlat_xizmat",
       "categoryId": "cat_davlat",
-      "categoryName": "Davlat organlari va hokimiyat",
+      "categoryName": "Davlat",
       "title": "Davlat xizmati ko'rsatishdan asossiz rad etish shikoyati",
       "targetOrg": "Adliya vazirligi huzuridagi Davlat xizmatlari agentligi",
       "durationDays": "5 ish kuni",
@@ -74,7 +97,39 @@
         "Rad etish to'g'risidagi elektron bildirishnoma",
         "Taqdim etilgan hujjatlar to'plami nusxasi"
       ],
-      "createdAt": "14.11.2026, 22:30"
+      "createdAt": "14.11.2026, 23:25"
+    },
+    {
+      "id": "ijara_shikoyat",
+      "categoryId": "cat_mulk",
+      "categoryName": "Mulk",
+      "title": "Uy-joy ijara depozitini qaytarish arizasi",
+      "targetOrg": "Fuqarolik ishlari bo'yicha tumanlararo sudi / Ichki ishlar bo'limi",
+      "durationDays": "10 kun",
+      "description": "Ijara shartnomasi yakunlangach uy egasi depozit mablag'ini asossiz ushlab qolganda yoki mol-mulkka zarar yetmagan holda pulni bermaganda.",
+      "law": "O'zbekiston Respublikasi Fuqarolik Kodeksi, 574-583-moddalar",
+      "requiredDocs": [
+        "Ijara shartnomasi nusxasi",
+        "Depozit topshirilganligi to'g'risidagi kvitansiya yoki tilxat",
+        "Xonadonning topshirilgan paytdagi holati suratlari"
+      ],
+      "createdAt": "14.11.2026, 23:25"
+    },
+    {
+      "id": "taklif_prezident",
+      "categoryId": "cat_taklif",
+      "categoryName": "Taklif",
+      "title": "Prezident Virtual Qabulxonasi uchun murojaat",
+      "targetOrg": "O'zbekiston Respublikasi Prezidentining Virtual qabulxonasi (pm.gov.uz)",
+      "durationDays": "15-30 kun",
+      "description": "Infratuzilma, ijtimoiy muammolar, tizimli kamchiliklar yoki qonunchilikni takomillashtirish bo'yicha to'g'ridan-to'g'ri oliy organga taklif/ariza.",
+      "law": "O'RQ-369 «Jismoniy va yuridik shaxslarning murojaatlari to'g'risida»gi Qonun",
+      "requiredDocs": [
+        "Fuqaro pasporti ma'lumotlari",
+        "Muammo aks etgan fotosuratlar yoki hujjatli dalillar",
+        "Oldin murojaat qilingan mahalliy hokimlik javoblari (agar bo'lsa)"
+      ],
+      "createdAt": "14.11.2026, 23:25"
     }
   ]
 }

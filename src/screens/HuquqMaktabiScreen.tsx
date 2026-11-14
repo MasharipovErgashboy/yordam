@@ -1010,52 +1010,7 @@ interface TopicCourseItem {
   imageUrl?: string;
 }
 
-const FAMILY_LAW_COURSES: TopicCourseItem[] = [
-  {
-    id: 'marriage',
-    topicId: 'oila',
-    title: 'Nikoh va oila munosabatlari',
-    lessons: '4 dars',
-    duration: '45 daqiqa',
-    progress: 0,
-    progressColor: '#94A3B8',
-    iconBg: '#FEF9C3',
-    iconType: 'rings',
-  },
-  {
-    id: 'parenting',
-    topicId: 'oila',
-    title: 'Ota-onalik huquq va majburiyatlari',
-    lessons: '3 dars',
-    duration: '38 daqiqa',
-    progress: 0,
-    progressColor: '#94A3B8',
-    iconBg: '#EFF6FF',
-    iconType: 'people',
-  },
-  {
-    id: 'alimony',
-    topicId: 'oila',
-    title: 'Aliment va moddiy ta’minot',
-    lessons: '4 dars',
-    duration: '52 daqiqa',
-    progress: 0,
-    progressColor: '#94A3B8',
-    iconBg: '#F8FAFC',
-    iconType: 'coins',
-  },
-  {
-    id: 'property',
-    topicId: 'oila',
-    title: 'Oilaviy mulk va meros',
-    lessons: '3 dars',
-    duration: '41 daqiqa',
-    progress: 0,
-    progressColor: '#94A3B8',
-    iconBg: '#F8FAFC',
-    iconType: 'home',
-  },
-];
+const FAMILY_LAW_COURSES: TopicCourseItem[] = [];
 
 interface CourseLesson {
   id: string;
@@ -1070,51 +1025,10 @@ interface CourseLesson {
   description?: string;
   plan?: Array<{ id: string; title: string; timeRange: string }>;
   materials?: Array<{ id: string; name: string; size?: string; type?: string; fileUrl?: string }>;
-  status: 'completed' | 'in_progress' | 'locked';
+  status: 'completed' | 'in_progress' | 'locked' | 'not_started';
 }
 
-const COURSE_LESSONS: CourseLesson[] = [
-  {
-    id: 'l1',
-    courseId: 'marriage',
-    topicId: 'oila',
-    order: 1,
-    title: '1. Nikoh tuşunçasi va ahamiyati',
-    duration: '10 daqiqa',
-    image: lessonThumb1,
-    status: 'locked',
-  },
-  {
-    id: 'l2',
-    courseId: 'marriage',
-    topicId: 'oila',
-    order: 2,
-    title: '2. Nikoh tuziş tartibi',
-    duration: '12 daqiqa',
-    image: lessonThumb2,
-    status: 'locked',
-  },
-  {
-    id: 'l3',
-    courseId: 'marriage',
-    topicId: 'oila',
-    order: 3,
-    title: '3. Er-xotin huquq va majburiyatlari',
-    duration: '11 daqiqa',
-    image: lessonThumb3,
-    status: 'locked',
-  },
-  {
-    id: 'l4',
-    courseId: 'marriage',
-    topicId: 'oila',
-    order: 4,
-    title: '4. Oilaning moddiy ta’minoti',
-    duration: '12 daqiqa',
-    image: lessonThumb4,
-    status: 'locked',
-  },
-];
+const COURSE_LESSONS: CourseLesson[] = [];
 
 interface LessonChapter {
   id: string;
@@ -1962,8 +1876,8 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   // Dynamic real-time legal topics and banners synchronized with Admin Panel & Backend
   const [legalCategories, setLegalCategories] = useState<LegalCategory[]>(LEGAL_CATEGORIES);
   const [homeBanners, setHomeBanners] = useState<any[]>([]);
-  const [dynamicCourses, setDynamicCourses] = useState<TopicCourseItem[]>(FAMILY_LAW_COURSES);
-  const [dynamicLessons, setDynamicLessons] = useState<CourseLesson[]>(COURSE_LESSONS);
+  const [dynamicCourses, setDynamicCourses] = useState<TopicCourseItem[]>([]);
+  const [dynamicLessons, setDynamicLessons] = useState<CourseLesson[]>([]);
 
   // Memoized real categories with dynamic real-time progress, course counts and lesson counts
   const activeCategories = useMemo(() => {
@@ -5313,7 +5227,7 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
           {/* 3. Badges Row: [🎓 X dars] [⏱ Y daqiqa] [📊 Boshlang'ich] [⚡ +400 XP] */}
           {(() => {
             const currentCourseLessons = dynamicLessons.filter(
-              (l) => l.courseId === selectedCourseDetail.id || (!l.courseId && selectedCourseDetail.id === 'marriage')
+              (l) => l.courseId === selectedCourseDetail.id
             );
             const currentCourseTotal = currentCourseLessons.length > 0 ? currentCourseLessons.length : 1;
             const currentCourseCompleted = currentCourseLessons.filter((l) => l.status === 'completed').length;

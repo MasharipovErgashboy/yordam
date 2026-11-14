@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { legalServicesApi } from '../services/legalServicesApi';
 import { WebView } from 'react-native-webview';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 const { width } = Dimensions.get('window');
 const SLIDE_WIDTH = width - 32;
@@ -1975,6 +1976,11 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
   const [isLessonDownloaded, setIsLessonDownloaded] = useState(false);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [userNotes, setUserNotes] = useState('');
+  const [youtubePlayerError, setYoutubePlayerError] = useState(false);
+
+  useEffect(() => {
+    setYoutubePlayerError(false);
+  }, [selectedLessonVideo?.id]);
 
   // Real lessons belonging to the currently selected course or lesson
   const currentCourseLessons = useMemo(() => {
@@ -4803,68 +4809,83 @@ export const HuquqMaktabiScreen: React.FC<HuquqMaktabiScreenProps> = ({ onBack }
               return (
                 <View style={styles.videoPlayerContainer}>
                   {ytVideoId ? (
-                    <View style={{ width: '100%', height: '100%', backgroundColor: '#000000', borderRadius: 18, overflow: 'hidden' }}>
-                      <WebView
-                        style={{ width: '100%', height: '100%', backgroundColor: '#000000' }}
-                        javaScriptEnabled={true}
-                        domStorageEnabled={true}
-                        allowsFullscreenVideo={true}
-                        allowsInlineMediaPlayback={true}
-                        mediaPlaybackRequiresUserAction={false}
-                        scalesPageToFit={true}
-                        scrollEnabled={false}
-                        originWhitelist={['*']}
-                        source={{
-                          html: `
-                            <!DOCTYPE html>
-                            <html>
-                              <head>
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                                <style>
-                                  * { margin: 0; padding: 0; box-sizing: border-box; }
-                                  html, body { width: 100%; height: 100%; background-color: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-                                  iframe { width: 100%; height: 100%; border: none; }
-                                </style>
-                              </head>
-                              <body>
-                                <iframe
-                                  src="https://www.youtube.com/embed/${ytVideoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                  allowfullscreen
-                                ></iframe>
-                              </body>
-                            </html>
-                          `,
-                          baseUrl: 'https://www.youtube.com',
-                        }}
-                      />
-                      {/* YouTube direct link button */}
-                      <TouchableOpacity
-                        style={{
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-                          paddingHorizontal: 8,
-                          paddingVertical: 4,
-                          borderRadius: 12,
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 4,
-                          zIndex: 30,
-                        }}
-                        activeOpacity={0.8}
-                        onPress={() => {
-                          if (selectedLessonVideo.youtubeUrl) {
-                            Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {});
-                          }
-                        }}
-                      >
-                        <Ionicons name="logo-youtube" size={13} color="#EF4444" />
-                        <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '700' }}>YouTube</Text>
-                      </TouchableOpacity>
-                    </View>
+                    youtubePlayerError ? (
+                      <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F172A', padding: 16 }}>
+                        <Ionicons name="alert-circle-outline" size={32} color="#EF4444" style={{ marginBottom: 6 }} />
+                        <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '700', textAlign: 'center' }}>
+                          Videoni ilovada ko‘rsatish cheklangan
+                        </Text>
+                        <Text style={{ color: '#94A3B8', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 12 }}>
+                          Muallif ushbu videoni tashqi sayt/ilovalarda ko‘rishni cheklagan bo‘lishi mumkin.
+                        </Text>
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: '#EF4444',
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            borderRadius: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 6,
+                          }}
+                          activeOpacity={0.8}
+                          onPress={() => {
+                            if (selectedLessonVideo?.youtubeUrl) {
+                              Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {});
+                            }
+                          }}
+                        >
+                          <Ionicons name="logo-youtube" size={16} color="#FFFFFF" />
+                          <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>YouTube'da tomosha qilish</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={{ width: '100%', height: '100%', backgroundColor: '#000000', borderRadius: 18, overflow: 'hidden' }}>
+                        <YoutubePlayer
+                          height={210}
+                          play={false}
+                          videoId={ytVideoId}
+                          webViewProps={{
+                            androidLayerType: 'hardware',
+                            scrollEnabled: false,
+                          }}
+                          initialPlayerParams={{
+                            preventFullScreen: false,
+                            controls: true,
+                            rel: false,
+                          }}
+                          onError={(e: string) => {
+                            console.warn('YouTube Player Error:', e);
+                            setYoutubePlayerError(true);
+                          }}
+                        />
+                        {/* YouTube direct link button */}
+                        <TouchableOpacity
+                          style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 4,
+                            zIndex: 30,
+                          }}
+                          activeOpacity={0.8}
+                          onPress={() => {
+                            if (selectedLessonVideo.youtubeUrl) {
+                              Linking.openURL(selectedLessonVideo.youtubeUrl).catch(() => {});
+                            }
+                          }}
+                        >
+                          <Ionicons name="logo-youtube" size={13} color="#EF4444" />
+                          <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '700' }}>YouTube</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )
                   ) : (
                     <View style={{ width: '100%', height: '100%', position: 'relative' }}>
                       <Image

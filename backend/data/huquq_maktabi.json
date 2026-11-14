@@ -1,0 +1,306 @@
+{
+  "banners": [
+    {
+      "id": "b_1794610797051_713",
+      "title": "Yangi reklama",
+      "subtitle": "Maxsus imtiyoz va e’lonlar",
+      "imageUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80",
+      "durationKey": "1_month",
+      "durationLabel": "1 oylik",
+      "createdAt": 1794610797051,
+      "expiresAt": 1797202797051,
+      "isActive": true
+    },
+    {
+      "id": "hm_b_2",
+      "title": "Konstitutsiya darslari yangilandi",
+      "subtitle": "Yangi tahrirdagi moddalar, interaktiv keyslar va yangi testlar bazasi qo'shildi.",
+      "imageUrl": "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
+      "durationKey": "forever",
+      "durationLabel": "Bir umr",
+      "createdAt": 1731530000000,
+      "expiresAt": null,
+      "isActive": true
+    }
+  ],
+  "topics": [
+    {
+      "id": "konstitutsiya",
+      "order": 1,
+      "title": "Konstitutsiyaviy huquqi",
+      "iconName": "scale-outline",
+      "subtitle": "Davlat tuzilishi, asosiy qonun va inson huquqlari kafolatlari",
+      "lessonsCount": 1,
+      "level": "Boshlang'ich",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "fuqarolik",
+      "order": 2,
+      "title": "Fuqarolik huquqi",
+      "iconName": "people",
+      "subtitle": "Mulk huquqi, oldi-sotdi, shartnomalar va majburiyatlar tartibi",
+      "lessonsCount": 0,
+      "level": "O‘rta",
+      "color": "#00A3FF"
+    },
+    {
+      "id": "oila",
+      "order": 3,
+      "title": "Oila huquqi",
+      "iconName": "people",
+      "subtitle": "Nikoh, mulkiy munosabatlar, aliment va bola huquqlari",
+      "lessonsCount": 0,
+      "level": "Boshlang'ich",
+      "color": "#EC4899"
+    },
+    {
+      "id": "mehnat",
+      "order": 4,
+      "title": "Mehnat huquqi",
+      "iconName": "hard-hat",
+      "subtitle": "Mehnat shartnomasi, xodim huquqlari, oylik va dam olish",
+      "lessonsCount": 0,
+      "level": "O'rta",
+      "color": "#F59E0B"
+    },
+    {
+      "id": "istemolchi",
+      "order": 5,
+      "title": "Iste’molchi huquqlari",
+      "iconName": "cart",
+      "subtitle": "Sifatsiz tovarlar, kafolat, 14 kunda qaytarish va tovon",
+      "lessonsCount": 0,
+      "level": "Boshlang'ich",
+      "color": "#10B981"
+    },
+    {
+      "id": "mamuriy",
+      "order": 6,
+      "title": "Ma’muriy huquq",
+      "iconName": "shield-checkmark",
+      "subtitle": "Yo‘l harakati, jarimalar va davlat idoralari murojaatlari",
+      "lessonsCount": 0,
+      "level": "O'rta",
+      "color": "#6366F1"
+    },
+    {
+      "id": "jinoyat",
+      "order": 7,
+      "title": "Jinoyat huquqi",
+      "iconName": "gavel",
+      "subtitle": "Jinoiy javobgarlik, jazo turlari va protsessual normalar",
+      "lessonsCount": 0,
+      "level": "Murakkab",
+      "color": "#EF4444"
+    },
+    {
+      "id": "uy_joy",
+      "order": 8,
+      "title": "Uy-joy huquqi",
+      "iconName": "home",
+      "subtitle": "Ijara, xususiylashtirish, propiska va kommunal xizmatlar",
+      "lessonsCount": 0,
+      "level": "Boshlang'ich",
+      "color": "#14B8A6"
+    },
+    {
+      "id": "raqamli",
+      "order": 9,
+      "title": "Raqamli huquqlar",
+      "iconName": "laptop",
+      "subtitle": "Shaxsiy ma’lumotlar, kiberjinoyat, IT shartnomalari",
+      "lessonsCount": 0,
+      "level": "O'rta",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "moliyaviy",
+      "order": 10,
+      "title": "Moliyaviy huquqlar",
+      "iconName": "coins",
+      "subtitle": "Kreditlar, soliqlar, bank shartnomalari va qarzdorlik",
+      "lessonsCount": 0,
+      "level": "O'rta",
+      "color": "#EAB308"
+    }
+  ],
+  "store": {
+    "banners": [
+      {
+        "id": "st_b_1",
+        "title": "Coin Shop Super Chegirma",
+        "subtitle": "To‘plangan coinlaringiz evaziga qimmatbaho sovg‘alar va chegirmalarni oling!",
+        "imageUrl": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80",
+        "durationKey": "forever",
+        "durationLabel": "Bir umr",
+        "createdAt": 1731530000000,
+        "expiresAt": null,
+        "isActive": true
+      }
+    ],
+    "talimItems": [
+      {
+        "id": "talim_1",
+        "title": "O‘zbekiston Konstitutsiyasi (Sharhlangan)",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Elektron kitoblar",
+        "priceCoins": 350,
+        "iconName": "book-outline",
+        "desc": "O‘zbekiston Respublikasi Konstitutsiyasining yangi tahrirdagi moddalari va amaliy huquqiy sharhlar to‘plami (PDF va ePub formatda)."
+      },
+      {
+        "id": "talim_2",
+        "title": "Yangi Mehnat kodeksi sharhi (2025)",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Qo‘llanmalar",
+        "priceCoins": 450,
+        "iconName": "briefcase",
+        "desc": "Xodim va ish beruvchi munosabatlari bo‘yicha to‘liq sharhlar, 60+ shablonlar to‘plami."
+      },
+      {
+        "id": "talim_3",
+        "title": "Huquqiy master-klass bilet",
+        "category": "talim",
+        "categoryLabel": "Ta’lim imtiyozlari",
+        "subcategory": "Vebinar",
+        "priceCoins": 600,
+        "iconName": "videocam",
+        "desc": "Taniqli advokatlar bilan yopiq vebinar va savol-javob sessiyasiga taklifnoma."
+      }
+    ],
+    "maxsusItems": [
+      {
+        "id": "maxsus_1",
+        "title": "Yordam brendli charm bloknot",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Aksessuarlar",
+        "priceCoins": 1200,
+        "iconName": "journal",
+        "desc": "Tabiiy charmdan tayyorlangan, zarhal logotipli premium kundalik va ruchka."
+      },
+      {
+        "id": "maxsus_2",
+        "title": "Yordam 'Legal Champion' Xudi",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Kiyimlar",
+        "priceCoins": 2500,
+        "iconName": "shirt",
+        "desc": "100% paxta, yuqori sifatli oversize xudi, ichki issiq qatlamli."
+      },
+      {
+        "id": "maxsus_3",
+        "title": "Smart Watch (Aqlli soat)",
+        "category": "maxsus",
+        "categoryLabel": "Maxsus sovg‘alar",
+        "subcategory": "Gadjetlar",
+        "priceCoins": 4500,
+        "iconName": "watch",
+        "desc": "Yurak urishi, bildirishnomalar va sport rejimlarini qo‘llab-quvvatlovchi zamonaviy smart soat."
+      }
+    ],
+    "hamkorlarItems": [
+      {
+        "id": "hamkor_1",
+        "title": "'Book House' 30% chegirma vaucheri",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "Chegirma kuponi",
+        "priceCoins": 200,
+        "iconName": "ticket",
+        "desc": "Barcha yuridik va o‘quv adabiyotlariga 30% lik bir martalik promokod."
+      },
+      {
+        "id": "hamkor_2",
+        "title": "'EduCenter' IT va huquq kurslariga 20%",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "O‘quv kursi",
+        "priceCoins": 500,
+        "iconName": "school",
+        "desc": "Hamkor o‘quv markazining offline va online barcha kurslariga taalluqli promokod."
+      },
+      {
+        "id": "hamkor_3",
+        "title": "'Legal Cafe' bepul qahva sertifikati",
+        "category": "hamkorlar",
+        "categoryLabel": "Hamkorlar takliflari",
+        "subcategory": "Kofe kuponi",
+        "priceCoins": 150,
+        "iconName": "cafe",
+        "desc": "Toshkent shahridagi hamkor kafelarda istalgan qahvani bepul olish uchun QR-kupon."
+      }
+    ]
+  },
+  "courses": [
+    {
+      "id": "course_1794615919411_912",
+      "topicId": "konstitutsiya",
+      "title": "Nikoh va oila munosabati",
+      "lessons": "1 dars",
+      "duration": "45 daqiqa",
+      "imageUrl": "data:image/png;base64,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",
+      "progress": 0,
+      "progressColor": "#10B981",
+      "iconBg": "#EFF6FF",
+      "iconType": "rings",
+      "createdAt": 1794615919411,
+      "updatedAt": 1794616489098
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson_1794616766974_687",
+      "courseId": "course_1794615919411_912",
+      "topicId": "konstitutsiya",
+      "title": "Nikoh tushunchasi va ahamiyati",
+      "duration": "45 daqiqa",
+      "order": 1,
+      "imageUrl": "data:image/png;base64,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",
+      "youtubeUrl": "https://youtu.be/Wp6Jf6clQsE?si=f569tLwRmFKMpOwM",
+      "description": "Assalomu alaykum, \nSizni qiziqtirgan barcha savollaringizni https://t.me/probonouz_bot o'rqali TDYU Yuridik klinikasiga berishingiz mumkin!",
+      "plan": [
+        {
+          "id": "ch1",
+          "title": "Kirish qismi va tushunchasi",
+          "timeRange": "00:00 – 00:20"
+        },
+        {
+          "id": "ch2",
+          "title": "O'zbekiston Respublikasi Konstitutsiyasi 76 - modda.",
+          "timeRange": "00:20 – 00:45"
+        },
+        {
+          "id": "ch3",
+          "title": "Oila kodeksi 2 - modda.",
+          "timeRange": "00:45 – 00:54"
+        }
+      ],
+      "materials": [
+        {
+          "id": "m1",
+          "name": "Mavzu bo‘yicha qo‘llanma (PDF)",
+          "size": "2.4 MB",
+          "type": "pdf"
+        }
+      ],
+      "status": "in_progress",
+      "createdAt": 1794616766974,
+      "updatedAt": 1794618433950
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert_1",
+      "topicId": "oila",
+      "title": "Oila huquqi bo‘yicha rasmiy sertifikat",
+      "pdfUrl": "https://example.com/certificates/oila-huquqi.pdf",
+      "pdfName": "Oila_huquqi_sertifikat_shablon.pdf",
+      "createdAt": 1731530000000
+    }
+  ]
+}

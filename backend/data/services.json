@@ -1,0 +1,63 @@
+[
+  {
+    "id": "huquq_maktabi",
+    "title": "Huquq Maktabi",
+    "category": "protection",
+    "categoryLabel": "Ta’lim",
+    "desc": "Fuqarolar uchun hayotiy huquqiy vaziyatlar, qo‘llanmalar, testlar va audio-darsliklar.",
+    "iconName": "school",
+    "badgeColor": "#8B5CF6",
+    "isActive": true,
+    "usedUserIds": [
+      "u_1794578344256_724"
+    ],
+    "usersCount": 1,
+    "lastUpdated": "Hozirgina yangilandi",
+    "features": [
+      "12 ta interaktiv huquqiy o‘quv moduli",
+      "48 ta video va audio darsliklar bazasi",
+      "Amaliy hayotiy huquqiy keyslar va tahlillar",
+      "Bilimni tekshirish testlari va yakuniy sertifikat"
+    ]
+  },
+  {
+    "id": "istemolchi",
+    "title": "Iste’molchi huquqlari",
+    "category": "protection",
+    "categoryLabel": "Iste’molchi himoyasi",
+    "desc": "Sifatsiz tovar va xizmatlar, 14 kun ichida almashtirish/qaytarish, kafolat ta’mirlari va 1159 Raqobat qo‘mitasi rasmiy talabnomalari.",
+    "iconName": "cart",
+    "badgeColor": "#00A3FF",
+    "isActive": true,
+    "usedUserIds": [
+      "u_1794578344256_724"
+    ],
+    "usersCount": 1,
+    "lastUpdated": "Bugun, 20:00",
+    "features": [
+      "14 kun ichida nuqsonsiz tovarni qaytarish arizasi",
+      "Kafolat muddati davomida bepul ta’mirlash talabi",
+      "1159 Raqobat qo‘mitasiga rasmiy shikoyat xati",
+      "Sotuvchiga nisbatan sudga da’vo arizalari generatori"
+    ]
+  },
+  {
+    "id": "ish_huquqi",
+    "title": "Ish va mehnat huquqi",
+    "category": "protection",
+    "categoryLabel": "Mehnat munosabatlari",
+    "desc": "Yangi Mehnat kodeksi me’yorlari, noqonuniy bo‘shatish, kechiktirilgan oylik maosh, kompensatsiya va Mehnat inspeksiyasi arizalari.",
+    "iconName": "briefcase",
+    "badgeColor": "#F59E0B",
+    "isActive": true,
+    "usedUserIds": [],
+    "usersCount": 0,
+    "lastUpdated": "Bugun, 20:00",
+    "features": [
+      "Yangi Mehnat kodeksi asosidagi huquqiy kafolatlar",
+      "Noqonuniy ishdan bo‘shatishni bekor qilish talabi",
+      "Ish haqi va zararlarni undirish bo‘yicha sud arizasi",
+      "Davlat mehnat inspeksiyasiga to‘g‘ridan-to‘g‘ri murojaat"
+    ]
+  }
+]

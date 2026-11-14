@@ -16,17 +16,17 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
   {
     id: 'platform',
     tag: 'YAGONA RAQAMLI EKOTIZIM',
-    title: 'Barcha huquqiy\nxizmatlar bir joyda',
+    title: 'Barça huquqiy\nxizmatlar bir joyda',
     description:
-      'Huquqiy muammolaringiz uchun kerakli xizmatlarni bitta ilovada toping. Alohida ilovalarni izlashga hojat yo‘q.',
+      'Huquqiy muammolaringiz uçun kerakli xizmatlarni bitta ilovada toping. Alohida ilovalarni izlaşga hojat yöq.',
     VisualComponent: PlatformVisual,
   },
   {
     id: 'ai_assistant',
-    tag: 'YORDAMCHI AI',
-    title: 'Aqlli yordamchi\nYordamchi AI',
+    tag: 'YORDAMÇI AI',
+    title: 'Aqlli yordamçi\nYordamçi AI',
     description:
-      'Muammoingizni oddiy tilda yozing yoki ovoz orqali tushuntiring. Yordamchi AI sizga tegishli huquqiy ma’lumot va keyingi qadamlarni topishga yordam beradi.',
+      'Muammoingizni oddiy tilda yozing yoki ovoz orqali tuşuntiring. Yordamçi AI sizga tegişli huquqiy ma’lumot va keyingi qadamlarni topişga yordam beradi.',
     VisualComponent: AiAssistantVisual,
   },
   {
@@ -34,7 +34,7 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     tag: 'HUJJATLAR',
     title: 'Hujjatlaringiz\ndoimo nazoratingizda',
     description:
-      'Shartnomalarni tahlil qiling, ariza va shikoyatlar tayyorlang hamda muhim hujjatlaringizni bitta joyda saqlang.',
+      'Şartnomalarni tahlil qiling, ariza va şikoyatlar tayyorlang hamda muhim hujjatlaringizni bitta joyda saqlang.',
     VisualComponent: DocumentsVisual,
   },
   {
@@ -42,7 +42,7 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     tag: 'HIMOYA',
     title: 'Huquqlaringizni\nhimoya qiling',
     description:
-      'Firibgarlikdan ehtiyot bo‘ling, huquqiy bilimlaringizni oshiring va kerak bo‘lganda malakali yuristdan yordam oling.',
+      'Firibgarlikdan ehtiyot böling, huquqiy bilimlaringizni oşiring va kerak bölganda malakali yuristdan yordam oling.',
     VisualComponent: ProtectionVisual,
   },
 ];

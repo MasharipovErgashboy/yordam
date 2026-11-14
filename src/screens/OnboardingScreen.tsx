@@ -137,7 +137,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           ]}
         >
           <Text style={styles.mainActionText}>
-            {isLastSlide ? 'Boshlash' : 'Keyingi'}
+            {isLastSlide ? 'Boşlaş' : 'Keyingi'}
           </Text>
           <Ionicons name="arrow-forward" size={19} color="#FFFFFF" style={styles.arrowIcon} />
         </TouchableOpacity>

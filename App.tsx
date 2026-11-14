@@ -6,12 +6,32 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { MainHomeScreen } from './src/screens/MainHomeScreen';
 import { BankHuquqScreen } from './src/screens/BankHuquqScreen';
 import { MurojaatScreen } from './src/screens/MurojaatScreen';
+import { AuthScreen } from './src/screens/AuthScreen';
+import { authService, UserProfile } from './src/services/authService';
 
-type AppScreen = 'splash' | 'onboarding' | 'main' | 'bank_huquq' | 'murojaat';
+type AppScreen = 'splash' | 'onboarding' | 'main' | 'auth' | 'bank_huquq' | 'murojaat';
 
 export default function App() {
   const [screenStack, setScreenStack] = useState<AppScreen[]>(['splash']);
   const currentScreen = screenStack[screenStack.length - 1] || 'splash';
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Restore stored session on mount
+  useEffect(() => {
+    const loadSession = async () => {
+      try {
+        const session = await authService.getSession();
+        if (session.user && session.token) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.warn('Error restoring user session:', err);
+      }
+    };
+    loadSession();
+  }, []);
 
   const navigateTo = useCallback((screen: AppScreen) => {
     setScreenStack((prev) => {
@@ -45,12 +65,44 @@ export default function App() {
     return () => sub.remove();
   }, [screenStack, goBack]);
 
+  const handleSplashFinish = async () => {
+    try {
+      const session = await authService.getSession();
+      if (session.user && session.token) {
+        setUser(session.user);
+        setIsAuthenticated(true);
+        setScreenStack(['main']);
+        return;
+      }
+    } catch (err) {
+      console.warn('Error checking session on splash finish:', err);
+    }
+
+    if (isAuthenticated) {
+      setScreenStack(['main']);
+    } else {
+      navigateTo('onboarding');
+    }
+  };
+
+  const handleAuthSuccess = (authenticatedUser: UserProfile) => {
+    setUser(authenticatedUser);
+    setIsAuthenticated(true);
+    setScreenStack(['main']);
+  };
+
+  const handleLogout = async () => {
+    await authService.clearSession();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+      <View style={[styles.container, currentScreen === 'auth' && { backgroundColor: '#F8FAFC' }]}>
         {currentScreen === 'splash' && (
           <SplashScreen
-            onFinish={() => navigateTo('onboarding')}
+            onFinish={handleSplashFinish}
           />
         )}
 
@@ -64,6 +116,10 @@ export default function App() {
         {currentScreen === 'main' && (
           <MainHomeScreen
             onBackToOnboarding={() => setScreenStack(['onboarding'])}
+            isAuthenticated={isAuthenticated}
+            user={user}
+            onRequireAuth={() => navigateTo('auth')}
+            onLogout={handleLogout}
             onOpenBankHuquq={() => navigateTo('bank_huquq')}
             onOpenMurojaat={() => navigateTo('murojaat')}
           />
@@ -78,6 +134,14 @@ export default function App() {
         {currentScreen === 'murojaat' && (
           <MurojaatScreen
             onBack={goBack}
+          />
+        )}
+
+        {currentScreen === 'auth' && (
+          <AuthScreen
+            initialTab="login"
+            onAuthSuccess={handleAuthSuccess}
+            onCancel={goBack}
           />
         )}
       </View>

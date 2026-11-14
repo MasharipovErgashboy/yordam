@@ -85,8 +85,9 @@ export const LegalMapHomeScreen: React.FC<LegalMapHomeScreenProps> = ({
       <LegalHeader
         title="LegalMap"
         badgeText="Adliya Ekotizimi"
-        showClose={true}
-        onClose={onClose}
+        showBack={true}
+        showClose={false}
+        onBack={onClose}
       />
 
       <ScrollView

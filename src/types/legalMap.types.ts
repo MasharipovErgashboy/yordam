@@ -24,6 +24,7 @@ export interface LegalPlace {
   phone: string;
   official: string;
   licenseNumber: string;
+  hasElectronicQueue?: boolean;
   fees: FeeItem[];
   coordinates: {
     latitude: number;
@@ -39,4 +40,18 @@ export interface QueueTicket {
   estimatedTime: string;
   peopleAhead: number;
   status: 'active' | 'completed' | 'cancelled';
+}
+
+export interface AppointmentBooking {
+  id: string;
+  bookingCode: string;
+  organizationName: string;
+  specialistName: string;
+  serviceName: string;
+  date: string;
+  timeSlot: string;
+  room: string;
+  address: string;
+  phone: string;
+  status: 'confirmed' | 'completed' | 'cancelled';
 }

@@ -1,4 +1,4 @@
-import { API_BASE_URL, WS_BASE_URL } from '../config/api';
+import { API_BASE_URL, WS_BASE_URL, getCandidateUrls } from '../config/api';
 import type { UserProfile } from './authService';
 
 export interface BackendServiceItem {
@@ -49,14 +49,32 @@ const FALLBACK_SERVICES: BackendServiceItem[] = [
     isActive: true,
     usersCount: 0,
   },
+  {
+    id: 'murojaat',
+    title: 'Murojaat va arizalar',
+    category: 'protection',
+    categoryLabel: 'Arizalar va murojaatlar',
+    desc: 'Davlat organlari, prokuratura, sud va tashkilotlarga rasmiy shikoyat, ariza va talabnomalar generatori.',
+    iconName: 'file-text',
+    badgeColor: '#0284C7',
+    isActive: true,
+    usersCount: 0,
+  },
+  {
+    id: 'bank_kredit_himoyasi',
+    title: 'Bank kreditlari himoyasi',
+    category: 'finance',
+    categoryLabel: 'Bank va kredit himoyasi',
+    desc: 'Kredit shartnomalari tahlili, asossiz yechilgan pullar, yashirin foizlar, garov va firibgarlik kreditlaridan himoya.',
+    iconName: 'landmark',
+    badgeColor: '#10B981',
+    isActive: true,
+    usersCount: 0,
+  },
 ];
 
 async function apiFetch(endpoint: string, options: RequestInit): Promise<Response> {
-  const urls = [
-    `${API_BASE_URL}${endpoint}`,
-    `http://localhost:5000${endpoint}`,
-    `http://10.0.2.2:5000${endpoint}`,
-  ];
+  const urls = getCandidateUrls(endpoint);
 
   let lastError: any = null;
 

@@ -9,9 +9,10 @@
     "badgeColor": "#8B5CF6",
     "isActive": true,
     "usedUserIds": [
-      "u_1794578344256_724"
+      "u_1794578344256_724",
+      "u_1794675552363_961"
     ],
-    "usersCount": 1,
+    "usersCount": 2,
     "lastUpdated": "Hozirgina yangilandi",
     "features": [
       "12 ta interaktiv huquqiy o‘quv moduli",
@@ -51,15 +52,58 @@
     "badgeColor": "#F59E0B",
     "isActive": true,
     "usedUserIds": [
-      "u_1794578344256_724"
+      "u_1794578344256_724",
+      "u_1794675552363_961"
     ],
-    "usersCount": 1,
+    "usersCount": 2,
     "lastUpdated": "Bugun, 20:00",
     "features": [
       "Yangi Mehnat kodeksi asosidagi huquqiy kafolatlar",
       "Noqonuniy ishdan bo‘shatishni bekor qilish talabi",
       "Ish haqi va zararlarni undirish bo‘yicha sud arizasi",
       "Davlat mehnat inspeksiyasiga to‘g‘ridan-to‘g‘ri murojaat"
+    ]
+  },
+  {
+    "id": "murojaat",
+    "title": "Murojaat va arizalar",
+    "category": "protection",
+    "categoryLabel": "Arizalar va murojaatlar",
+    "desc": "Davlat organlari, prokuratura, sud va tashkilotlarga rasmiy shikoyat, ariza va talabnomalar generatori.",
+    "iconName": "file-text",
+    "badgeColor": "#0284C7",
+    "isActive": true,
+    "usedUserIds": [
+      "u_1794675552363_961"
+    ],
+    "usersCount": 1,
+    "lastUpdated": "Bugun, 21:00",
+    "features": [
+      "Davlat organlari va vazirliklarga rasmiy ariza va shikoyatlar",
+      "Prokuratura va IIB organlariga huquqbuzarlik bo‘yicha murojaat",
+      "Sud va adliya idoralariga da’vo hamda iltimosnomalar",
+      "Rasmiy blank asosida avtomatik shakllantirish va chop etish"
+    ]
+  },
+  {
+    "id": "bank_kredit_himoyasi",
+    "title": "Bank kreditlari himoyasi",
+    "category": "finance",
+    "categoryLabel": "Bank va kredit himoyasi",
+    "desc": "Kredit shartnomalari tahlili, asossiz yechilgan pullar, yashirin foizlar, garov va firibgarlik kreditlaridan himoya.",
+    "iconName": "landmark",
+    "badgeColor": "#10B981",
+    "isActive": true,
+    "usedUserIds": [
+      "u_1794675552363_961"
+    ],
+    "usersCount": 1,
+    "lastUpdated": "Bugun, 21:00",
+    "features": [
+      "Kredit shartnomalaridagi noqonuniy foiz va ortiqcha to‘lovlar tahlili",
+      "Bank kartasidan asossiz yechilgan mablag‘larni qaytarish talabnomasi",
+      "Fuqaro xabarisiz (firibgarlik) rasmiylashtirilgan kredit shikoyati",
+      "Markaziy bank (3030-son Nizom) va sud organlariga rasmiy arizalar"
     ]
   }
 ]

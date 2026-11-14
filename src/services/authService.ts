@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, getCandidateUrls } from '../config/api';
 
 export interface UserProfile {
   id: string;
@@ -28,25 +28,24 @@ export interface RegisterPayload {
 const STORAGE_KEY_USER = '@yordam_user_data';
 const STORAGE_KEY_TOKEN = '@yordam_user_token';
 
-// Helper to attempt fetch with fallback to localhost/10.0.2.2 if LAN IP fails
+// Helper to attempt fetch with fallback to dynamic LAN IP, localhost, or emulator
 async function apiFetch(endpoint: string, options: RequestInit): Promise<Response> {
-  const urls = [
-    `${API_BASE_URL}${endpoint}`,
-    `http://localhost:5000${endpoint}`,
-    `http://10.0.2.2:5000${endpoint}`,
-  ];
-
+  const urls = getCandidateUrls(endpoint);
   let lastError: any = null;
 
   for (const url of urls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeoutId);
       return res;
-    } catch (err) {
-      lastError = err;
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.message?.includes('canceled') || err?.message?.includes('aborted')) {
+        lastError = new Error('Server javob berish vaqti tugadi (Timeout). Tarmoq aloqasini tekshiring.');
+      } else {
+        lastError = err;
+      }
     }
   }
 

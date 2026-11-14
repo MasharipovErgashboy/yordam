@@ -88,20 +88,32 @@ export const LegalMapDetailScreen: React.FC<LegalMapDetailScreenProps> = ({
           </View>
         </View>
 
-        {/* E-navbat Live Block */}
+        {/* E-navbat & Qabul Live Block */}
         <View style={styles.queueCard}>
           <View style={styles.queueHeader}>
             <UsersIcon size={18} color={Colors.primary} />
             <Text style={styles.queueTitle}>
-              Hozir navbatda: <Text style={styles.queueBold}>{place.queueCount} kishi</Text>
+              {place.hasElectronicQueue === false
+                ? 'Qabul tartibi: Oldindan yozilish (Bron)'
+                : (
+                  <>
+                    Hozir navbatda: <Text style={styles.queueBold}>{place.queueCount} kishi</Text>
+                  </>
+                )}
             </Text>
           </View>
           <Text style={styles.queueSubtitle}>
-            Taxminiy kutish vaqti: ~{place.queueCount * 4} daqiqa
+            {place.hasElectronicQueue === false
+              ? 'Ushbu idorada elektron kiosk yo‘q. Qabul vaqti oldindan band qilinadi.'
+              : `Taxminiy kutish vaqti: ~${place.queueCount * 4} daqiqa`}
           </Text>
 
           <CustomButton
-            title="Onlayn navbat olish (E-navbat)"
+            title={
+              place.hasElectronicQueue === false
+                ? 'Qabulga yozilish (Bron qilish)'
+                : 'Onlayn navbat olish (E-navbat)'
+            }
             variant="accent"
             onPress={() => onGetTicket(place)}
             style={styles.ticketBtn}

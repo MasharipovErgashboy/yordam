@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../../theme/colors';
 import { HomeTabIcon, MapTabIcon, TicketTabIcon } from '../../../components/common/Icons';
 
@@ -11,8 +12,11 @@ interface BottomTabBarProps {
 }
 
 export const BottomTabBar: React.FC<BottomTabBarProps> = ({ currentTab, onSelectTab }) => {
+  const insets = useSafeAreaInsets();
+  const safeBottom = Math.max(insets.bottom, 8);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: safeBottom, height: 58 + safeBottom }]}>
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => onSelectTab('home')}

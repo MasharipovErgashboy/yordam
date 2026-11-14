@@ -72,21 +72,37 @@ export const LegalMapNavigator: React.FC<LegalMapNavigatorProps> = ({ onBack }) 
       });
   };
 
-  // Online Queue Ticket acquisition
+  // Online Queue Ticket acquisition or Appointment Booking
   const handleGetTicket = (place: LegalPlace) => {
-    Alert.alert(
-      'Navbat olindi!',
-      `${place.name} bo‘yicha sizga A-14 raqamli navbat biriktirildi.`,
-      [
-        {
-          text: 'Chiptani ko‘rish',
-          onPress: () => {
-            setSelectedPlace(null);
-            setCurrentTab('ticket');
+    if (place.hasElectronicQueue === false || place.category === 'lawyer') {
+      Alert.alert(
+        'Qabulga yozildingiz!',
+        `${place.name} bo‘yicha sizga bugun soat 15:30 ga qabul belgilandi (Bron kodi: #BRON-8492).`,
+        [
+          {
+            text: 'Bronni ko‘rish',
+            onPress: () => {
+              setSelectedPlace(null);
+              setCurrentTab('ticket');
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Navbat olindi!',
+        `${place.name} bo‘yicha sizga A-14 raqamli elektron navbat biriktirildi.`,
+        [
+          {
+            text: 'Chiptani ko‘rish',
+            onPress: () => {
+              setSelectedPlace(null);
+              setCurrentTab('ticket');
+            },
+          },
+        ]
+      );
+    }
   };
 
   const handleCancelQueue = () => {
@@ -178,7 +194,7 @@ export const LegalMapNavigator: React.FC<LegalMapNavigatorProps> = ({ onBack }) 
         styles.container,
         {
           paddingTop: insets.top,
-          paddingBottom: insets.bottom,
+          paddingBottom: selectedPlace ? insets.bottom : 0,
         },
       ]}
     >

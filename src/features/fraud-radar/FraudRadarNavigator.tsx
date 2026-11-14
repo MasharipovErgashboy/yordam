@@ -170,7 +170,7 @@ export const FraudRadarNavigator: React.FC<FraudRadarNavigatorProps> = ({ onBack
         styles.container,
         {
           paddingTop: insets.top,
-          paddingBottom: insets.bottom,
+          paddingBottom: showTabBar ? 0 : insets.bottom,
         },
       ]}
     >

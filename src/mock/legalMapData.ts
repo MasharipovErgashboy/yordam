@@ -1,4 +1,4 @@
-import { LegalPlace, QueueTicket } from '../types/legalMap.types';
+import { LegalPlace, QueueTicket, AppointmentBooking } from '../types/legalMap.types';
 
 export const MOCK_LEGAL_PLACES: LegalPlace[] = [
   {
@@ -16,6 +16,7 @@ export const MOCK_LEGAL_PLACES: LegalPlace[] = [
     statusText: 'Hozir ochiq (18:00 gacha)',
     queueCount: 3,
     queueStatus: 'kam',
+    hasElectronicQueue: true,
     address: 'Toshkent sh., Navoiy ko‘chasi, 12-uy',
     phone: '+998 71 239 12 34',
     official: 'A. B. Karimov (Litsenziya №034128)',
@@ -45,6 +46,7 @@ export const MOCK_LEGAL_PLACES: LegalPlace[] = [
     statusText: 'Tushlik (13:00 gacha)',
     queueCount: 4,
     queueStatus: 'kam',
+    hasElectronicQueue: true,
     address: 'Toshkent sh., Yunusobod tumani, A. Temur shoh ko‘chasi, 45-uy',
     phone: '+998 71 223 88 11',
     official: 'N. S. Saidova (Mudira)',
@@ -73,6 +75,7 @@ export const MOCK_LEGAL_PLACES: LegalPlace[] = [
     statusText: 'Hozir ochiq',
     queueCount: 11,
     queueStatus: 'gavjum',
+    hasElectronicQueue: true,
     address: 'Toshkent sh., Shayxontohur tumani, Beruniy ko‘chasi, 8-uy',
     phone: '+998 71 202 00 11',
     official: 'Davlat xizmatlari markazi',
@@ -101,6 +104,7 @@ export const MOCK_LEGAL_PLACES: LegalPlace[] = [
     statusText: 'Hozir ochiq',
     queueCount: 1,
     queueStatus: 'kam',
+    hasElectronicQueue: false,
     address: 'Toshkent sh., Mirzo Ulug‘bek tumani, Mustaqillik shoh ko‘chasi, 14-uy',
     phone: '+998 90 900 11 22',
     official: 'Advokat M. I. Rahimov',
@@ -124,4 +128,18 @@ export const MOCK_CURRENT_TICKET: QueueTicket = {
   estimatedTime: '14:30',
   peopleAhead: 2,
   status: 'active',
+};
+
+export const MOCK_APPOINTMENT_BOOKING: AppointmentBooking = {
+  id: 'booking-1',
+  bookingCode: '#BRON-8492',
+  organizationName: '“Adolat Himoyasi” Advokatlik Byurosi',
+  specialistName: 'Advokat M. I. Rahimov',
+  serviceName: 'Yuridik maslahat va shartnoma tekshiruvi',
+  date: '14-Noyabr, 2026',
+  timeSlot: '15:30 - 16:00',
+  room: '2-qavat, 14-kabinet',
+  address: 'Toshkent sh., Mirzo Ulug‘bek tumani, Mustaqillik shoh ko‘chasi, 14-uy',
+  phone: '+998 90 900 11 22',
+  status: 'confirmed',
 };

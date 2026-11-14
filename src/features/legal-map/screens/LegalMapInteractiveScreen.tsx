@@ -5,11 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../../../theme/colors';
+import { LegalHeader } from '../../../components/common/LegalHeader';
 import { SearchInput } from '../../../components/common/SearchInput';
 import { CustomButton } from '../../../components/common/CustomButton';
+import { GOOGLE_MAPS_CONFIG } from '../../../config/maps';
 import {
   StarIcon,
   VerifiedCheckIcon,
@@ -41,6 +44,7 @@ export const LegalMapInteractiveScreen: React.FC<LegalMapInteractiveScreenProps>
   const [activeCategory, setActiveCategory] = useState<LegalCategory>(initialCategory);
   const [selectedPlace, setSelectedPlace] = useState<LegalPlace>(MOCK_LEGAL_PLACES[0]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapViewMode, setMapViewMode] = useState<'google' | 'pins'>('google');
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -72,6 +76,14 @@ export const LegalMapInteractiveScreen: React.FC<LegalMapInteractiveScreenProps>
   return (
     <View style={styles.safeArea}>
       <StatusBar style="dark" />
+
+      {/* Header: LegalMap */}
+      <LegalHeader
+        title="LegalMap"
+        badgeText="Interaktiv xarita"
+        showBack={false}
+        showClose={false}
+      />
 
       {/* Top Search & Filter Bar */}
       <View style={styles.topControlContainer}>
@@ -109,63 +121,97 @@ export const LegalMapInteractiveScreen: React.FC<LegalMapInteractiveScreenProps>
       {/* Map Interactive Canvas */}
       <View style={styles.mapArea}>
         <View style={styles.mapCanvas}>
-          {/* Simulated city grid roads */}
-          <View style={[styles.mapRoad, { top: '30%', width: '100%', height: 16 }]} />
-          <View style={[styles.mapRoad, { top: '65%', width: '100%', height: 20 }]} />
-          <View style={[styles.mapRoadVertical, { left: '25%', height: '100%', width: 14 }]} />
-          <View style={[styles.mapRoadVertical, { left: '70%', height: '100%', width: 18 }]} />
-          <View style={styles.mapRoadDiagonal} />
-
-          {/* User Location Pulse Marker */}
-          <View style={styles.userLocationContainer}>
-            <View style={styles.userPulseRing} />
-            <View style={styles.userLocationDot}>
-              <View style={styles.userInnerDot} />
+          {mapViewMode === 'google' && Platform.OS === 'web' ? (
+            <View style={StyleSheet.absoluteFill}>
+              <iframe
+                title="Google Maps"
+                src={GOOGLE_MAPS_CONFIG.getEmbedUrl(
+                  selectedPlace.coordinates.latitude,
+                  selectedPlace.coordinates.longitude,
+                  16,
+                  selectedPlace.name
+                )}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                }}
+                loading="lazy"
+              />
             </View>
-          </View>
+          ) : (
+            <>
+              {/* Simulated city grid roads */}
+              <View style={[styles.mapRoad, { top: '30%', width: '100%', height: 16 }]} />
+              <View style={[styles.mapRoad, { top: '65%', width: '100%', height: 20 }]} />
+              <View style={[styles.mapRoadVertical, { left: '25%', height: '100%', width: 14 }]} />
+              <View style={[styles.mapRoadVertical, { left: '70%', height: '100%', width: 18 }]} />
+              <View style={styles.mapRoadDiagonal} />
 
-          {/* Interactive Place Markers */}
-          {filteredPlaces.map((place, index) => {
-            const isSelected = selectedPlace.id === place.id;
-            const positions = [
-              { top: '38%' as const, left: '50%' as const },
-              { top: '22%' as const, left: '28%' as const },
-              { top: '55%' as const, left: '75%' as const },
-              { top: '26%' as const, left: '80%' as const },
-            ];
-            const pos = positions[index % positions.length];
-
-            return (
-              <TouchableOpacity
-                key={place.id}
-                activeOpacity={0.9}
-                onPress={() => setSelectedPlace(place)}
-                style={[
-                  styles.markerContainer,
-                  { top: pos.top, left: pos.left },
-                  isSelected && styles.selectedMarkerContainer,
-                ]}
-              >
-                <View style={[styles.markerPin, isSelected && styles.selectedMarkerPin]}>
-                  {place.category === 'notary' && <NotaryStampIcon size={18} color="#FFFFFF" />}
-                  {place.category === 'fhdyo' && <FhdyoIcon size={18} color="#FFFFFF" />}
-                  {place.category === 'lawyer' && <ScalesIcon size={18} color="#FFFFFF" />}
-                  {place.category === 'dxm' && <BuildingIcon size={18} color="#FFFFFF" />}
+              {/* User Location Pulse Marker */}
+              <View style={styles.userLocationContainer}>
+                <View style={styles.userPulseRing} />
+                <View style={styles.userLocationDot}>
+                  <View style={styles.userInnerDot} />
                 </View>
-                {isSelected && <View style={styles.markerArrow} />}
-              </TouchableOpacity>
-            );
-          })}
+              </View>
+
+              {/* Interactive Place Markers */}
+              {filteredPlaces.map((place, index) => {
+                const isSelected = selectedPlace.id === place.id;
+                const positions = [
+                  { top: '38%' as const, left: '50%' as const },
+                  { top: '22%' as const, left: '28%' as const },
+                  { top: '55%' as const, left: '75%' as const },
+                  { top: '26%' as const, left: '80%' as const },
+                ];
+                const pos = positions[index % positions.length];
+
+                return (
+                  <TouchableOpacity
+                    key={place.id}
+                    activeOpacity={0.9}
+                    onPress={() => setSelectedPlace(place)}
+                    style={[
+                      styles.markerContainer,
+                      { top: pos.top, left: pos.left },
+                      isSelected && styles.selectedMarkerContainer,
+                    ]}
+                  >
+                    <View style={[styles.markerPin, isSelected && styles.selectedMarkerPin]}>
+                      {place.category === 'notary' && <NotaryStampIcon size={18} color="#FFFFFF" />}
+                      {place.category === 'fhdyo' && <FhdyoIcon size={18} color="#FFFFFF" />}
+                      {place.category === 'lawyer' && <ScalesIcon size={18} color="#FFFFFF" />}
+                      {place.category === 'dxm' && <BuildingIcon size={18} color="#FFFFFF" />}
+                    </View>
+                    {isSelected && <View style={styles.markerArrow} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </>
+          )}
 
           {/* Floating Controls */}
           <View style={styles.floatingControls}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={onSwitchToList}
-              style={styles.floatingListToggle}
-            >
-              <Text style={styles.floatingListToggleText}>Ro‘yxat ko‘rinishi</Text>
-            </TouchableOpacity>
+            <View style={styles.floatingLeftControls}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setMapViewMode(mapViewMode === 'google' ? 'pins' : 'google')}
+                style={styles.floatingMapToggle}
+              >
+                <Text style={styles.floatingMapToggleText}>
+                  {mapViewMode === 'google' ? '📌 Sxema' : '🗺️ Google Maps'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={onSwitchToList}
+                style={styles.floatingListToggle}
+              >
+                <Text style={styles.floatingListToggleText}>Ro‘yxat</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               activeOpacity={0.8}
@@ -401,6 +447,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    zIndex: 10,
+  },
+  floatingLeftControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  floatingMapToggle: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  floatingMapToggleText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   floatingListToggle: {
     backgroundColor: Colors.surface,

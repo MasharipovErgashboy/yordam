@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, StatusBar, KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -149,7 +151,7 @@ export default function AIScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -159,17 +161,23 @@ export default function AIScreen() {
 
         {/* ── HEADER ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+          <TouchableOpacity
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+            style={styles.backBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={C.textDark} />
           </TouchableOpacity>
-          <View style={styles.logoBox}><Text>💼</Text></View>
+          <View style={styles.logoBox}>
+            <Ionicons name="sparkles" size={16} color={C.primary} />
+          </View>
           <View>
             <Text style={styles.appName}>AI Yordamchi</Text>
             <Text style={styles.appSub}>Hujjatlar hamyoni</Text>
           </View>
           <View style={{ flex: 1 }} />
           <View style={styles.securityBadge}>
-            <Text style={styles.securityIcon}>🛡️</Text>
+            <Ionicons name="shield-checkmark-outline" size={18} color={C.primary} />
           </View>
         </View>
 
@@ -195,7 +203,9 @@ export default function AIScreen() {
               {/* AI message */}
               {msg.role === 'ai' && (
                 <View style={styles.aiMsgRow}>
-                  <View style={styles.aiAvatar}><Text>🤖</Text></View>
+                  <View style={styles.aiAvatar}>
+                    <Ionicons name="sparkles" size={16} color={C.primary} />
+                  </View>
                   <View style={styles.aiMsgBody}>
                     {/* Accuracy badge */}
                     {msg.accuracy && (
@@ -215,9 +225,9 @@ export default function AIScreen() {
                     {/* Doc reference */}
                     {msg.docRef && (
                       <TouchableOpacity style={styles.docRefCard} onPress={() => navigation.navigate('Documents')}>
-                        <Text style={styles.docRefIcon}>📄</Text>
+                        <Ionicons name="document-text-outline" size={16} color={C.primary} />
                         <Text style={styles.docRefText}>{msg.docRef}</Text>
-                        <Text style={styles.docRefArrow}>↗</Text>
+                        <Ionicons name="arrow-forward" size={14} color={C.primary} />
                       </TouchableOpacity>
                     )}
 
@@ -225,7 +235,10 @@ export default function AIScreen() {
                     {msg.card && (
                       <View style={styles.legalCard}>
                         <View style={styles.legalHeader}>
-                          <Text style={styles.legalTitle}>📋 {msg.card.type}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Ionicons name="clipboard-outline" size={15} color={C.textDark} />
+                            <Text style={styles.legalTitle}>{msg.card.type}</Text>
+                          </View>
                           <View style={styles.legalBadge}>
                             <Text style={styles.legalBadgeText}>{msg.card.badge}</Text>
                           </View>
@@ -236,18 +249,21 @@ export default function AIScreen() {
                             : <Text key={i}>{part}</Text>
                         )}</Text>
                         <View style={styles.requirementBox}>
-                          <Text style={styles.requirementIcon}>⚠️</Text>
+                          <Ionicons name="alert-circle-outline" size={16} color="#92400E" style={{ marginTop: 1 }} />
                           <Text style={styles.requirementText}>{msg.card.requirement}</Text>
                         </View>
                         {msg.docRef && (
                           <TouchableOpacity style={styles.attachmentRow}>
-                            <Text style={styles.attachIcon}>📄</Text>
+                            <Ionicons name="document-attach-outline" size={16} color={C.textDark} />
                             <Text style={styles.attachText}>{msg.docRef}</Text>
                             <Text style={styles.attachMeta}>3-sahifa, 4-bm • Notarial tasdiq</Text>
                           </TouchableOpacity>
                         )}
                         <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Reminders')}>
-                          <Text style={styles.actionBtnText}>🔔 {msg.card.action}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Ionicons name="notifications-outline" size={16} color={C.white} />
+                            <Text style={styles.actionBtnText}>{msg.card.action}</Text>
+                          </View>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -269,7 +285,7 @@ export default function AIScreen() {
           >
             {SUGGESTIONS.map((s, i) => (
               <TouchableOpacity key={i} style={styles.suggestionChip} onPress={() => sendMessage(s)}>
-                <Text style={styles.suggestionSparkle}>✦ </Text>
+                <Ionicons name="sparkles" size={12} color={C.primary} style={{ marginRight: 4 }} />
                 <Text style={styles.suggestionText}>{s}</Text>
               </TouchableOpacity>
             ))}
@@ -287,44 +303,17 @@ export default function AIScreen() {
             multiline
           />
           <TouchableOpacity style={styles.micBtn}>
-            <Text style={{ fontSize: 20 }}>🎙️</Text>
+            <Ionicons name="mic-outline" size={20} color={C.primary} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.sendBtn} onPress={() => sendMessage()}>
-            <Text style={styles.sendIcon}>↑</Text>
+            <Ionicons name="arrow-up" size={18} color={C.white} />
           </TouchableOpacity>
         </View>
 
         {/* ── BOTTOM NAV (Hidden when keyboard is active) ── */}
-        {!isKeyboardVisible && (
-          <View style={styles.bottomNav}>
-            {[
-              { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-              { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-              { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-              { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-              { icon: '👤', label: 'Profil', screen: 'Profile' },
-            ].map(item => (
-              <TouchableOpacity
-                key={item.screen}
-                style={[styles.navItem, item.center && styles.navItemCenter]}
-                onPress={() => navigation.navigate(item.screen)}
-              >
-                {item.center ? (
-                  <View style={styles.navCenterBtn}>
-                    <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-                  </View>
-                ) : (
-                  <>
-                    <Text style={styles.navIcon}>{item.icon}</Text>
-                    <Text style={[styles.navLabel, item.screen === 'AI' && styles.navLabelActive]}>{item.label}</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+        {!isKeyboardVisible && <BottomNav activeScreen="AI" />}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -417,13 +406,4 @@ const styles = StyleSheet.create({
   micBtn: { padding: 6 },
   sendBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   sendIcon: { fontSize: 18, color: C.white, fontWeight: '700' },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
-  navLabelActive: { color: C.primary, fontWeight: '700' },
 });

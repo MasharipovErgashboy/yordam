@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
   Modal,
+  Keyboard,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +24,11 @@ import { AiChatScreen } from './AiChat/AiChatScreen';
 import { ContractAiScreen } from './ContractAi/ContractAiScreen';
 import { LegalMapNavigator } from '../features/legal-map/LegalMapNavigator';
 import { FraudRadarNavigator } from '../features/fraud-radar/FraudRadarNavigator';
+import { YuristOnlineNavigator } from '../features/yurist-online/YuristOnlineNavigator';
+import { FoydaliMalumotlarScreen } from './FoydaliMalumotlarScreen';
+import { LEGAL_ARTICLES } from '../data/legalArticles';
+import type { UserProfile } from '../services/authService';
+import { legalServicesApi, BackendServiceItem } from '../services/legalServicesApi';
 
 const { width } = Dimensions.get('window');
 
@@ -31,11 +37,19 @@ type ServiceCategory = 'all' | 'ai' | 'documents' | 'protection';
 
 interface MainHomeScreenProps {
   onBackToOnboarding?: () => void;
+  isAuthenticated?: boolean;
+  user?: UserProfile | null;
+  onRequireAuth?: () => void;
+  onLogout?: () => void;
 }
 
 const logoImage = require('../../assets/images/logo.jpg');
 const robotImage = require('../../assets/images/onboarding_2.png');
 const articleGavelImage = require('../../assets/images/article_gavel.jpg');
+const istemolchiHeroImage = require('../../assets/images/huquqlar_scale_book.png');
+const contractAiImage = require('../../assets/images/bolimlar_checklist_3d_clean.png');
+const courtBuildingImage = require('../../assets/images/court_building.png');
+const lawyerHeroImage = require('../../assets/images/lawyer-female-call.jpg');
 
 interface ServiceGridItem {
   id: string;
@@ -351,15 +365,51 @@ const SERVICES_TABLE_CATALOG: DetailedServiceItem[] = [
   },
 ];
 
-export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboarding }) => {
+export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({
+  onBackToOnboarding,
+  isAuthenticated = false,
+  user = null,
+  onRequireAuth,
+  onLogout,
+}) => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [serviceCategory, setServiceCategory] = useState<ServiceCategory>('all');
   const [serviceSearch, setServiceSearch] = useState('');
 
+  // Authentication check helper
+  const checkAuth = useCallback(() => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return false;
+    }
+    return true;
+  }, [isAuthenticated, onRequireAuth]);
+
+  // Auto-rotating Swiper state
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const swiperScrollRef = useRef<any>(null);
+
   // Service Detail Custom Dialog Modal State
   const [selectedService, setSelectedService] = useState<DetailedServiceItem | null>(null);
+
+  // Dynamic services synchronized with Backend & Admin Panel (Real-Time)
+  const [backendServices, setBackendServices] = useState<Record<string, BackendServiceItem>>({});
+
+  useEffect(() => {
+    const unsubscribe = legalServicesApi.subscribeToRealtime((list) => {
+      const map: Record<string, BackendServiceItem> = {};
+      list.forEach((item) => {
+        map[item.id] = item;
+      });
+      setBackendServices(map);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Huquq Maktabi Mini App State
   const [isHuquqMaktabiOpen, setIsHuquqMaktabiOpen] = useState(false);
@@ -380,7 +430,122 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   const [isLegalMapOpen, setIsLegalMapOpen] = useState(false);
   const [isFraudRadarOpen, setIsFraudRadarOpen] = useState(false);
 
+  // Yurist Online Mini App State
+  const [isYuristOnlineOpen, setIsYuristOnlineOpen] = useState(false);
+
+  // Foydali ma'lumotlar Screen State
+  const [isFoydaliMalumotlarOpen, setIsFoydaliMalumotlarOpen] = useState(false);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+
+  // 5 Newest Promotional Swiper Banners (Auto-rotating under Search)
+  const SWIPER_BANNERS = useMemo(() => [
+    {
+      id: 'banner_haqim_ai',
+      badge: 'HAQIM AI',
+      badgeBg: '#F59E0B',
+      title: 'AI huquqiy yordamchi',
+      desc: 'Savolingizni yozing va 24/7 tezkor huquqiy tahlil oling.',
+      ctaText: 'AI bilan suhbat',
+      colors: ['#003A70', '#074886', '#0B599E'] as const,
+      image: robotImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setActiveTab('ai_assistant');
+      },
+    },
+    {
+      id: 'banner_istemolchi',
+      badge: 'ISTE’MOLCHI HIMOYA',
+      badgeBg: '#10B981',
+      title: 'Sifatsiz tovar uchun 100% pulni qaytaring',
+      desc: '14 kun ichida almashtirish va 1159 Raqobat qo‘mitasi arizalari.',
+      ctaText: 'Arizani boshlash',
+      colors: ['#064E3B', '#047857', '#059669'] as const,
+      image: istemolchiHeroImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsIstemolchiOpen(true);
+      },
+    },
+    {
+      id: 'banner_shartnoma_ai',
+      badge: 'SHARTNOMA AI',
+      badgeBg: '#0284C7',
+      title: 'Shartnomalardagi yashirin xavflarni toping',
+      desc: 'PDF yoki foto yuklang — AI barcha tuzoqlarni fosh etadi.',
+      ctaText: 'Hujjatni tekshirish',
+      colors: ['#0C4A6E', '#0284C7', '#0369A1'] as const,
+      image: contractAiImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setShowContractAi(true);
+      },
+    },
+    {
+      id: 'banner_fraud_radar',
+      badge: 'XAVFSIZLIK RADARI',
+      badgeBg: '#DC2626',
+      title: 'Shubhali havola va kartalarni tekshiring',
+      desc: 'Moliyaviy firibgarlik va fishing hujumlaridan himoyalaning.',
+      ctaText: 'Radarni ochish',
+      colors: ['#881337', '#BE123C', '#E11D48'] as const,
+      image: courtBuildingImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsFraudRadarOpen(true);
+      },
+    },
+    {
+      id: 'banner_yurist_online',
+      badge: 'YURIST ONLINE',
+      badgeBg: '#8B5CF6',
+      title: '150+ malakali advokatlar bilan bog‘laning',
+      desc: 'Mehnat, sud, aliment va mulk bo‘yicha jonli konsultatsiya.',
+      ctaText: 'Advokat tanlash',
+      colors: ['#4C1D95', '#6D28D9', '#7C3AED'] as const,
+      image: lawyerHeroImage,
+      onPress: () => {
+        if (!checkAuth()) return;
+        setIsYuristOnlineOpen(true);
+      },
+    },
+  ], [checkAuth]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % SWIPER_BANNERS.length;
+        const bannerWidth = width - 40;
+        swiperScrollRef.current?.scrollTo({
+          x: nextIndex * bannerWidth,
+          animated: true,
+        });
+        return nextIndex;
+      });
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [SWIPER_BANNERS.length]);
+
+  // Pastki panel balandligi — AI suhbat yozish paneli uning ustida turishi uchun o‘lchanadi
+  const [navbarHeight, setNavbarHeight] = useState(64);
+  // AI suhbatda klaviatura ochilganda pastki panel yashiriladi (yozish paneli klaviatura ustiga chiqadi)
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  const hideNavbar = activeTab === 'ai_assistant' && keyboardVisible;
+
   const handleQuickGridClick = (item: ServiceGridItem) => {
+    if (!checkAuth()) return;
+
     if (item.id === 'istemolchi') {
       setIsIstemolchiOpen(true);
       return;
@@ -401,6 +566,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       setIsLegalMapOpen(true);
       return;
     }
+    if (item.id === 'yurist_online') {
+      setIsYuristOnlineOpen(true);
+      return;
+    }
     // Find matching detailed service or show modal
     const detailed = SERVICES_TABLE_CATALOG.find((s) => s.id === item.id);
     if (detailed) {
@@ -411,13 +580,19 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   };
 
   const handleDetailedServiceClick = (item: DetailedServiceItem) => {
+    if (!checkAuth()) return;
     setSelectedService(item);
   };
 
   const handleUseService = () => {
+    if (!checkAuth()) return;
     if (!selectedService) return;
-    const sName = selectedService.name;
+    const sName = backendServices[selectedService.id]?.title || selectedService.name;
     const sId = selectedService.id;
+
+    // Record unique user usage in backend
+    legalServicesApi.recordUsage(sId, user);
+
     setSelectedService(null);
 
     if (sId === 'huquq_maktabi') {
@@ -434,6 +609,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
       setIsLegalMapOpen(true);
     } else if (sId === 'firibgarlik_radari') {
       setIsFraudRadarOpen(true);
+    } else if (sId === 'yurist_online') {
+      setIsYuristOnlineOpen(true);
     } else if (sId === 'bank_kredit_himoyasi') {
       Alert.alert(
         'Bank Kreditlari Himoyasi',
@@ -479,7 +656,14 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
   }
 
   if (isIstemolchiOpen) {
-    return <IstemolchiHuquqlariScreen onBack={() => setIsIstemolchiOpen(false)} />;
+    return (
+      <IstemolchiHuquqlariScreen
+        onBack={() => {
+          setIsIstemolchiOpen(false);
+          setActiveTab('services');
+        }}
+      />
+    );
   }
 
   if (isHujjatlarHamyoniOpen) {
@@ -506,11 +690,21 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
     return <FraudRadarNavigator onBack={() => setIsFraudRadarOpen(false)} />;
   }
 
-  // AI yordamchi — o‘z header va input paneliga ega to‘liq ekran
-  if (activeTab === 'ai_assistant') {
-    return <AiChatScreen onBack={() => setActiveTab('home')} />;
+  if (isYuristOnlineOpen) {
+    return <YuristOnlineNavigator onBack={() => setIsYuristOnlineOpen(false)} />;
   }
 
+  if (isFoydaliMalumotlarOpen) {
+    return (
+      <FoydaliMalumotlarScreen
+        initialArticleId={selectedArticleId}
+        onBack={() => {
+          setIsFoydaliMalumotlarOpen(false);
+          setSelectedArticleId(null);
+        }}
+      />
+    );
+  }
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
@@ -552,8 +746,16 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         </View>
       </View>
 
-      {/* ===================== TAB 2: XIZMATLAR (STICKY HEADER + INDEPENDENT SCROLL) ===================== */}
-      {activeTab === 'services' ? (
+      {/* ===================== TAB 3: AI YORDAMCHI (header va pastki panel orasida) ===================== */}
+      {activeTab === 'ai_assistant' ? (
+        <View style={styles.aiTabWrapper}>
+          <AiChatScreen
+            embedded
+            bottomOffset={hideNavbar ? 0 : navbarHeight}
+            onBack={() => setActiveTab('home')}
+          />
+        </View>
+      ) : activeTab === 'services' ? (
         <View style={styles.servicesTabWrapper}>
           {/* Fixed Sticky Header for Services */}
           <View style={styles.stickyFilterHeader}>
@@ -700,12 +902,12 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   <View style={styles.tableDetailsCol}>
                     {/* Top: Service Name */}
                     <Text style={styles.tableServiceName} numberOfLines={1}>
-                      {service.name}
+                      {backendServices[service.id]?.title || service.name}
                     </Text>
 
                     {/* Middle: Short Description */}
                     <Text style={styles.tableServiceDesc} numberOfLines={2}>
-                      {service.description}
+                      {backendServices[service.id]?.desc || service.description}
                     </Text>
 
                     {/* Bottom Metadata Tags */}
@@ -716,7 +918,9 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                       </View>
 
                       <View style={styles.metaCategoryTag}>
-                        <Text style={styles.metaCategoryText}>{service.categoryLabel}</Text>
+                        <Text style={styles.metaCategoryText}>
+                          {backendServices[service.id]?.categoryLabel || service.categoryLabel}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -751,6 +955,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   onChangeText={setSearchQuery}
                   returnKeyType="search"
                   onSubmitEditing={() => {
+                    if (!checkAuth()) return;
                     if (searchQuery.trim().length > 0) {
                       setServiceSearch(searchQuery.trim());
                       setActiveTab('services');
@@ -769,64 +974,112 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
                   style={styles.homeSearchQuickJump}
                   activeOpacity={0.8}
                   onPress={() => {
+                    if (!checkAuth()) return;
                     setServiceSearch(searchQuery.trim());
                     setActiveTab('services');
                   }}
                 >
                   <Ionicons name="search" size={15} color="#0284C7" />
                   <Text style={styles.homeSearchQuickText}>
-                    "{searchQuery}" böyiça xizmatlar katalogida qidiriş →
+                    «{searchQuery}» böyiça xizmatlar katalogida qidiriş →
                   </Text>
                 </TouchableOpacity>
               )}
 
-              {/* HAQIM AI Hero Banner Card */}
-              <TouchableOpacity
-                style={styles.heroBannerWrap}
-                activeOpacity={0.92}
-                onPress={() => setActiveTab('ai_assistant')}
-              >
-                <LinearGradient
-                  colors={['#003A70', '#074886', '#0B599E']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.heroBanner}
+              {/* 5-Banner Auto-rotating Swiper (Reklama va Yangiliklar) */}
+              <View style={styles.swiperContainer}>
+                <ScrollView
+                  ref={swiperScrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={(e) => {
+                    const bannerWidth = width - 40;
+                    const index = Math.round(e.nativeEvent.contentOffset.x / bannerWidth);
+                    if (index >= 0 && index < SWIPER_BANNERS.length) {
+                      setCurrentSlideIndex(index);
+                    }
+                  }}
+                  style={styles.swiperScrollView}
+                  contentContainerStyle={styles.swiperContentContainer}
                 >
-                  {/* Left Texts & Button */}
-                  <View style={styles.heroLeft}>
-                    {/* HAQIM Badge */}
-                    <View style={styles.haqimBadge}>
-                      <Text style={styles.haqimBadgeText}>HAQIM</Text>
-                    </View>
+                  {SWIPER_BANNERS.map((banner) => (
+                    <TouchableOpacity
+                      key={banner.id}
+                      style={[styles.swiperSlide, { width: width - 40 }]}
+                      activeOpacity={0.92}
+                      onPress={banner.onPress}
+                    >
+                      <LinearGradient
+                        colors={banner.colors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.heroBanner}
+                      >
+                        {/* Left Texts & Button */}
+                        <View style={styles.heroLeft}>
+                          <View style={[styles.haqimBadge, { backgroundColor: banner.badgeBg }]}>
+                            <Text style={styles.haqimBadgeText}>{banner.badge}</Text>
+                          </View>
 
-                    <Text style={styles.heroTitle}>AI huquqiy yordamçi</Text>
-                    <Text style={styles.heroDesc}>
-                      Savolingizni yozing va tezkor huquqiy javob oling.
-                    </Text>
+                          <Text style={styles.heroTitle} numberOfLines={2}>
+                            {banner.title}
+                          </Text>
+                          <Text style={styles.heroDesc} numberOfLines={2}>
+                            {banner.desc}
+                          </Text>
 
-                    {/* Action CTA Button */}
-                    <View style={styles.heroCtaBtn}>
-                      <Text style={styles.heroCtaText}>AI bilan suhbat</Text>
-                      <Ionicons name="chevron-forward" size={14} color="#002B49" />
-                    </View>
-                  </View>
+                          {/* Action CTA Button */}
+                          <View style={styles.heroCtaBtn}>
+                            <Text style={styles.heroCtaText}>{banner.ctaText}</Text>
+                            <Ionicons name="chevron-forward" size={13} color="#002B49" />
+                          </View>
+                        </View>
 
-                  {/* Right 3D Robot Image */}
-                  <View style={styles.heroRight}>
-                    <Image
-                      source={robotImage}
-                      style={styles.heroRobotImage}
-                      resizeMode="contain"
+                        {/* Right Banner Image */}
+                        <View style={styles.heroRight}>
+                          <Image
+                            source={banner.image}
+                            style={styles.heroRobotImage}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                {/* Swiper Pagination Indicators */}
+                <View style={styles.swiperDotsRow}>
+                  {SWIPER_BANNERS.map((_, dotIdx) => (
+                    <TouchableOpacity
+                      key={dotIdx}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        const bannerWidth = width - 40;
+                        swiperScrollRef.current?.scrollTo({
+                          x: dotIdx * bannerWidth,
+                          animated: true,
+                        });
+                        setCurrentSlideIndex(dotIdx);
+                      }}
+                      style={[
+                        styles.swiperDot,
+                        currentSlideIndex === dotIdx && styles.swiperDotActive,
+                      ]}
                     />
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
 
               {/* Section: Asosiy xizmatlar */}
               <View style={styles.sectionHeaderRow}>
                 <Text style={styles.sectionTitle}>Asosiy xizmatlar</Text>
                 <TouchableOpacity
-                  onPress={() => setActiveTab('services')}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    setActiveTab('services');
+                  }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
@@ -856,101 +1109,336 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
                 <Text style={styles.sectionTitle}>Foydali ma’lumotlar</Text>
                 <TouchableOpacity
-                  onPress={() => Alert.alert('Maqolalar', 'Barça foydali huquqiy maqolalar sahifasi.')}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    setSelectedArticleId(null);
+                    setIsFoydaliMalumotlarOpen(true);
+                  }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.seeAllText}>Barçasini köriş ›</Text>
+                  <Text style={styles.seeAllText}>Barchasini ko‘rish ›</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Article Card matching screenshot */}
-              <TouchableOpacity
-                style={styles.articleCard}
-                activeOpacity={0.85}
-                onPress={() =>
-                  Alert.alert(
-                    'Mehnat şartnomasi',
-                    'Mehnat şartnomasi tuzişda asosiy qoidalar: sinov muddati, ta’tillar, oylik maoh va bekor qiliş şartlariga e’tibor qaratiş lozim.'
-                  )
-                }
-              >
-                {/* Article Thumbnail Image */}
-                <Image
-                  source={articleGavelImage}
-                  style={styles.articleImage}
-                  resizeMode="cover"
-                />
+              {/* 5 eng yangi chiqqan maqolalar */}
+              {LEGAL_ARTICLES.slice(0, 5).map((article) => (
+                <TouchableOpacity
+                  key={article.id}
+                  style={styles.articleCard}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    if (!checkAuth()) return;
+                    setSelectedArticleId(article.id);
+                    setIsFoydaliMalumotlarOpen(true);
+                  }}
+                >
+                  {/* Article Thumbnail Image */}
+                  <Image
+                    source={articleGavelImage}
+                    style={styles.articleImage}
+                    resizeMode="cover"
+                  />
 
-                {/* Article Details */}
-                <View style={styles.articleInfo}>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>Huquqiy maslahat</Text>
-                  </View>
-
-                  <Text style={styles.articleTitle} numberOfLines={2}>
-                    Mehnat şartnomasi tuzişda nimalarga e’tibor beriş kerak?
-                  </Text>
-
-                  {/* Date & Views Meta */}
-                  <View style={styles.articleMetaRow}>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
-                      <Text style={styles.metaText}>12-noy, 2026</Text>
+                  {/* Article Details */}
+                  <View style={styles.articleInfo}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <View style={[styles.categoryBadge, { backgroundColor: article.badgeBg }]}>
+                        <Text style={[styles.categoryBadgeText, { color: article.badgeColor }]}>
+                          {article.categoryLabel}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                        <Ionicons name="time-outline" size={10.5} color="#64748B" />
+                        <Text style={{ fontSize: 10, color: '#64748B', fontWeight: '500' }}>{article.readTime}</Text>
+                      </View>
                     </View>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="eye-outline" size={12} color="#9CA3AF" />
-                      <Text style={styles.metaText}>3 420</Text>
+
+                    <Text style={styles.articleTitle} numberOfLines={2}>
+                      {article.title}
+                    </Text>
+
+                    {/* Date & Views Meta */}
+                    <View style={styles.articleMetaRow}>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
+                        <Text style={styles.metaText}>{article.date}</Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="eye-outline" size={12} color="#9CA3AF" />
+                        <Text style={styles.metaText}>{article.views}</Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
             </>
           )}
 
 
-          {/* ===================== 4. PROFIL TAB ===================== */}
+          {/* ===================== 4. PROFIL TAB (PREMIUM REDESIGN) ===================== */}
           {activeTab === 'profile' && (
             <View style={styles.tabContentContainer}>
-              <View style={styles.profileCard}>
-                <View style={styles.profileAvatar}>
-                  <Ionicons name="person" size={28} color="#FFFFFF" />
+              {/* 1. User Hero Card */}
+              <View style={styles.profileHeroCard}>
+                <View style={styles.profileHeroTop}>
+                  <LinearGradient
+                    colors={['#0284C7', '#00A3FF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.profileAvatarLarge}
+                  >
+                    <Text style={styles.profileAvatarInitials}>
+                      {user?.avatar || (user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'YD')}
+                    </Text>
+                  </LinearGradient>
+
+                  <View style={{ flex: 1, marginLeft: 14 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.profileHeroName} numberOfLines={1}>
+                        {user?.name || (user ? `${user.firstName} ${user.lastName}` : 'O‘zbekiston Fuqarosi')}
+                      </Text>
+                      <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                    </View>
+
+                    <View style={styles.profileBadgesRow}>
+                      <View style={styles.roleBadge}>
+                        <Text style={styles.roleBadgeText}>{user?.role || 'Fuqaro'}</Text>
+                      </View>
+                      <View style={styles.verifiedBadge}>
+                        <Ionicons name="shield-checkmark" size={11} color="#10B981" />
+                        <Text style={styles.verifiedBadgeText}>OneID tasdiqlangan</Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.profileName}>Özbekiston Fuqarosi</Text>
-                  <Text style={styles.profileStatus}>OneID orqali tasdiqlangan</Text>
+
+                {/* Contact info list inside card */}
+                <View style={styles.profileContactList}>
+                  {user?.phone ? (
+                    <View style={styles.profileContactRow}>
+                      <Ionicons name="call-outline" size={14} color="#0284C7" />
+                      <Text style={styles.profileContactText}>{user.phone}</Text>
+                    </View>
+                  ) : null}
+                  {user?.email ? (
+                    <View style={styles.profileContactRow}>
+                      <Ionicons name="mail-outline" size={14} color="#0284C7" />
+                      <Text style={styles.profileContactText}>{user.email}</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.profileContactRow}>
+                    <Ionicons name="calendar-outline" size={14} color="#64748B" />
+                    <Text style={[styles.profileContactText, { color: '#64748B' }]}>
+                      Ro‘yxatdan o‘tgan: {user?.registered || '13.11.2026'}
+                    </Text>
+                  </View>
                 </View>
-                <Ionicons name="checkmark-circle" size={22} color="#10B981" />
               </View>
 
+              {/* 2. Quick Activity KPI Strip */}
+              <View style={styles.profileStatsRow}>
+                <View style={styles.profileStatItem}>
+                  <Text style={styles.profileStatNumber}>{user?.appsCount || 0}</Text>
+                  <Text style={styles.profileStatLabel}>Arizalarim</Text>
+                </View>
+                <View style={styles.profileStatDivider} />
+                <View style={styles.profileStatItem}>
+                  <Text style={[styles.profileStatNumber, { color: '#0284C7' }]}>0</Text>
+                  <Text style={styles.profileStatLabel}>AI tahlillari</Text>
+                </View>
+                <View style={styles.profileStatDivider} />
+                <View style={styles.profileStatItem}>
+                  <Text style={[styles.profileStatNumber, { color: '#10B981' }]}>100%</Text>
+                  <Text style={styles.profileStatLabel}>Himoyalangan</Text>
+                </View>
+              </View>
+
+              {/* 3. Section: Yuridik xizmatlarim & Hujjatlar */}
+              <Text style={styles.profileSectionTitle}>YURIDIK XIZMATLAR VA ARXIV</Text>
               <View style={styles.profileMenuBox}>
-                <TouchableOpacity style={styles.profileMenuItem}>
-                  <Ionicons name="globe-outline" size={20} color="#0284C7" />
-                  <Text style={styles.profileMenuText}>Dastur tili</Text>
-                  <Text style={styles.profileMenuSub}>Özbekça</Text>
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setIsHujjatlarHamyoniOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#FFFBEB' }]}>
+                    <Ionicons name="folder" size={20} color="#F59E0B" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Hujjatlar hamyoni</Text>
+                    <Text style={styles.profileMenuSubText}>Pasport, shartnoma va rasmiy arxiv</Text>
+                  </View>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.profileMenuItem}>
-                  <Ionicons name="shield-checkmark-outline" size={20} color="#10B981" />
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setShowContractAi(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="document-text" size={20} color="#0284C7" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Shartnoma AI tahlili</Text>
+                    <Text style={styles.profileMenuSubText}>Yuridik xavflar va shartnomalar xulosasi</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() => setIsYuristOnlineOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="headset" size={20} color="#10B981" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Yurist Online</Text>
+                    <Text style={styles.profileMenuSubText}>Advokatlar bilan jonli maslahatlashuv</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                  activeOpacity={0.7}
+                  onPress={() => setIsLegalMapOpen(true)}
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F5F3FF' }]}>
+                    <Ionicons name="map" size={20} color="#8B5CF6" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Huquqiy xarita</Text>
+                    <Text style={styles.profileMenuSubText}>Yaqin oradagi sud, notarius va FHDYo</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 4. Section: Sozlamalar va xavfsizlik */}
+              <Text style={styles.profileSectionTitle}>SOZLAMALAR VA XAVFSIZLIK</Text>
+              <View style={styles.profileMenuBox}>
+                <TouchableOpacity style={styles.profileMenuItem} activeOpacity={0.7}>
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="globe-outline" size={20} color="#0284C7" />
+                  </View>
+                  <Text style={styles.profileMenuText}>Dastur tili</Text>
+                  <Text style={styles.profileMenuSub}>O‘zbekcha (Lotin)</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.profileMenuItem} activeOpacity={0.7}>
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color="#10B981" />
+                  </View>
                   <Text style={styles.profileMenuText}>Xavfsizlik va biometriya</Text>
+                  <Text style={styles.profileMenuSub}>Faol</Text>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
                 {onBackToOnboarding && (
-                  <TouchableOpacity style={styles.profileMenuItem} onPress={onBackToOnboarding}>
-                    <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
-                    <Text style={styles.profileMenuText}>Kiriş taqdimotini köriş</Text>
+                  <TouchableOpacity
+                    style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                    activeOpacity={0.7}
+                    onPress={onBackToOnboarding}
+                  >
+                    <View style={[styles.profileMenuIconWrap, { backgroundColor: '#FFFBEB' }]}>
+                      <Ionicons name="refresh-outline" size={20} color="#F59E0B" />
+                    </View>
+                    <Text style={styles.profileMenuText}>Kirish taqdimotini qayta ko‘rish</Text>
                     <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                   </TouchableOpacity>
                 )}
               </View>
+
+              {/* 5. Section: Qo‘llab-quvvatlash */}
+              <Text style={styles.profileSectionTitle}>QO‘LLAB-QUVVATLASH</Text>
+              <View style={styles.profileMenuBox}>
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    Alert.alert(
+                      'Yordam markazi',
+                      'Yordam huquqiy portali yagona koll-markazi: 1159 yoki +998 (71) 200-00-00\n\nIsh vaqti: 24/7 uzluksiz'
+                    )
+                  }
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F0F9FF' }]}>
+                    <Ionicons name="call-outline" size={20} color="#0284C7" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.profileMenuText}>Koll-markaz: 1159</Text>
+                    <Text style={styles.profileMenuSubText}>24/7 bepul huquqiy aloqa</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.profileMenuItem, { borderBottomWidth: 0 }]}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    Alert.alert(
+                      'Yordam ilovasi',
+                      'Yordam — O‘zbekiston fuqarolari uchun rasmiy huquqiy ko‘makchi dasturi.\n\nTalqin: v1.0.0 (Rasmiy nashr)\n© 2026 Barcha huquqlar himoyalangan.'
+                    )
+                  }
+                >
+                  <View style={[styles.profileMenuIconWrap, { backgroundColor: '#F1F5F9' }]}>
+                    <Ionicons name="information-circle-outline" size={20} color="#64748B" />
+                  </View>
+                  <Text style={styles.profileMenuText}>Ilova haqida</Text>
+                  <Text style={styles.profileMenuSub}>v1.0.0</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 6. Logout Button */}
+              {onLogout && (
+                <TouchableOpacity
+                  style={styles.profileLogoutCard}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    Alert.alert(
+                      'Tizimdan chiqish',
+                      'Haqiqatan ham profilingizdan chiqmoqchimisiz?',
+                      [
+                        { text: 'Bekor qilish', style: 'cancel' },
+                        {
+                          text: 'Chiqish',
+                          style: 'destructive',
+                          onPress: () => {
+                            onLogout();
+                            setActiveTab('home');
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <Ionicons name="log-out-outline" size={20} color="#EF4444" style={{ marginRight: 8 }} />
+                  <Text style={styles.profileLogoutText}>Tizimdan chiqish</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </ScrollView>
       )}
 
       {/* ===================== BOTTOM NAVBAR (MATCHING SCREENSHOT) ===================== */}
-      <View style={[styles.bottomNavbar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View
+        style={[
+          styles.bottomNavbar,
+          { paddingBottom: Math.max(insets.bottom, 8) },
+          hideNavbar && styles.bottomNavbarHidden,
+        ]}
+        onLayout={(e) => {
+          const h = Math.round(e.nativeEvent.layout.height);
+          if (h > 0 && h !== navbarHeight) setNavbarHeight(h);
+        }}
+      >
         {/* 1. Asosiy sahifa (Active) */}
         <TouchableOpacity
           style={styles.navItem}
@@ -977,7 +1465,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         {/* 2. Xizmatlar */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('services')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('services');
+          }}
           activeOpacity={0.7}
         >
           {activeTab === 'services' ? (
@@ -1000,20 +1491,36 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
         {/* 3. AI yordamchi */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('ai_assistant')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('ai_assistant');
+          }}
           activeOpacity={0.7}
         >
-          {/* AI tab to‘liq ekran (AiChatScreen) ochadi, shuning uchun bu yerda faol holat bo‘lmaydi */}
-          <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
-          <Text style={[styles.navLabel, styles.navLabelInactive]}>
-            AI yordamçi
+          {activeTab === 'ai_assistant' ? (
+            <View style={styles.activePillContainer}>
+              <Ionicons name="sparkles" size={20} color="#D97706" />
+            </View>
+          ) : (
+            <Ionicons name="sparkles-outline" size={22} color="#4B5563" />
+          )}
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'ai_assistant' ? styles.navLabelActive : styles.navLabelInactive,
+            ]}
+          >
+            AI yordamchi
           </Text>
         </TouchableOpacity>
 
         {/* 4. Profil */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => setActiveTab('profile')}
+          onPress={() => {
+            if (!checkAuth()) return;
+            setActiveTab('profile');
+          }}
           activeOpacity={0.7}
         >
           {activeTab === 'profile' ? (
@@ -1079,9 +1586,13 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
 
             {/* Service Title & Category Badge */}
             <View style={styles.modalTitleBlock}>
-              <Text style={styles.modalServiceName}>{selectedService?.name}</Text>
+              <Text style={styles.modalServiceName}>
+                {selectedService ? (backendServices[selectedService.id]?.title || selectedService.name) : ''}
+              </Text>
               <View style={styles.modalCategoryBadge}>
-                <Text style={styles.modalCategoryText}>{selectedService?.categoryLabel}</Text>
+                <Text style={styles.modalCategoryText}>
+                  {selectedService ? (backendServices[selectedService.id]?.categoryLabel || selectedService.categoryLabel) : ''}
+                </Text>
               </View>
             </View>
 
@@ -1089,6 +1600,13 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = ({ onBackToOnboardi
               style={styles.modalBodyScroll}
               showsVerticalScrollIndicator={false}
             >
+              {/* Short description from backend or catalog */}
+              {selectedService && (
+                <Text style={[styles.tableServiceDesc, { marginBottom: 12, fontSize: 13, color: '#4B5563', lineHeight: 18 }]}>
+                  {backendServices[selectedService.id]?.desc || selectedService.description}
+                </Text>
+              )}
+
               {/* Special Note / Project Basis Badge */}
               {selectedService?.specialNote && (
                 <View style={styles.modalSpecialNoteBox}>
@@ -1267,6 +1785,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 12,
     elevation: 5,
+  },
+  swiperContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  swiperScrollView: {
+    borderRadius: 22,
+  },
+  swiperContentContainer: {
+    alignItems: 'center',
+  },
+  swiperSlide: {
+    borderRadius: 22,
+    overflow: 'hidden',
+    shadowColor: '#003A70',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  swiperDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  swiperDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+  },
+  swiperDotActive: {
+    width: 22,
+    backgroundColor: '#0284C7',
   },
   heroBanner: {
     flexDirection: 'row',
@@ -1592,62 +2146,214 @@ const styles = StyleSheet.create({
   // Tab container styles
   tabContentContainer: {
     paddingTop: 8,
+    paddingBottom: 24,
   },
-  profileCard: {
+  profileHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  profileHeroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  profileAvatarLarge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  profileAvatarInitials: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  profileHeroName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  profileBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 5,
+  },
+  roleBadge: {
+    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.2)',
+  },
+  roleBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0284C7',
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  verifiedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  profileContactList: {
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 12,
+    gap: 7,
+  },
+  profileContactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileContactText: {
+    fontSize: 12.5,
+    color: '#334155',
+    fontWeight: '500',
+  },
+
+  // KPI Quick Stats
+  profileStatsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 14,
+    borderColor: '#E2E8F0',
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
-  profileAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#034687',
+  profileStatItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileName: {
-    fontSize: 15,
+  profileStatNumber: {
+    fontSize: 18,
     fontWeight: '800',
     color: '#0F172A',
+    marginBottom: 2,
   },
-  profileStatus: {
+  profileStatLabel: {
     fontSize: 11,
-    color: '#10B981',
+    color: '#64748B',
     fontWeight: '600',
-    marginTop: 2,
+  },
+  profileStatDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#E2E8F0',
+  },
+
+  // Profile Sections & Lists
+  profileSectionTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.8,
+    marginLeft: 4,
+    marginBottom: 8,
+    marginTop: 6,
   },
   profileMenuBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
     overflow: 'hidden',
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   profileMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F1F5F9',
     gap: 12,
+  },
+  profileMenuIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profileMenuText: {
     flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
     color: '#0F172A',
+  },
+  profileMenuSubText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 1,
   },
   profileMenuSub: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     marginRight: 4,
+    fontWeight: '500',
+  },
+
+  // Logout card
+  profileLogoutCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    borderRadius: 16,
+    paddingVertical: 14,
+    marginTop: 6,
+    marginBottom: 18,
+  },
+  profileLogoutText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#EF4444',
   },
 
   // Bottom Navbar
@@ -1667,6 +2373,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 8,
+  },
+  bottomNavbarHidden: {
+    display: 'none',
+  },
+  aiTabWrapper: {
+    flex: 1,
   },
   navItem: {
     alignItems: 'center',

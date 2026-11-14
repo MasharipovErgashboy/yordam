@@ -34,10 +34,20 @@ const shorten = (text: string, max: number) =>
 
 interface Props {
   onBack: () => void;
+  /**
+   * true — bosh sahifa ichida (tepada Yordam header, pastda navigatsiya paneli) ko‘rsatiladi:
+   * yuqori safe area'ni ota ekran beradi, pastdan esa `bottomOffset` qadar joy qoldiriladi.
+   */
+  embedded?: boolean;
+  /** Pastki navigatsiya paneli balandligi (faqat embedded rejimda) */
+  bottomOffset?: number;
 }
 
-export const AiChatScreen: React.FC<Props> = ({ onBack }) => {
-  const insets = useSafeAreaInsets();
+export const AiChatScreen: React.FC<Props> = ({ onBack, embedded = false, bottomOffset = 0 }) => {
+  const safeInsets = useSafeAreaInsets();
+  const insets = embedded
+    ? { top: 0, bottom: bottomOffset }
+    : { top: safeInsets.top, bottom: safeInsets.bottom };
   const [stack, setStack] = useState<AiView[]>(['welcome']);
   const [conversations, setConversations] = useState<Conversation[]>(SEED_CONVERSATIONS);
   const [activeId, setActiveId] = useState<string | null>(null);

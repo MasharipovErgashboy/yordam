@@ -3,7 +3,9 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import ScreenContainer from './ScreenContainer';
+import BottomNav from '../../components/BottomNav';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 // ─── COLORS ─────────────────────────────────────────────────
@@ -71,17 +73,20 @@ export default function DetailsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ScreenContainer style={styles.safe}>
       <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── HEADER ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backArrow}>‹</Text>
+          <TouchableOpacity
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={C.textDark} />
           </TouchableOpacity>
           <View style={styles.logoBox}>
-            <Text>💼</Text>
+            <Ionicons name="document-text-outline" size={16} color={C.primary} />
           </View>
           <View>
             <Text style={styles.appName}>Hujjat tafsilotlari</Text>
@@ -89,7 +94,7 @@ export default function DetailsScreen() {
           </View>
           <View style={{ flex: 1 }} />
           <View style={styles.avatar}>
-            <Text style={{ fontSize: 16 }}>👤</Text>
+            <Ionicons name="person" size={16} color={C.primary} />
           </View>
         </View>
 
@@ -100,21 +105,26 @@ export default function DetailsScreen() {
           <Text style={styles.breadcrumbText}>SHARTNOMA</Text>
           <Text style={styles.breadcrumbDot}> • </Text>
           <View style={styles.validBadge}>
-            <Text style={styles.validText}>✅ Yaroqli</Text>
+            <Ionicons name="checkmark-circle" size={12} color={C.green} style={{ marginRight: 3 }} />
+            <Text style={styles.validText}>Yaroqli</Text>
           </View>
         </View>
 
         {/* ── DOC TITLE ROW ── */}
         <View style={styles.titleRow}>
           <Text style={styles.docTitle} numberOfLines={2}>{DOC.title}</Text>
-          <TouchableOpacity style={styles.iconBtn}><Text style={styles.iconBtnText}>↗</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}><Text style={styles.iconBtnText}>⋮</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="share-outline" size={18} color={C.textDark} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="ellipsis-vertical" size={18} color={C.textDark} />
+          </TouchableOpacity>
         </View>
 
         {/* ── PREVIEW CARD ── */}
         <View style={styles.previewCard}>
           <View style={styles.previewImage}>
-            <Text style={styles.previewIcon}>📄</Text>
+            <Ionicons name="document-text-outline" size={42} color={C.primary} />
             <Text style={styles.previewLines}>▬▬▬▬▬▬▬▬</Text>
             <Text style={styles.previewLines}>▬▬▬▬▬</Text>
             <Text style={styles.previewLines}>▬▬▬▬▬▬▬</Text>
@@ -122,30 +132,39 @@ export default function DetailsScreen() {
           <View style={styles.previewMeta}>
             <View style={styles.previewMetaLeft}>
               <View style={styles.pdfBadge}>
-                <Text style={styles.pdfBadgeText}>✅ Tasdiqlangan PDF</Text>
+                <Ionicons name="checkmark-circle-outline" size={12} color={C.primary} style={{ marginRight: 4 }} />
+                <Text style={styles.pdfBadgeText}>Tasdiqlangan PDF</Text>
               </View>
               <View style={styles.sizeBadge}>
-                <Text style={styles.sizeBadgeText}>📦 {DOC.size}</Text>
+                <Ionicons name="cube-outline" size={12} color={C.textGrey} style={{ marginRight: 4 }} />
+                <Text style={styles.sizeBadgeText}>{DOC.size}</Text>
               </View>
               <View style={styles.pagesBadge}>
-                <Text style={styles.pagesBadgeText}>📋 {DOC.pages} sahifa</Text>
+                <Ionicons name="copy-outline" size={12} color={C.textGrey} style={{ marginRight: 4 }} />
+                <Text style={styles.pagesBadgeText}>{DOC.pages} sahifa</Text>
               </View>
             </View>
             <View style={styles.verifiedCircle}>
-              <Text style={{ fontSize: 20 }}>✔️</Text>
+              <Ionicons name="shield-checkmark" size={18} color={C.primary} />
             </View>
           </View>
           <TouchableOpacity style={styles.viewBtn}>
-            <Text style={styles.viewBtnText}>🔍 Kattalashtirib ko'rish</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="scan-outline" size={16} color={C.primary} />
+              <Text style={styles.viewBtnText}>Kattalashtirib ko'rish</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
         {/* ── AI SUMMARY ── */}
         <View style={styles.aiCard}>
           <View style={styles.aiHeader}>
-            <View>
-              <Text style={styles.aiTitle}>✦ Al tahlil xulosasi</Text>
-              <Text style={styles.aiSub}>GPT-4 Legal Vision orqali</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="sparkles" size={16} color={C.primary} />
+              <View>
+                <Text style={styles.aiTitle}>AI tahlil xulosasi</Text>
+                <Text style={styles.aiSub}>GPT-4 Legal Vision orqali</Text>
+              </View>
             </View>
             <View style={styles.accuracyBadge}>
               <Text style={styles.accuracyText}>⬤ {DOC.aiAccuracy} aniqlik</Text>
@@ -171,13 +190,18 @@ export default function DetailsScreen() {
         {/* ── PARAMS ── */}
         <View style={styles.paramsCard}>
           <View style={styles.paramsHeader}>
-            <Text style={styles.paramsTitle}>📋 Asosiy parametrlar</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="list-outline" size={16} color={C.textDark} />
+              <Text style={styles.paramsTitle}>Asosiy parametrlar</Text>
+            </View>
             <Text style={styles.paramsId}>ID: {DOC.id}</Text>
           </View>
 
           {/* Type */}
           <View style={styles.paramRow}>
-            <Text style={styles.paramIcon}>📄</Text>
+            <View style={styles.paramIconBox}>
+              <Ionicons name="document-text-outline" size={18} color={C.primary} />
+            </View>
             <View>
               <Text style={styles.paramLabel}>Hujjat turi</Text>
               <Text style={styles.paramValue}>{DOC.type}</Text>
@@ -191,14 +215,16 @@ export default function DetailsScreen() {
               <Text style={styles.paramLabel}>Imzolangan sana</Text>
               <Text style={styles.paramValue}>{DOC.signedDate}</Text>
               <View style={styles.greenBadge}>
-                <Text style={styles.greenBadgeText}>✅ Rasmiylashtrilidi</Text>
+                <Ionicons name="checkmark-circle" size={11} color={C.green} style={{ marginRight: 3 }} />
+                <Text style={styles.greenBadgeText}>Rasmiylashtirildi</Text>
               </View>
             </View>
             <View style={styles.paramHalf}>
               <Text style={styles.paramLabel}>Amal qilish muddati</Text>
               <Text style={styles.paramValue}>{DOC.expiryDate}</Text>
               <View style={styles.orangeBadge}>
-                <Text style={styles.orangeBadgeText}>⏰ {DOC.expiryLeft}</Text>
+                <Ionicons name="time-outline" size={11} color={C.orange} style={{ marginRight: 3 }} />
+                <Text style={styles.orangeBadgeText}>{DOC.expiryLeft}</Text>
               </View>
             </View>
           </View>
@@ -206,7 +232,9 @@ export default function DetailsScreen() {
 
           {/* Parties */}
           <View style={styles.paramRow}>
-            <Text style={styles.paramIcon}>👥</Text>
+            <View style={styles.paramIconBox}>
+              <Ionicons name="people-outline" size={18} color={C.primary} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.paramLabel}>Tomonlar</Text>
               <View style={styles.partiesRow}>
@@ -226,7 +254,9 @@ export default function DetailsScreen() {
 
           {/* Payment */}
           <View style={styles.paramRow}>
-            <Text style={styles.paramIcon}>💳</Text>
+            <View style={styles.paramIconBox}>
+              <Ionicons name="card-outline" size={18} color={C.primary} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.paramLabel}>Oylik to'lov summasi</Text>
               <View style={styles.paymentRow}>
@@ -243,17 +273,17 @@ export default function DetailsScreen() {
         <Text style={styles.actionsTitle}>Amallar va Boshqaruv</Text>
         <View style={styles.actionsGrid}>
           {[
-            { icon: '🔔', label: 'Eslatma yaratish', sub: "To'lov vaqti bo'yicha", screen: 'Reminders' },
-            { icon: '📁', label: "To'plamga qo'shish", sub: 'Dalillar hamyoniga', screen: 'Legal' },
-            { icon: '⬇️', label: 'Yuklab olish', sub: `PDF nussasi ${DOC.size}`, screen: null },
-            { icon: '✏️', label: 'Tahrirlash', sub: "Metama'lumotlarni", screen: null },
+            { icon: 'notifications-outline', label: 'Eslatma yaratish', sub: "To'lov vaqti bo'yicha", screen: 'Reminders' },
+            { icon: 'briefcase-outline', label: "To'plamga qo'shish", sub: 'Dalillar hamyoniga', screen: 'Legal' },
+            { icon: 'download-outline', label: 'Yuklab olish', sub: `PDF nusxasi ${DOC.size}`, screen: null },
+            { icon: 'create-outline', label: 'Tahrirlash', sub: "Metama'lumotlarni", screen: null },
           ].map((a, i) => (
             <TouchableOpacity
               key={i}
               style={styles.actionCard}
               onPress={() => a.screen && navigation.navigate(a.screen)}
             >
-              <Text style={styles.actionIcon}>{a.icon}</Text>
+              <Ionicons name={a.icon as any} size={22} color={C.primary} style={{ marginBottom: 6 }} />
               <Text style={styles.actionLabel}>{a.label}</Text>
               <Text style={styles.actionSub}>{a.sub}</Text>
             </TouchableOpacity>
@@ -262,40 +292,16 @@ export default function DetailsScreen() {
 
         {/* ── DELETE ── */}
         <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-          <Text style={styles.deleteBtnText}>🗑️ Hujjatni o'chirish</Text>
+          <Ionicons name="trash-outline" size={16} color={C.red} style={{ marginRight: 6 }} />
+          <Text style={styles.deleteBtnText}>Hujjatni o'chirish</Text>
         </TouchableOpacity>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.bottomNav}>
-        {[
-          { icon: '🏠', label: 'Bosh sahifa', screen: 'Home' },
-          { icon: '📂', label: 'Hujjatlar', screen: 'Documents' },
-          { icon: '✨', label: 'AI Yordamchi', screen: 'AI', center: true },
-          { icon: '🔔', label: 'Eslatmalar', screen: 'Reminders' },
-          { icon: '👤', label: 'Profil', screen: 'Profile' },
-        ].map(item => (
-          <TouchableOpacity
-            key={item.screen}
-            style={[styles.navItem, item.center && styles.navItemCenter]}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.center ? (
-              <View style={styles.navCenterBtn}>
-                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-              </View>
-            ) : (
-              <>
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text style={styles.navLabel}>{item.label}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-    </SafeAreaView>
+      <BottomNav activeScreen="Documents" />
+    </ScreenContainer>
   );
 }
 
@@ -361,17 +367,17 @@ const styles = StyleSheet.create({
   paramsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   paramsTitle: { fontSize: 15, fontWeight: '700', color: C.textDark },
   paramsId: { fontSize: 12, color: C.textGrey },
-  paramRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 10 },
+  paramRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
   paramDualRow: { flexDirection: 'row', gap: 16, paddingVertical: 10 },
   paramHalf: { flex: 1 },
-  paramIcon: { fontSize: 20, marginTop: 2 },
+  paramIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
   paramLabel: { fontSize: 12, color: C.textGrey, marginBottom: 4 },
   paramValue: { fontSize: 14, fontWeight: '700', color: C.textDark },
   paramMeta: { fontSize: 12, color: C.textGrey },
   divider: { height: 1, backgroundColor: '#F1F5F9' },
-  greenBadge: { backgroundColor: C.greenLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
+  greenBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.greenLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
   greenBadgeText: { fontSize: 11, color: C.green, fontWeight: '600' },
-  orangeBadge: { backgroundColor: C.orangeLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
+  orangeBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.orangeLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
   orangeBadgeText: { fontSize: 11, color: C.orange, fontWeight: '600' },
   partiesRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 4 },
   partiesDivider: { width: 1, height: 32, backgroundColor: '#E2E8F0' },
@@ -389,14 +395,6 @@ const styles = StyleSheet.create({
   actionSub: { fontSize: 11, color: C.textGrey, marginTop: 2 },
 
   // Delete
-  deleteBtn: { backgroundColor: C.redLight, borderRadius: 16, padding: 16, alignItems: 'center', marginBottom: 12 },
+  deleteBtn: { flexDirection: 'row', justifyContent: 'center', backgroundColor: C.redLight, borderRadius: 16, padding: 16, alignItems: 'center', marginBottom: 12 },
   deleteBtnText: { fontSize: 15, color: C.red, fontWeight: '700' },
-
-  // Bottom Nav
-  bottomNav: { flexDirection: 'row', backgroundColor: C.white, paddingBottom: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0', elevation: 10 },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navItemCenter: { position: 'relative', top: -20 },
-  navCenterBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: C.primary, shadowOpacity: 0.4, shadowRadius: 8 },
-  navIcon: { fontSize: 20 },
-  navLabel: { fontSize: 10, color: C.textGrey, marginTop: 2 },
 });

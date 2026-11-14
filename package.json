@@ -3,21 +3,29 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/manrope": "^0.4.3",
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/native": "^7.5.1",
     "@react-navigation/native-stack": "^7.21.0",
     "expo": "~58.0.23",
     "expo-document-picker": "~58.0.4",
     "expo-font": "~58.0.11",
+    "expo-image": "~58.0.18",
+    "expo-image-picker": "~58.0.10",
     "expo-linear-gradient": "~58.0.3",
     "expo-status-bar": "~58.0.4",
     "expo-video": "~58.0.13",
+    "lucide-react-native": "^1.72.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-svg": "15.16.0",
-    "react-native-web": "^0.21.4"
+    "react-native-web": "^0.21.4",
+    "react-native-webview": "14.0.1",
+    "react-native-youtube-iframe": "^2.4.1"
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
@@ -30,7 +38,13 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "admin": "npm --prefix admin run dev",
+    "admin:build": "npm --prefix admin run build",
+    "backend": "node backend/src/server.js"
+  },
+  "overrides": {
+    "react-native-webview": "14.0.1"
   },
   "private": true
 }

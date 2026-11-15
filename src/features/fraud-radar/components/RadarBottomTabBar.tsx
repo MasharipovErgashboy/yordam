@@ -17,10 +17,10 @@ export const RadarBottomTabBar: React.FC<RadarBottomTabBarProps> = ({
   onSelectTab,
 }) => {
   const insets = useSafeAreaInsets();
-  const safeBottom = Math.max(insets.bottom, 8);
+  const safeBottom = Math.max(insets.bottom, 12);
 
   return (
-    <View style={[styles.container, { paddingBottom: safeBottom, height: 58 + safeBottom }]}>
+    <View style={[styles.container, { paddingBottom: safeBottom, height: 60 + safeBottom }]}>
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => onSelectTab('home')}
@@ -62,12 +62,10 @@ export const RadarBottomTabBar: React.FC<RadarBottomTabBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: 64,
     backgroundColor: Colors.surface,
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: Colors.divider,
-    paddingBottom: 6,
     paddingTop: 6,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: -2 },

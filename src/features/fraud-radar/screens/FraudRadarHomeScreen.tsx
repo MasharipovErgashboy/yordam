@@ -35,8 +35,9 @@ export const FraudRadarHomeScreen: React.FC<FraudRadarHomeScreenProps> = ({
       <LegalHeader
         title="Firibgarlik Radari"
         badgeText="Cyber102"
-        showClose={true}
-        onClose={onClose}
+        showBack={true}
+        showClose={false}
+        onBack={onClose}
       />
 
       <ScrollView
